@@ -1,36 +1,28 @@
 package sptech.school.dto.item;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-public class ItemRequestDto {
+public record ItemRequestDto(
 
-    @NotBlank
-    @Size(max = 100)
-    @Column(nullable = false, length = 100, unique = true)
-    private Integer codigoInterno;
+        @NotNull
+        Integer codigoInterno,
 
-    @NotBlank
-    @Column(nullable = true)
-    private String marca;
+        @NotBlank
+        @Size(max = 50)
+        String marca,
 
-    @NotBlank
-    @Column(nullable = true)
-    private Integer ano;
+        Integer ano,
 
-    @NotBlank
-    @Column(nullable = true, columnDefinition = "TEXT")
-    private String descricao;
+        String descricao,
 
-    @NotBlank
-    @Column(nullable = false)
-    private String localidade;
+        @NotBlank
+        @Size(max = 100)
+        String localizacao,
 
-    @NotBlank
-    @Column(nullable = false)
-    private LocalDate dataCadastro;
-
+        LocalDateTime dataCadastro
+) {
 }
