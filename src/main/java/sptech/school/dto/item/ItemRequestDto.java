@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 
 public record ItemRequestDto(
 
-        @NotNull
-        Integer codigoInterno,
-
         @NotBlank
+        @Size(max = 50)
+        String codigoInterno,
+
         @Size(max = 50)
         String marca,
 
@@ -19,7 +19,7 @@ public record ItemRequestDto(
 
         String descricao,
 
-        @NotBlank
+        @NotNull
         @Size(max = 100)
         String localizacao,
 

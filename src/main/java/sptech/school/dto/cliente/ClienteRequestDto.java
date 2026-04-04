@@ -1,0 +1,29 @@
+package sptech.school.dto.cliente;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+import java.time.LocalDateTime;
+
+public record ClienteRequestDto(
+        @NotBlank
+        @Size(max = 150)
+        String nome,
+
+        @Size(max = 18)
+        String cpfCnpj,
+
+        @Size(max = 20)
+        String telefone,
+
+        @Size(max = 100)
+        String email,
+
+        String observacoes,
+
+        LocalDateTime dataCadastro,
+
+        Integer enderecoId
+) {
+}
+

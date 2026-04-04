@@ -1,0 +1,30 @@
+package sptech.school.dto.movimentacaoEstoque;
+
+import sptech.school.dto.cliente.ClienteResponseDto;
+import sptech.school.dto.fornecedor.FornecedorResponseDto;
+import sptech.school.dto.status.StatusResponseDto;
+import sptech.school.dto.tipo.TipoResponseDto;
+import sptech.school.dto.usuario.UsuarioResponseDto;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+public record MovimentacaoEstoqueResponseDto(
+        Integer id,
+        UsuarioResponseDto usuario,
+        BigDecimal totalGastoImpostos,
+        BigDecimal precoFrete,
+        LocalDateTime dataMovimentacao,
+        LocalDate dataEntregaPrevista,
+        LocalDate dataEntrega,
+        String observacoes,
+        TipoResponseDto tipo,
+        StatusResponseDto status,
+        ClienteResponseDto cliente,
+        FornecedorResponseDto fornecedor,
+        Integer movimentacaoOriginalId,
+        String numeroNotaFiscal
+) {
+}
+

@@ -1,7 +1,6 @@
 package sptech.school.entity;
 
 import jakarta.persistence.*;
-import sptech.school.entity.enums.TipoCodigoEnum;
 
 import java.util.List;
 
@@ -13,71 +12,34 @@ public class CodigoAssociado {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_codigo", nullable = false)
-    private TipoCodigoEnum tipoCodigo;
-
-    @Column(name = "codigo", nullable = false, length = 100)
+    @Column(name = "codigo", nullable = false)
     private String codigo;
 
-    @Column(name = "fk_fornecedor")
-    private Integer fkFornecedor;
+    @ManyToOne
+    @JoinColumn(name = "fk_fornecedor")
+    private Fornecedor fornecedor;
 
-    @Column(name = "fk_cliente")
-    private Integer fkCliente;
+    @ManyToOne
+    @JoinColumn(name = "fk_cliente")
+    private Cliente cliente;
 
     @ManyToMany(mappedBy = "codigosAssociados")
     private List<Item> itens;
 
-    public CodigoAssociado() {
-    }
+    public CodigoAssociado() {}
 
-    public Integer getId() {
-        return id;
-    }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    public String getCodigo() { return codigo; }
+    public void setCodigo(String codigo) { this.codigo = codigo; }
 
-    public TipoCodigoEnum getTipoCodigo() {
-        return tipoCodigo;
-    }
+    public Fornecedor getFornecedor() { return fornecedor; }
+    public void setFornecedor(Fornecedor fornecedor) { this.fornecedor = fornecedor; }
 
-    public void setTipoCodigo(TipoCodigoEnum tipoCodigo) {
-        this.tipoCodigo = tipoCodigo;
-    }
+    public Cliente getCliente() { return cliente; }
+    public void setCliente(Cliente cliente) { this.cliente = cliente; }
 
-    public String getCodigo() {
-        return codigo;
-    }
-
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
-
-    public Integer getFkFornecedor() {
-        return fkFornecedor;
-    }
-
-    public void setFkFornecedor(Integer fkFornecedor) {
-        this.fkFornecedor = fkFornecedor;
-    }
-
-    public Integer getFkCliente() {
-        return fkCliente;
-    }
-
-    public void setFkCliente(Integer fkCliente) {
-        this.fkCliente = fkCliente;
-    }
-
-    public List<Item> getPecas() {
-        return itens;
-    }
-
-    public void setPecas(List<Item> pecas) {
-        this.itens = pecas;
-    }
+    public List<Item> getItens() { return itens; }
+    public void setItens(List<Item> itens) { this.itens = itens; }
 }
-

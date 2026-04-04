@@ -50,7 +50,7 @@ public class ItemController {
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<ItemResponseDto> deletar(@PathVariable Integer id) {
-        return ResponseEntity.ok(new ItemResponseDto(null, null, null, null, null, null, null));
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+        return ResponseEntity.ok().build();
     }
 }
