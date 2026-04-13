@@ -9,9 +9,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import school.sptech.exemplojwt.dto.*;
-import school.sptech.exemplojwt.entity.Usuario;
-import school.sptech.exemplojwt.service.UsuarioService;
+import sptech.school.dto.*;
+import sptech.school.dto.usuario.UsuarioCriacaoDto;
+import sptech.school.dto.usuario.UsuarioListarDto;
+import sptech.school.dto.usuario.UsuarioSessaoDto;
+import sptech.school.entity.Usuario;
+import sptech.school.mapper.UsuarioMapper;
+import sptech.school.service.UsuarioService;
 
 import java.time.Duration;
 import java.util.List;

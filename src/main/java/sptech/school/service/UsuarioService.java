@@ -9,9 +9,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import sptech.school.config.GerenciadorTokenJwt;
-import sptech.school.dto.UsuarioListarDto;
-import sptech.school.dto.UsuarioMapper;
-import sptech.school.dto.UsuarioTokenDto;
+
+import sptech.school.dto.usuario.UsuarioListarDto;
+
+import sptech.school.mapper.UsuarioMapper;
+
+import sptech.school.dto.usuario.UsuarioTokenDto;
+
 import sptech.school.entity.Usuario;
 import sptech.school.repository.UsuarioRepository;
 
@@ -33,7 +37,6 @@ public class UsuarioService {
   private AuthenticationManager authenticationManager;
 
   public void criar(Usuario novoUsuario) {
-
 
     String senhaCriptografada = passwordEncoder.encode(novoUsuario.getSenha());
     novoUsuario.setSenha(senhaCriptografada);
