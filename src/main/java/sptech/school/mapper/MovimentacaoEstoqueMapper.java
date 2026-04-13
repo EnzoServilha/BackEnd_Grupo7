@@ -19,7 +19,8 @@ public class MovimentacaoEstoqueMapper {
         movimentacao.setNumeroNotaFiscal(dto.numeroNotaFiscal());
         if (dto.usuarioId() != null) {
             Usuario usuario = new Usuario();
-            usuario.setId(dto.usuarioId());
+            //Estava sendo passado como integer, mas o id do usuário é do tipo Long, então foi necessário converter
+            usuario.setId(Long.valueOf(dto.usuarioId()));
             movimentacao.setUsuario(usuario);
         }
         if (dto.tipoId() != null) {

@@ -45,6 +45,12 @@ public class UsuarioMapper {
         usuario.setNome(usuarioCriacaoDto.getNome());
         usuario.setSenha(usuarioCriacaoDto.getSenha());
 
+        if (usuarioCriacaoDto.getPermissaoId() != null) {
+            Permissao permissao = new Permissao();
+            permissao.setId(usuarioCriacaoDto.getPermissaoId());
+            usuario.setPermissao(permissao);
+        }
+        
         return usuario;
     }
 
