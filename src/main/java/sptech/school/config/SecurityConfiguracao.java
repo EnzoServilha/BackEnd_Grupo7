@@ -3,6 +3,7 @@ package sptech.school.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -78,6 +79,7 @@ public class SecurityConfiguracao {
             "/webjars/**",
             "/v3/api-docs/**",
             "/actuator/*",
+            "/usuarios/login",
             "/usuarios/login/**",
             "/usuarios/logout/**",
             "/h2-console/**",
@@ -145,12 +147,26 @@ public class SecurityConfiguracao {
      * Aqui registramos nosso {@link AutenticacaoProvider}, que sabe validar credenciais
      * contra o banco de dados usando BCrypt.</p>
      */
+
+//    @Bean
+//    @Primary //Original do Diego é sem o primary porem irem tentar com pq o chat pediu pra testar
+//    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+//        AuthenticationManagerBuilder authenticationManagerBuilder =
+//                http.getSharedObject(AuthenticationManagerBuilder.class);
+//        authenticationManagerBuilder.authenticationProvider(
+//                new AutenticacaoProvider(autenticacaoService, passwordEncoder()));
+//        return authenticationManagerBuilder.build();
+//    }
+
+    //Versão chat
     @Bean
+    @Primary
     public AuthenticationManager authManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder =
                 http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.authenticationProvider(
                 new AutenticacaoProvider(autenticacaoService, passwordEncoder()));
+        authenticationManagerBuilder.parentAuthenticationManager(null);
         return authenticationManagerBuilder.build();
     }
 

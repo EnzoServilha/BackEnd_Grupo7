@@ -50,7 +50,7 @@ public class UsuarioMapper {
             permissao.setId(usuarioCriacaoDto.getPermissaoId());
             usuario.setPermissao(permissao);
         }
-        
+
         return usuario;
     }
 
