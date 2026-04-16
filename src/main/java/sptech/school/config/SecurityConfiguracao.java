@@ -160,13 +160,11 @@ public class SecurityConfiguracao {
 
     //Versão chat
     @Bean
-    @Primary
     public AuthenticationManager authManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder =
                 http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.authenticationProvider(
                 new AutenticacaoProvider(autenticacaoService, passwordEncoder()));
-        authenticationManagerBuilder.parentAuthenticationManager(null);
         return authenticationManagerBuilder.build();
     }
 

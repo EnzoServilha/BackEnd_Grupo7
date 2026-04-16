@@ -9,25 +9,35 @@ import java.util.List;
 
 public class UsuarioDetalhesDto implements UserDetails {
 
-    private final Usuario usuario;
+    private final String nome;
+
+    private final String email;
+
+    private final String senha;
 
     public UsuarioDetalhesDto(Usuario usuario) {
-        this.usuario = usuario;
+        this.nome = usuario.getNome();
+        this.email = usuario.getEmail();
+        this.senha = usuario.getSenha();
     }
 
-    @Override
-    public String getUsername() {
-        return usuario.getEmail();
-    }
-
-    @Override
-    public String getPassword() {
-        return usuario.getSenha();
+    public String getNome() {
+        return nome;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(usuario.getPermissao().getNome()));
+        return null;
+    }
+
+    @Override
+    public String getPassword() {
+        return senha;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 
     @Override
