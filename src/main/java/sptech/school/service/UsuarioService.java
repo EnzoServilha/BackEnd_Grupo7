@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import sptech.school.config.GerenciadorTokenJwt;
 
+import sptech.school.dto.usuario.UsuarioCriacaoDto;
 import sptech.school.dto.usuario.UsuarioListarDto;
 
+import sptech.school.exception.UsuarioNaoEncontradoException;
 import sptech.school.mapper.UsuarioMapper;
 
 import sptech.school.dto.usuario.UsuarioTokenDto;
@@ -70,4 +72,27 @@ public class UsuarioService {
     return usuariosEncontrados.stream().map(UsuarioMapper::of).toList();
 
   }
+
+  public UsuarioListarDto buscarPorId(Long id) {
+    Usuario usuario = usuarioRepository.findById(id)
+            .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
+    return UsuarioMapper.of(usuario);
+  }
+
+  public void atualizar(Long id, UsuarioCriacaoDto dto) {
+    Usuario usuario = usuarioRepository.findById(id)
+            .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
+    usuario.setNome(dto.getNome());
+    usuario.setEmail(dto.getEmail());
+    usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
+    usuarioRepository.save(usuario);
+  }
+
+  public void deletar(Long id) {
+    if (!usuarioRepository.existsById(id)) {
+      throw new UsuarioNaoEncontradoException("Usuário não encontrado");
+    }
+    usuarioRepository.deleteById(id);
+  }
+
 }

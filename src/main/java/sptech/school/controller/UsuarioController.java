@@ -29,7 +29,11 @@ public class UsuarioController {
     private long jwtValidity;
 
     @Autowired
-    private UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
+
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
 
     @PostMapping
     @SecurityRequirement(name = "Bearer")
@@ -115,4 +119,28 @@ public class UsuarioController {
         }
         return ResponseEntity.ok(usuariosEncontrados);
     }
+
+
+    @GetMapping("/{id}")
+    @SecurityRequirement(name = "Bearer")
+    public ResponseEntity<UsuarioListarDto> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(usuarioService.buscarPorId(id));
+    }
+
+    @PutMapping("/{id}")
+    @SecurityRequirement(name = "Bearer")
+    public ResponseEntity<Void> atualizar(@PathVariable Long id, @RequestBody @Valid UsuarioCriacaoDto dto) {
+        usuarioService.atualizar(id, dto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    @SecurityRequirement(name = "Bearer")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        usuarioService.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
+
 }
