@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record ItemRequestDto(
 
@@ -23,6 +24,10 @@ public record ItemRequestDto(
         @Size(max = 100)
         String localizacao,
 
-        LocalDateTime dataCadastro
+        LocalDateTime dataCadastro,
+
+        List<Integer> codigosAssociadosIds,
+
+        List<Integer> itensSimilaresIds
 ) {
 }

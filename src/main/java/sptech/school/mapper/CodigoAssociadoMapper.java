@@ -27,11 +27,21 @@ public class CodigoAssociadoMapper {
     }
 
     public static CodigoAssociadoResponseDto toResponseDto(CodigoAssociado codigoAssociado) {
+        CodigoAssociadoResponseDto.FornecedorResumo fornecedorResumo = null;
+        if (codigoAssociado.getFornecedor() != null) {
+            Fornecedor fornecedor = codigoAssociado.getFornecedor();
+            fornecedorResumo = new CodigoAssociadoResponseDto.FornecedorResumo(fornecedor.getId(), fornecedor.getRazaoSocial(), fornecedor.getEmail());
+        }
+        CodigoAssociadoResponseDto.ClienteResumo clienteResumo = null;
+        if (codigoAssociado.getCliente() != null) {
+            Cliente cliente = codigoAssociado.getCliente();
+            clienteResumo = new CodigoAssociadoResponseDto.ClienteResumo(cliente.getId(), cliente.getNome(), cliente.getEmail());
+        }
         return new CodigoAssociadoResponseDto(
                 codigoAssociado.getId(),
                 codigoAssociado.getCodigo(),
-                codigoAssociado.getFornecedor() != null ? FornecedorMapper.toResponseDto(codigoAssociado.getFornecedor()) : null,
-                codigoAssociado.getCliente() != null ? ClienteMapper.toResponseDto(codigoAssociado.getCliente()) : null
+                fornecedorResumo,
+                clienteResumo
         );
     }
 
@@ -39,4 +49,3 @@ public class CodigoAssociadoMapper {
         return codigos.stream().map(CodigoAssociadoMapper::toResponseDto).toList();
     }
 }
-
