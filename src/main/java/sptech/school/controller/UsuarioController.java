@@ -29,7 +29,11 @@ public class UsuarioController {
     private long jwtValidity;
 
     @Autowired
-    private UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
+
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
 
     @PostMapping
     @SecurityRequirement(name = "Bearer")
@@ -107,12 +111,55 @@ public class UsuarioController {
 
     @GetMapping
     @SecurityRequirement(name = "Bearer")
-    public ResponseEntity<List<UsuarioListarDto>> listarTodos() {
-        List<UsuarioListarDto> usuariosEncontrados = this.usuarioService.listarTodos();
+    public ResponseEntity<List<UsuarioResponseDto>> listarTodos() {
+        List<UsuarioResponseDto> usuariosEncontrados = this.usuarioService.listarTodos();
 
         if (usuariosEncontrados.isEmpty()) {
             return ResponseEntity.status(204).build();
         }
         return ResponseEntity.ok(usuariosEncontrados);
     }
+
+
+    @GetMapping("/{id}")
+    @SecurityRequirement(name = "Bearer")
+    public ResponseEntity<UsuarioResponseDto> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(usuarioService.buscarPorId(id));
+    }
+
+    @PutMapping("/{id}")
+    @SecurityRequirement(name = "Bearer")
+    public ResponseEntity<Void> atualizar(@PathVariable Long id, @RequestBody @Valid UsuarioCriacaoDto dto) {
+        usuarioService.atualizar(id, dto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    @SecurityRequirement(name = "Bearer")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        usuarioService.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/permissao/{permissaoId}")
+    @SecurityRequirement(name = "Bearer")
+    public ResponseEntity<Void> atualizarPermissao(@PathVariable Long id, @PathVariable Integer permissaoId) {
+        usuarioService.atualizarPermissao(id, permissaoId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/senha")
+    @SecurityRequirement(name = "Bearer")
+    public ResponseEntity<Void> alterarSenha(@PathVariable Long id, @RequestBody @Valid UsuarioSenhaDto dto) {
+        usuarioService.alterarSenha(id, dto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    @SecurityRequirement(name = "Bearer")
+    public ResponseEntity<UsuarioResponseDto> buscarUsuarioLogado() {
+        return ResponseEntity.ok(usuarioService.buscarUsuarioLogado());
+    }
+
+
 }
