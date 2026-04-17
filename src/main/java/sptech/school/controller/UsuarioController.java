@@ -111,8 +111,8 @@ public class UsuarioController {
 
     @GetMapping
     @SecurityRequirement(name = "Bearer")
-    public ResponseEntity<List<UsuarioListarDto>> listarTodos() {
-        List<UsuarioListarDto> usuariosEncontrados = this.usuarioService.listarTodos();
+    public ResponseEntity<List<UsuarioResponseDto>> listarTodos() {
+        List<UsuarioResponseDto> usuariosEncontrados = this.usuarioService.listarTodos();
 
         if (usuariosEncontrados.isEmpty()) {
             return ResponseEntity.status(204).build();
@@ -123,7 +123,7 @@ public class UsuarioController {
 
     @GetMapping("/{id}")
     @SecurityRequirement(name = "Bearer")
-    public ResponseEntity<UsuarioListarDto> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<UsuarioResponseDto> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.buscarPorId(id));
     }
 
@@ -153,6 +153,12 @@ public class UsuarioController {
     public ResponseEntity<Void> alterarSenha(@PathVariable Long id, @RequestBody @Valid UsuarioSenhaDto dto) {
         usuarioService.alterarSenha(id, dto);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    @SecurityRequirement(name = "Bearer")
+    public ResponseEntity<UsuarioResponseDto> buscarUsuarioLogado() {
+        return ResponseEntity.ok(usuarioService.buscarUsuarioLogado());
     }
 
 

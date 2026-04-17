@@ -10,17 +10,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import sptech.school.config.GerenciadorTokenJwt;
 
-import sptech.school.dto.usuario.UsuarioCriacaoDto;
-import sptech.school.dto.usuario.UsuarioListarDto;
+import sptech.school.dto.usuario.*;
 
-import sptech.school.dto.usuario.UsuarioSenhaDto;
 import sptech.school.entity.Permissao;
 import sptech.school.exception.PermissaoNaoEncontradaException;
 import sptech.school.exception.SenhaInvalidaException;
 import sptech.school.exception.UsuarioNaoEncontradoException;
 import sptech.school.mapper.UsuarioMapper;
-
-import sptech.school.dto.usuario.UsuarioTokenDto;
 
 import sptech.school.entity.Usuario;
 import sptech.school.repository.PermissaoRepository;
@@ -74,17 +70,17 @@ public class UsuarioService {
     return UsuarioMapper.of(usuarioAutenticado, token);
   }
 
-  public List<UsuarioListarDto> listarTodos() {
+  public List<UsuarioResponseDto> listarTodos() {
 
     List<Usuario> usuariosEncontrados = usuarioRepository.findAll();
-    return usuariosEncontrados.stream().map(UsuarioMapper::of).toList();
+    return UsuarioMapper.toResponseDtoList(usuariosEncontrados);
 
   }
 
-  public UsuarioListarDto buscarPorId(Long id) {
+  public UsuarioResponseDto buscarPorId(Long id) {
     Usuario usuario = usuarioRepository.findById(id)
             .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
-    return UsuarioMapper.of(usuario);
+    return UsuarioMapper.toResponseDto(usuario);
   }
 
   public void atualizar(Long id, UsuarioCriacaoDto dto) {
@@ -125,5 +121,12 @@ public class UsuarioService {
 
     usuario.setSenha(passwordEncoder.encode(dto.getNovaSenha()));
     usuarioRepository.save(usuario);
+  }
+
+  public UsuarioResponseDto buscarUsuarioLogado() {
+    String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    Usuario usuario = usuarioRepository.findByEmail(email)
+            .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
+    return UsuarioMapper.toResponseDto(usuario);
   }
 }
