@@ -55,6 +55,13 @@ public class ItemController {
         return ResponseEntity.ok(ItemMapper.toResponseDtoList(itens));
     }
 
+    @GetMapping("/por-codigo-associado")
+    public ResponseEntity<List<ItemResponseDto>> buscarPorCodigoAssociado(@RequestParam String codigo) {
+        List<Item> itens = itemService.buscarPorCodigoAssociado(codigo);
+        if (itens.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ItemMapper.toResponseDtoList(itens));
+    }
+
     @PostMapping
     public ResponseEntity<ItemResponseDto> cadastrar(@RequestBody @Valid ItemRequestDto request) {
         Item item = ItemMapper.toEntity(request);
@@ -84,18 +91,6 @@ public class ItemController {
     @DeleteMapping("/{itemId}/codigos-associados/{codigoAssociadoId}")
     public ResponseEntity<Void> removerCodigoAssociado(@PathVariable Integer itemId, @PathVariable Integer codigoAssociadoId) {
         itemService.removerCodigoAssociado(itemId, codigoAssociadoId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{itemId}/similares/{similarId}")
-    public ResponseEntity<ItemResponseDto> adicionarSimilar(@PathVariable Integer itemId, @PathVariable Integer similarId) {
-        Item item = itemService.adicionarItemSimilar(itemId, similarId);
-        return ResponseEntity.ok(ItemMapper.toResponseDto(item));
-    }
-
-    @DeleteMapping("/{itemId}/similares/{similarId}")
-    public ResponseEntity<Void> removerSimilar(@PathVariable Integer itemId, @PathVariable Integer similarId) {
-        itemService.removerItemSimilar(itemId, similarId);
         return ResponseEntity.noContent().build();
     }
 }

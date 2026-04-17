@@ -42,7 +42,11 @@ public class ItemService {
     }
 
     public List<Item> pesquisar(String termo) {
-        return itemRepository.findByCodigoInternoContainingIgnoreCaseOrMarcaContainingIgnoreCaseOrDescricaoContainingIgnoreCase(termo, termo, termo);
+        return itemRepository.pesquisarPorTermo(termo);
+    }
+
+    public List<Item> buscarPorCodigoAssociado(String codigo) {
+        return itemRepository.buscarPorCodigoAssociado(codigo);
     }
 
     public Item cadastrar(Item item) {
@@ -67,28 +71,9 @@ public class ItemService {
         itemRepository.deleteById(id);
     }
 
-    public Item adicionarItemSimilar(Integer itemId, Integer similarId) {
-        Item item = buscarPorId(itemId);
-        Item similar = buscarPorId(similarId);
-        if (item.getItensSimilares() == null) {
-            item.setItensSimilares(new ArrayList<>());
-        }
-        if (item.getItensSimilares().stream().noneMatch(s -> s.getId().equals(similarId))) {
-            item.getItensSimilares().add(similar);
-        }
-        return itemRepository.save(item);
-    }
-
-    public Item removerItemSimilar(Integer itemId, Integer similarId) {
-        Item item = buscarPorId(itemId);
-        if (item.getItensSimilares() != null) {
-            item.getItensSimilares().removeIf(s -> s.getId().equals(similarId));
-        }
-        return itemRepository.save(item);
-    }
-
     public Item adicionarCodigoAssociado(Integer itemId, Integer codigoAssociadoId) {
-        Item item = buscarPorId(itemId);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado"));
         CodigoAssociado codigo = codigoAssociadoRepository.findById(codigoAssociadoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Código associado não encontrado"));
         if (item.getCodigosAssociados() == null) {
@@ -101,7 +86,8 @@ public class ItemService {
     }
 
     public Item removerCodigoAssociado(Integer itemId, Integer codigoAssociadoId) {
-        Item item = buscarPorId(itemId);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado"));
         if (item.getCodigosAssociados() != null) {
             item.getCodigosAssociados().removeIf(c -> c.getId().equals(codigoAssociadoId));
         }

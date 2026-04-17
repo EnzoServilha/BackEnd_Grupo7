@@ -1,9 +1,12 @@
 package sptech.school.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import sptech.school.entity.Item;
 import sptech.school.repository.ItemRepository;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,23 +14,37 @@ import java.util.List;
 public class ItensSimilaresService {
 
     private final ItemRepository itemRepository;
-    private final ItemService itemService;
 
-    public ItensSimilaresService(ItemRepository itemRepository, ItemService itemService) {
+    public ItensSimilaresService(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
-        this.itemService = itemService;
     }
 
     public List<Item> listarSimilares(Integer itemId) {
-        Item item = itemService.buscarPorId(itemId);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado"));
         return item.getItensSimilares() != null ? item.getItensSimilares() : Collections.emptyList();
     }
 
     public Item adicionarSimilar(Integer itemId, Integer similarId) {
-        return itemService.adicionarItemSimilar(itemId, similarId);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado"));
+        Item similar = itemRepository.findById(similarId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item similar não encontrado"));
+        if (item.getItensSimilares() == null) {
+            item.setItensSimilares(new ArrayList<>());
+        }
+        if (item.getItensSimilares().stream().noneMatch(s -> s.getId().equals(similarId))) {
+            item.getItensSimilares().add(similar);
+        }
+        return itemRepository.save(item);
     }
 
     public Item removerSimilar(Integer itemId, Integer similarId) {
-        return itemService.removerItemSimilar(itemId, similarId);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado"));
+        if (item.getItensSimilares() != null) {
+            item.getItensSimilares().removeIf(s -> s.getId().equals(similarId));
+        }
+        return itemRepository.save(item);
     }
 }
