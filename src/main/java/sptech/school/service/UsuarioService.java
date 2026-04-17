@@ -13,8 +13,10 @@ import sptech.school.config.GerenciadorTokenJwt;
 import sptech.school.dto.usuario.UsuarioCriacaoDto;
 import sptech.school.dto.usuario.UsuarioListarDto;
 
+import sptech.school.dto.usuario.UsuarioSenhaDto;
 import sptech.school.entity.Permissao;
 import sptech.school.exception.PermissaoNaoEncontradaException;
+import sptech.school.exception.SenhaInvalidaException;
 import sptech.school.exception.UsuarioNaoEncontradoException;
 import sptech.school.mapper.UsuarioMapper;
 
@@ -113,4 +115,15 @@ public class UsuarioService {
     usuarioRepository.save(usuario);
   }
 
+  public void alterarSenha(Long id, UsuarioSenhaDto dto) {
+    Usuario usuario = usuarioRepository.findById(id)
+            .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
+
+    if (!passwordEncoder.matches(dto.getSenhaAtual(), usuario.getSenha())) {
+      throw new SenhaInvalidaException("Usuario ou senha invalidos"); //no caso senha
+    }
+
+    usuario.setSenha(passwordEncoder.encode(dto.getNovaSenha()));
+    usuarioRepository.save(usuario);
+  }
 }

@@ -148,6 +148,12 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}/senha")
+    @SecurityRequirement(name = "Bearer")
+    public ResponseEntity<Void> alterarSenha(@PathVariable Long id, @RequestBody @Valid UsuarioSenhaDto dto) {
+        usuarioService.alterarSenha(id, dto);
+        return ResponseEntity.noContent().build();
+    }
 
 
 }
