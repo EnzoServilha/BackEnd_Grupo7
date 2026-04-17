@@ -1,9 +1,8 @@
 package sptech.school.service;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import sptech.school.entity.CodigoAssociado;
+import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.repository.CodigoAssociadoRepository;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public class CodigoAssociadoService {
 
     public CodigoAssociado buscarPorId(Integer id) {
         return codigoAssociadoRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Código associado não encontrado"));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Código Associado", id));
     }
 
     public List<CodigoAssociado> pesquisarPorCodigo(String codigo) {
@@ -44,7 +43,7 @@ public class CodigoAssociadoService {
 
     public void deletar(Integer id) {
         if (!codigoAssociadoRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Código associado não encontrado");
+            throw new EntidadeNaoEncontradaException("Código Associado", id);
         }
         codigoAssociadoRepository.deleteById(id);
     }

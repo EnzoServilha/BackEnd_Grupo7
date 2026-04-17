@@ -1,9 +1,8 @@
 package sptech.school.service;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import sptech.school.entity.Item;
+import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.repository.ItemRepository;
 
 import java.util.ArrayList;
@@ -21,15 +20,15 @@ public class ItensSimilaresService {
 
     public List<Item> listarSimilares(Integer itemId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado"));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", itemId));
         return item.getItensSimilares() != null ? item.getItensSimilares() : Collections.emptyList();
     }
 
     public Item adicionarSimilar(Integer itemId, Integer similarId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado"));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", itemId));
         Item similar = itemRepository.findById(similarId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item similar não encontrado"));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Item Similar", similarId));
         if (item.getItensSimilares() == null) {
             item.setItensSimilares(new ArrayList<>());
         }
@@ -41,7 +40,7 @@ public class ItensSimilaresService {
 
     public Item removerSimilar(Integer itemId, Integer similarId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado"));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", itemId));
         if (item.getItensSimilares() != null) {
             item.getItensSimilares().removeIf(s -> s.getId().equals(similarId));
         }

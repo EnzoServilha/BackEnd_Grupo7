@@ -46,8 +46,7 @@ public class CodigoAssociadoController {
     public ResponseEntity<CodigoAssociadoResponseDto> cadastrar(@RequestBody @Valid CodigoAssociadoRequestDto request) {
         CodigoAssociado entity = CodigoAssociadoMapper.toEntity(request);
         CodigoAssociado salvo = codigoAssociadoService.cadastrar(entity);
-        return ResponseEntity.created(URI.create("/codigos-associados/" + salvo.getId()))
-                .body(CodigoAssociadoMapper.toResponseDto(salvo));
+        return ResponseEntity.created(null).body(CodigoAssociadoMapper.toResponseDto(salvo));
     }
 
     @PutMapping("/{id}")

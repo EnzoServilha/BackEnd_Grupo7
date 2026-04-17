@@ -1,10 +1,9 @@
 package sptech.school.service;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import sptech.school.entity.CodigoAssociado;
 import sptech.school.entity.Item;
+import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.repository.CodigoAssociadoRepository;
 import sptech.school.repository.ItemRepository;
 
@@ -29,12 +28,12 @@ public class ItemService {
 
     public Item buscarPorId(Integer id) {
         return itemRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado"));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", id));
     }
 
     public Item buscarPorCodigoInterno(String codigoInterno) {
         return itemRepository.findByCodigoInterno(codigoInterno)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado"));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", codigoInterno));
     }
 
     public List<Item> listarPorMarca(String marca) {
@@ -49,8 +48,19 @@ public class ItemService {
         return itemRepository.buscarPorCodigoAssociado(codigo);
     }
 
-    public Item cadastrar(Item item) {
+    public Item cadastrar(Item item, List<Integer> codigosAssociadosIds, List<Integer> itensSimilaresIds) {
         item.setDataCadastro(LocalDateTime.now());
+
+        if (codigosAssociadosIds != null && !codigosAssociadosIds.isEmpty()) {
+            List<CodigoAssociado> codigos = codigoAssociadoRepository.findAllById(codigosAssociadosIds);
+            item.setCodigosAssociados(codigos);
+        }
+
+        if (itensSimilaresIds != null && !itensSimilaresIds.isEmpty()) {
+            List<Item> similares = itemRepository.findAllById(itensSimilaresIds);
+            item.setItensSimilares(similares);
+        }
+
         return itemRepository.save(item);
     }
 
@@ -66,16 +76,16 @@ public class ItemService {
 
     public void deletar(Integer id) {
         if (!itemRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado");
+            throw new EntidadeNaoEncontradaException("Item", id);
         }
         itemRepository.deleteById(id);
     }
 
     public Item adicionarCodigoAssociado(Integer itemId, Integer codigoAssociadoId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado"));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", itemId));
         CodigoAssociado codigo = codigoAssociadoRepository.findById(codigoAssociadoId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Código associado não encontrado"));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Código Associado", codigoAssociadoId));
         if (item.getCodigosAssociados() == null) {
             item.setCodigosAssociados(new ArrayList<>());
         }
@@ -87,7 +97,7 @@ public class ItemService {
 
     public Item removerCodigoAssociado(Integer itemId, Integer codigoAssociadoId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado"));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", itemId));
         if (item.getCodigosAssociados() != null) {
             item.getCodigosAssociados().removeIf(c -> c.getId().equals(codigoAssociadoId));
         }

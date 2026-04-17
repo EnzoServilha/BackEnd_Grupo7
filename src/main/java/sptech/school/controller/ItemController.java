@@ -65,8 +65,8 @@ public class ItemController {
     @PostMapping
     public ResponseEntity<ItemResponseDto> cadastrar(@RequestBody @Valid ItemRequestDto request) {
         Item item = ItemMapper.toEntity(request);
-        Item salvo = itemService.cadastrar(item);
-        return ResponseEntity.created(URI.create("/itens/" + salvo.getId())).body(ItemMapper.toResponseDto(salvo));
+        Item salvo = itemService.cadastrar(item, request.codigosAssociadosIds(), request.itensSimilaresIds());
+        return ResponseEntity.created(null).body(ItemMapper.toResponseDto(salvo));
     }
 
     @PutMapping("/{id}")
