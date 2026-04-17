@@ -13,12 +13,15 @@ import sptech.school.config.GerenciadorTokenJwt;
 import sptech.school.dto.usuario.UsuarioCriacaoDto;
 import sptech.school.dto.usuario.UsuarioListarDto;
 
+import sptech.school.entity.Permissao;
+import sptech.school.exception.PermissaoNaoEncontradaException;
 import sptech.school.exception.UsuarioNaoEncontradoException;
 import sptech.school.mapper.UsuarioMapper;
 
 import sptech.school.dto.usuario.UsuarioTokenDto;
 
 import sptech.school.entity.Usuario;
+import sptech.school.repository.PermissaoRepository;
 import sptech.school.repository.UsuarioRepository;
 
 import java.util.List;
@@ -30,13 +33,16 @@ public class UsuarioService {
   private PasswordEncoder passwordEncoder;
 
   @Autowired
-  private UsuarioRepository usuarioRepository;
-
-  @Autowired
   private GerenciadorTokenJwt gerenciadorTokenJwt;
 
   @Autowired
   private AuthenticationManager authenticationManager;
+
+  @Autowired
+  private UsuarioRepository usuarioRepository;
+
+  @Autowired
+  private PermissaoRepository permissaoRepository;
 
   public void criar(Usuario novoUsuario) {
 
@@ -93,6 +99,18 @@ public class UsuarioService {
       throw new UsuarioNaoEncontradoException("Usuário não encontrado");
     }
     usuarioRepository.deleteById(id);
+  }
+
+  public void atualizarPermissao(Long id, Integer permissaoId) {
+    Usuario usuario = usuarioRepository.findById(id)
+            .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
+
+    Permissao permissao = permissaoRepository.findById(permissaoId)
+            .orElseThrow(() -> new PermissaoNaoEncontradaException("Permissão não encontrada"));
+
+    usuario.setPermissao(permissao);
+
+    usuarioRepository.save(usuario);
   }
 
 }

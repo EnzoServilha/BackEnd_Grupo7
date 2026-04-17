@@ -141,6 +141,13 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}/permissao/{permissaoId}")
+    @SecurityRequirement(name = "Bearer")
+    public ResponseEntity<Void> atualizarPermissao(@PathVariable Long id, @PathVariable Integer permissaoId) {
+        usuarioService.atualizarPermissao(id, permissaoId);
+        return ResponseEntity.noContent().build();
+    }
+
 
 
 }
