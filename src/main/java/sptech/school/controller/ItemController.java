@@ -1,56 +1,101 @@
 package sptech.school.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.item.ItemRequestDto;
 import sptech.school.dto.item.ItemResponseDto;
+import sptech.school.entity.Item;
+import sptech.school.mapper.ItemMapper;
+import sptech.school.service.ItemService;
 
+import java.net.URI;
 import java.util.List;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
-@RequestMapping("/Itens")
+@RequestMapping("/itens")
 public class ItemController {
+
+    private final ItemService itemService;
+
+    public ItemController(ItemService itemService) {
+        this.itemService = itemService;
+    }
 
     @GetMapping
     public ResponseEntity<List<ItemResponseDto>> listarTodos() {
-        return ResponseEntity.ok(List.of());
+        List<Item> itens = itemService.listarTodos();
+        if (itens.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ItemMapper.toResponseDtoList(itens));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ItemResponseDto> buscarPorId(@PathVariable Integer id) {
-        return ResponseEntity.ok(new ItemResponseDto(null, null, null, null, null, null, null));
+        Item item = itemService.buscarPorId(id);
+        return ResponseEntity.ok(ItemMapper.toResponseDto(item));
     }
 
-    @GetMapping("/{codigo}")
-    public ResponseEntity<ItemResponseDto> buscarPorCodigoInterno(@PathVariable Integer codigo) {
-        return ResponseEntity.ok(new ItemResponseDto(null, null, null, null, null, null, null));
+    @GetMapping("/codigo/{codigoInterno}")
+    public ResponseEntity<ItemResponseDto> buscarPorCodigoInterno(@PathVariable String codigoInterno) {
+        Item item = itemService.buscarPorCodigoInterno(codigoInterno);
+        return ResponseEntity.ok(ItemMapper.toResponseDto(item));
     }
 
-    @GetMapping("/{marca}")
-    public ResponseEntity<List<ItemResponseDto>> listarTodosPorMarca(@PathVariable String marca) {
-        return ResponseEntity.ok(List.of());
+    @GetMapping("/marca/{marca}")
+    public ResponseEntity<List<ItemResponseDto>> listarPorMarca(@PathVariable String marca) {
+        List<Item> itens = itemService.listarPorMarca(marca);
+        if (itens.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ItemMapper.toResponseDtoList(itens));
+    }
+
+    @GetMapping("/pesquisar")
+    public ResponseEntity<List<ItemResponseDto>> pesquisar(@RequestParam String termo) {
+        List<Item> itens = itemService.pesquisar(termo);
+        if (itens.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ItemMapper.toResponseDtoList(itens));
     }
 
     @PostMapping
-    public ResponseEntity<ItemResponseDto> cadastrar(@RequestBody ItemRequestDto request) {
-        return ResponseEntity.ok(new ItemResponseDto(null, null, null, null, null, null, null));
+    public ResponseEntity<ItemResponseDto> cadastrar(@RequestBody @Valid ItemRequestDto request) {
+        Item item = ItemMapper.toEntity(request);
+        Item salvo = itemService.cadastrar(item);
+        return ResponseEntity.created(URI.create("/itens/" + salvo.getId())).body(ItemMapper.toResponseDto(salvo));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ItemResponseDto> atualizar(@PathVariable Integer id, @RequestBody ItemRequestDto request) {
-        return ResponseEntity.ok(new ItemResponseDto(null, null, null, null, null, null, null));
+    public ResponseEntity<ItemResponseDto> atualizar(@PathVariable Integer id, @RequestBody @Valid ItemRequestDto request) {
+        Item item = ItemMapper.toEntity(request);
+        Item atualizado = itemService.atualizar(id, item);
+        return ResponseEntity.ok(ItemMapper.toResponseDto(atualizado));
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id) {
-        return ResponseEntity.ok().build();
+        itemService.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{itemId}/codigos-associados/{codigoAssociadoId}")
+    public ResponseEntity<ItemResponseDto> adicionarCodigoAssociado(@PathVariable Integer itemId, @PathVariable Integer codigoAssociadoId) {
+        Item item = itemService.adicionarCodigoAssociado(itemId, codigoAssociadoId);
+        return ResponseEntity.ok(ItemMapper.toResponseDto(item));
+    }
+
+    @DeleteMapping("/{itemId}/codigos-associados/{codigoAssociadoId}")
+    public ResponseEntity<Void> removerCodigoAssociado(@PathVariable Integer itemId, @PathVariable Integer codigoAssociadoId) {
+        itemService.removerCodigoAssociado(itemId, codigoAssociadoId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{itemId}/similares/{similarId}")
+    public ResponseEntity<ItemResponseDto> adicionarSimilar(@PathVariable Integer itemId, @PathVariable Integer similarId) {
+        Item item = itemService.adicionarItemSimilar(itemId, similarId);
+        return ResponseEntity.ok(ItemMapper.toResponseDto(item));
+    }
+
+    @DeleteMapping("/{itemId}/similares/{similarId}")
+    public ResponseEntity<Void> removerSimilar(@PathVariable Integer itemId, @PathVariable Integer similarId) {
+        itemService.removerItemSimilar(itemId, similarId);
+        return ResponseEntity.noContent().build();
     }
 }
