@@ -7,6 +7,7 @@ public record StatusRequestDto(
         @NotBlank
         @Size(max = 45)
         String nome
+
 ) {
 }
 

@@ -1,9 +1,12 @@
 package sptech.school.mapper;
 
+import sptech.school.dto.cliente.ClienteResponseDto;
+import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoResponseDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
 import sptech.school.entity.*;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class MovimentacaoEstoqueMapper {
@@ -12,7 +15,6 @@ public class MovimentacaoEstoqueMapper {
         MovimentacaoEstoque movimentacao = new MovimentacaoEstoque();
         movimentacao.setTotalGastoImpostos(dto.totalGastoImpostos());
         movimentacao.setPrecoFrete(dto.precoFrete());
-        movimentacao.setDataMovimentacao(dto.dataMovimentacao());
         movimentacao.setDataEntregaPrevista(dto.dataEntregaPrevista());
         movimentacao.setDataEntrega(dto.dataEntrega());
         movimentacao.setObservacoes(dto.observacoes());
@@ -51,27 +53,97 @@ public class MovimentacaoEstoqueMapper {
         return movimentacao;
     }
 
-    public static MovimentacaoEstoqueResponseDto toResponseDto(MovimentacaoEstoque movimentacao) {
-        return new MovimentacaoEstoqueResponseDto(
-                movimentacao.getId(),
-                movimentacao.getUsuario() != null ? UsuarioMapper.toResponseDto(movimentacao.getUsuario()) : null,
-                movimentacao.getTotalGastoImpostos(),
-                movimentacao.getPrecoFrete(),
-                movimentacao.getDataMovimentacao(),
-                movimentacao.getDataEntregaPrevista(),
-                movimentacao.getDataEntrega(),
-                movimentacao.getObservacoes(),
-                movimentacao.getTipo() != null ? TipoMapper.toResponseDto(movimentacao.getTipo()) : null,
-                movimentacao.getStatus() != null ? StatusMapper.toResponseDto(movimentacao.getStatus()) : null,
-                movimentacao.getCliente() != null ? ClienteMapper.toResponseDto(movimentacao.getCliente()) : null,
-                movimentacao.getFornecedor() != null ? FornecedorMapper.toResponseDto(movimentacao.getFornecedor()) : null,
-                movimentacao.getMovimentacaoOriginal() != null ? movimentacao.getMovimentacaoOriginal().getId() : null,
-                movimentacao.getNumeroNotaFiscal()
-        );
+    public static Double valorTotal(Double valorProdutos, MovimentacaoEstoque e){
+
+        Double frete = e.getPrecoFrete();
+
+        if(e.getPrecoFrete() == null){
+            frete = 0.0;
+        }
+
+        Double impostos = e.getTotalGastoImpostos();
+
+        if(e.getTotalGastoImpostos() == null){
+            impostos = 0.0;
+        }
+
+        return frete + impostos + valorProdutos;
+
     }
 
-    public static List<MovimentacaoEstoqueResponseDto> toResponseDtoList(List<MovimentacaoEstoque> movimentacoes) {
-        return movimentacoes.stream().map(MovimentacaoEstoqueMapper::toResponseDto).toList();
+    public static Double valorProdutos(List<ItensNaMovimentacao> itens){
+        if(itens == null || itens.isEmpty()){
+            return 0.0;
+        }
+
+        Double calculo = 0.0;
+        for(ItensNaMovimentacao t : itens){
+            calculo += t.getPrecoUnitario() * t.getQtd();
+        }
+        return calculo;
+    }
+
+    public static Integer qtdItens(List<ItensNaMovimentacao> itens){
+        if(itens == null || itens.isEmpty()){
+            return 0;
+        }
+
+        Integer calculo = 0;
+        for(ItensNaMovimentacao t : itens){
+            calculo += t.getQtd();
+        }
+        return calculo;
+    }
+
+    public static Long qtdDiasPrevistos(MovimentacaoEstoque e){
+        if(e.getDataMovimentacao() == null || e.getDataEntregaPrevista() == null || e.getDataEntregaPrevista().isBefore(e.getDataMovimentacao().toLocalDate())){
+            return 0L;
+        }
+
+        return ChronoUnit.DAYS.between(e.getDataMovimentacao().toLocalDate(), e.getDataEntregaPrevista());
+    }
+
+    public static Long qtdDiasReais(MovimentacaoEstoque e){
+        if(e.getDataMovimentacao() == null || e.getDataEntrega() == null || e.getDataEntrega().isBefore(e.getDataMovimentacao().toLocalDate())){
+            return 0L;
+        }
+
+        return ChronoUnit.DAYS.between(e.getDataMovimentacao().toLocalDate(), e.getDataEntrega());
+    }
+
+    public static MovimentacaoEstoqueResponseDto toResponse(MovimentacaoEstoque entity){
+
+
+        Double valorP = valorProdutos(entity.getItens());
+
+        MovimentacaoEstoqueResponseDto response = new MovimentacaoEstoqueResponseDto(
+                entity.getId(),
+                UsuarioMapper.toResponseDto(entity.getUsuario()),
+                entity.getTotalGastoImpostos(),
+                entity.getPrecoFrete(),
+                entity.getDataMovimentacao(),
+                entity.getDataEntregaPrevista(),
+                entity.getDataEntrega(),
+                entity.getObservacoes(),
+                TipoMapper.toResponseDto(entity.getTipo()) ,
+                StatusMapper.toResponseDto(entity.getStatus()),
+                ClienteMapper.toResponseDto(entity.getCliente()),
+                FornecedorMapper.toResponseDto(entity.getFornecedor()),
+                entity.getMovimentacaoOriginal().getId(),
+                entity.getNumeroNotaFiscal(),
+                valorTotal(valorP, entity),
+                valorP,
+                qtdItens(entity.getItens()),
+                qtdDiasPrevistos(entity),
+                qtdDiasReais(entity)
+
+        );
+
+        return response;
+    }
+
+    public static List<MovimentacaoEstoqueResponseDto> toResponseDtoList(List<MovimentacaoEstoque> lista) {
+        return lista.stream().map(MovimentacaoEstoqueMapper::toResponse).toList();
     }
 }
 

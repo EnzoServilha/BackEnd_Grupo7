@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 public record MovimentacaoEstoqueResponseDto(
         Integer id,
         UsuarioResponseDto usuario,
-        BigDecimal totalGastoImpostos,
-        BigDecimal precoFrete,
+        Double totalGastoImpostos,
+        Double precoFrete,
         LocalDateTime dataMovimentacao,
         LocalDate dataEntregaPrevista,
         LocalDate dataEntrega,
@@ -24,7 +24,12 @@ public record MovimentacaoEstoqueResponseDto(
         ClienteResponseDto cliente,
         FornecedorResponseDto fornecedor,
         Integer movimentacaoOriginalId,
-        String numeroNotaFiscal
+        String numeroNotaFiscal,
+        Double valorTotal,
+        Double precoProdutos,
+        Integer qtdItens,
+        Long qtdDiasPrevistos,
+        Long qtdDiasReal
 ) {
 }
 

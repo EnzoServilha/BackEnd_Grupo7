@@ -13,7 +13,7 @@ public record ItensNaMovimentacaoRequestDto(
 
         Integer qtd,
 
-        BigDecimal precoUnitario
+        Double precoUnitario
 ) {
 }
 

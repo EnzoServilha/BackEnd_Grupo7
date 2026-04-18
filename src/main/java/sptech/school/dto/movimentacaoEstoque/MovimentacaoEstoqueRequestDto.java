@@ -6,9 +6,8 @@ import java.time.LocalDateTime;
 
 public record MovimentacaoEstoqueRequestDto(
         Integer usuarioId,
-        BigDecimal totalGastoImpostos,
-        BigDecimal precoFrete,
-        LocalDateTime dataMovimentacao,
+        Double totalGastoImpostos,
+        Double precoFrete,
         LocalDate dataEntregaPrevista,
         LocalDate dataEntrega,
         String observacoes,
