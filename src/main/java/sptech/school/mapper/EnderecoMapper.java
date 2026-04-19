@@ -12,7 +12,7 @@ public class EnderecoMapper {
         Endereco endereco = new Endereco();
         endereco.setCep(dto.cep());
         endereco.setLogradouro(dto.logradouro());
-        endereco.setNumero(dto.numero());
+        endereco.setNumero(String.valueOf(dto.numero())); // numero é integer
         endereco.setComplemento(dto.complemento());
         endereco.setBairro(dto.bairro());
         endereco.setCidade(dto.cidade());
@@ -37,4 +37,3 @@ public class EnderecoMapper {
         return enderecos.stream().map(EnderecoMapper::toResponseDto).toList();
     }
 }
-

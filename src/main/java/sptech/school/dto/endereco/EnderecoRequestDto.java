@@ -11,9 +11,11 @@ public record EnderecoRequestDto(
         String logradouro,
 
         @Size(max = 20)
-        String numero,
+        // Pode null
+        Integer numero,
 
         @Size(max = 100)
+        // Pode null
         String complemento,
 
         @Size(max = 100)
@@ -28,4 +30,3 @@ public record EnderecoRequestDto(
         String uf
 ) {
 }
-
