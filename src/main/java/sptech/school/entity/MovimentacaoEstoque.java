@@ -63,6 +63,10 @@ public class MovimentacaoEstoque {
     @OneToMany(mappedBy = "movimentacaoEstoque")
     private List<ItensNaMovimentacao> itens;
 
+    @ManyToOne
+    @JoinColumn(name = "periodo_id")
+    private Periodo periodo;
+
     public MovimentacaoEstoque() {}
 
     public Integer getId() { return id; }
@@ -109,6 +113,14 @@ public class MovimentacaoEstoque {
 
     public List<ItensNaMovimentacao> getItens() { return itens; }
     public void setItens(List<ItensNaMovimentacao> itens) { this.itens = itens; }
+
+    public Periodo getPeriodo() {
+        return periodo;
+    }
+
+    public void setPeriodo(Periodo periodo) {
+        this.periodo = periodo;
+    }
 }
 
 
