@@ -1,37 +1,26 @@
 package sptech.school.service;
 
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import sptech.school.dto.endereco.EnderecoRequestDto;
-import sptech.school.dto.endereco.EnderecoResponseDto;
-import sptech.school.entity.CodigoAssociado;
 import sptech.school.entity.Endereco;
-import sptech.school.entity.Item;
 import sptech.school.exception.EnderecoNaoEncontradoException;
-import sptech.school.mapper.EnderecoMapper;
 import sptech.school.repository.ClienteRepository;
 import sptech.school.repository.EnderecoRepository;
 import sptech.school.repository.FabricanteRepository;
 import sptech.school.repository.FornecedorRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class EnderecoService {
 
-    @Autowired
+//    @Autowired
     private EnderecoRepository enderecoRepository;
-    @Autowired
+//    @Autowired
     private FabricanteRepository fabricanteRepository;
-    @Autowired
+//    @Autowired
     private FornecedorRepository fornecedorRepository;
-    @Autowired
+//    @Autowired
     private ClienteRepository clienteRepository;
 
     public EnderecoService(EnderecoRepository enderecoRepository, FabricanteRepository fabricanteRepository, FornecedorRepository fornecedorRepository, ClienteRepository clienteRepository) {
@@ -41,20 +30,27 @@ public class EnderecoService {
         this.clienteRepository = clienteRepository;
     }
 
+    // ----------------------------------------------------------------------------------------------------
+    // Listar todos os endereços
+    // ----------------------------------------------------------------------------------------------------
     public List<Endereco> listarTodos() {
         return enderecoRepository.findAll();
     }
 
+    // ----------------------------------------------------------------------------------------------------
+    // Buscar endereço por ID
+    // ----------------------------------------------------------------------------------------------------
     public Endereco buscarPorId(Integer id) {
         return enderecoRepository.findById(id)
                 .orElseThrow(() -> new EnderecoNaoEncontradoException(String.valueOf(id)));
     }
 
-    // TODO: cadastrar
-    // TODO: atualizar
-
+    // ----------------------------------------------------------------------------------------------------
+    // TODO: Cadastrar endereço
+    // ----------------------------------------------------------------------------------------------------
+    // Rascunos por enquanto sla
 //    public Item cadastrar(Endereco, List<Integer> codigosAssociadosIds, List<Integer> itensSimilaresIds) {
-//        // TODO: fazer  aqui
+//
 //        return null;
 //
 //        return enderecoRepository.save(endereco);
@@ -97,10 +93,20 @@ public class EnderecoService {
 //    }
 
 
+    // ----------------------------------------------------------------------------------------------------
+    // TODO: Atualizar endereço por ID
+    // ----------------------------------------------------------------------------------------------------
+
+    // ----------------------------------------------------------------------------------------------------
+    // Deletar endereço por ID
+    // ----------------------------------------------------------------------------------------------------
     public void deletar(Integer id) {
         if (!enderecoRepository.existsById(id)) {
             throw new EnderecoNaoEncontradoException(String.valueOf(id));
         }
         enderecoRepository.deleteById(id);
     }
+
+
+    // mais métodos provavelmente vão ser necessários
 }

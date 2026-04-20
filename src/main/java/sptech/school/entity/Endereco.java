@@ -18,6 +18,7 @@ public class Endereco {
 
     @Column(length = 20)
     private String numero;
+    // número de endereço nem sempre é numérico (ex: "S/N", "12A")
 
     @Column(length = 100)
     private String complemento;
@@ -57,4 +58,3 @@ public class Endereco {
     public String getUf() { return uf; }
     public void setUf(String uf) { this.uf = uf; }
 }
-

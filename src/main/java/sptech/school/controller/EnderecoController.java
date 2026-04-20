@@ -1,23 +1,12 @@
 package sptech.school.controller;
 
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sptech.school.dto.endereco.EnderecoRequestDto;
 import sptech.school.dto.endereco.EnderecoResponseDto;
-import sptech.school.dto.endereco.EnderecoRequestDto;
-import sptech.school.dto.endereco.EnderecoResponseDto;
-import sptech.school.entity.CodigoAssociado;
-import sptech.school.entity.Endereco;
 import sptech.school.entity.Endereco;
 import sptech.school.mapper.EnderecoMapper;
-import sptech.school.mapper.EnderecoMapper;
-import sptech.school.service.ClienteService;
 import sptech.school.service.EnderecoService;
-import sptech.school.service.FabricanteService;
-import sptech.school.service.FornecedorService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -52,10 +41,7 @@ public class EnderecoController {
     // ----------------------------------------------------------------------------------------------------
     // TODO: Cadastrar endereço
     // ----------------------------------------------------------------------------------------------------
-
-    // ----------------------------------------------------------------------------------------------------
-    // TODO: Atualizar endereço por ID
-    // ----------------------------------------------------------------------------------------------------
+    // Rascunhos
 //    @PostMapping
 //    public ResponseEntity<EnderecoResponseDto> cadastrar(@RequestBody @Valid EnderecoRequestDto request) {
 //        Endereco endereco = EnderecoMapper.toEntity(request);
@@ -71,6 +57,10 @@ public class EnderecoController {
 //    }
 
     // ----------------------------------------------------------------------------------------------------
+    // TODO: Atualizar endereço por ID
+    // ----------------------------------------------------------------------------------------------------
+
+    // ----------------------------------------------------------------------------------------------------
     // Deletar endereço por ID
     // ----------------------------------------------------------------------------------------------------
     @DeleteMapping("/{id}")
@@ -78,4 +68,6 @@ public class EnderecoController {
         enderecoService.deletar(id);
         return ResponseEntity.noContent().build();
     }
+
+    // mais métodos provavelmente vão ser necessários
 }

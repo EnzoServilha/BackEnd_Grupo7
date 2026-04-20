@@ -1,23 +1,23 @@
 package sptech.school.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import sptech.school.entity.Cliente;
-import sptech.school.entity.Endereco;
 import sptech.school.exception.ClienteNaoEncontradoException;
-import sptech.school.exception.EnderecoNaoEncontradoException;
 import sptech.school.repository.*;
 
 import java.util.List;
 
+@Service
 public class ClienteService {
 
-    @Autowired
+//    @Autowired
     private ClienteRepository clienteRepository;
-    @Autowired
+//    @Autowired
     private CodigoAssociadoRepository codigoAssociadoRepository;
-    @Autowired
+//    @Autowired
     private EnderecoRepository enderecoRepository;
-    @Autowired
+//    @Autowired
     private MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
 
     public ClienteService(ClienteRepository clienteRepository, CodigoAssociadoRepository codigoAssociadoRepository, EnderecoRepository enderecoRepository, MovimentacaoEstoqueRepository movimentacaoEstoqueRepository) {
@@ -60,4 +60,7 @@ public class ClienteService {
         }
         clienteRepository.deleteById(id);
     }
+
+
+    // mais métodos provavelmente vão ser necessários
 }

@@ -5,6 +5,7 @@ import sptech.school.dto.cliente.ClienteResponseDto;
 import sptech.school.entity.Cliente;
 import sptech.school.entity.Endereco;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class ClienteMapper {
@@ -16,11 +17,10 @@ public class ClienteMapper {
         cliente.setTelefone(dto.telefone());
         cliente.setEmail(dto.email());
         cliente.setObservacoes(dto.observacoes());
-        cliente.setDataCadastro(dto.dataCadastro());
-        if (dto.enderecoId() != null) {
-            Endereco endereco = new Endereco();
-            endereco.setId(dto.enderecoId());
-            cliente.setEndereco(endereco);
+//        cliente.setDataCadastro(dto.dataCadastro());
+        cliente.setDataCadastro(LocalDateTime.now());
+        if (dto.endereco() != null) {
+            cliente.setEndereco(EnderecoMapper.toEntity(dto.endereco()));
         }
         return cliente;
     }

@@ -1,16 +1,15 @@
 package sptech.school.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.cliente.ClienteResponseDto;
 import sptech.school.entity.Cliente;
 import sptech.school.mapper.ClienteMapper;
 import sptech.school.service.ClienteService;
 
 import java.util.List;
-
+@RestController
+@RequestMapping("/clientes")
 public class ClienteController {
 
     private ClienteService clienteService;
@@ -54,4 +53,18 @@ public class ClienteController {
         clienteService.deletar(id);
         return ResponseEntity.noContent().build();
     }
+
+    // ----------------------------------------------------------------------------------------------------
+    // ENDPOINT NOVO
+    // --- Cartões da tela de contato de cliente ---
+    // Buscar lista de cartoes informações:
+    // - Nome da empresa (nome do cliente)
+    // - (ignorar porque não tem no banco) Nome do contato
+    // - Telefone
+    // - E-mail
+    // - Estado + "-" + Cidade
+    // ----------------------------------------------------------------------------------------------------
+
+
+    // mais métodos provavelmente vão ser necessários
 }
