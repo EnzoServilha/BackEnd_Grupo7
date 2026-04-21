@@ -9,6 +9,6 @@ public record ItensNaMovimentacaoResponseDto(
         Integer movimentacaoEstoqueId,
         ItemResponseDto item,
         Integer qtd,
-        BigDecimal precoUnitario
+        Double precoUnitario
 ) {
 }
