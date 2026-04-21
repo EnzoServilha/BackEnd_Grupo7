@@ -1,41 +1,31 @@
-package sptech.school.entity;
+package sptech.school.dto.endereco;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-@Entity
-@Table(name = "endereco")
-public class Endereco {
+public class EnderecoRequest_Dto {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(length = 10)
+    @NotBlank
     private String cep;
 
-    @Column(length = 150)
+    @NotBlank
     private String logradouro;
 
-    // número de endereço nem sempre é numérico (ex: "S/N", "12A")
-    @Column(length = 20)
+//    Pode ser null
     private String numero;
 
-    @Column(length = 100)
+//    Pode ser null
     private String complemento;
 
-    @Column(length = 100)
+    @NotBlank
     private String bairro;
 
-    @Column(length = 100)
+    @NotNull
     private String cidade;
 
     @Column(length = 2)
     private String uf;
-
-    public Endereco() {}
-
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
 
     public String getCep() { return cep; }
     public void setCep(String cep) { this.cep = cep; }

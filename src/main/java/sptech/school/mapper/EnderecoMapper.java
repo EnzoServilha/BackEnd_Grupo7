@@ -37,4 +37,3 @@ public class EnderecoMapper {
         return enderecos.stream().map(EnderecoMapper::toResponseDto).toList();
     }
 }
-
