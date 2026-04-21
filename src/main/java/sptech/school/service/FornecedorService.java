@@ -1,12 +1,10 @@
 package sptech.school.service;
 
 import org.springframework.stereotype.Service;
-import sptech.school.dto.fornecedor.FornecedorRequestDto;
 import sptech.school.entity.Categoria;
-import sptech.school.entity.Fabricante;
+import sptech.school.entity.Marca;
 import sptech.school.entity.Fornecedor;
 import sptech.school.exception.EntidadeNaoEncontradaException;
-import sptech.school.mapper.FornecedorMapper;
 import sptech.school.repository.FornecedorRepository;
 
 import java.util.List;
@@ -40,7 +38,7 @@ public class FornecedorService {
         return repository.findAllByCategoria(categoria);
     }
 
-    public List<Fabricante> listarFabricantesPorFornecedorId(Integer fornecedorId) {
+    public List<Marca> listarFabricantesPorFornecedorId(Integer fornecedorId) {
         Fornecedor fornecedor = repository.findById(fornecedorId)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor não encontrado", fornecedorId));
 

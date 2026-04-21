@@ -2,8 +2,10 @@ package sptech.school.dto.fornecedor;
 
 import sptech.school.dto.categoria.CategoriaResponseDto;
 import sptech.school.dto.endereco.EnderecoResponseDto;
+import sptech.school.dto.marca.MarcaResponseDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record FornecedorResponseDto(
         Integer id,
@@ -15,7 +17,8 @@ public record FornecedorResponseDto(
         String email,
         String observacoes,
         LocalDateTime dataCadastro,
-        CategoriaResponseDto categoria,
+        List<CategoriaResponseDto> categoria,
+        List<MarcaResponseDto> marcas,
         EnderecoResponseDto endereco
 ) {
 }

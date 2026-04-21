@@ -3,6 +3,7 @@ package sptech.school.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -37,53 +38,110 @@ public class Fornecedor {
     @Column
     private LocalDateTime dataCadastro;
 
-    @ManyToOne
-    @JoinColumn(name = "categoria_id")
-    private Categoria categoria;
+    @ManyToMany(mappedBy = "fornecedores")
+    private List<Categoria> categoria = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "endereco_id")
     private Endereco endereco;
 
     @ManyToMany(mappedBy = "fornecedores")
-    private List<Fabricante> fabricantes;
+    private List<Marca> marcas = new ArrayList<>();
 
-    public Fornecedor() {}
+    public Integer getId() {
+        return id;
+    }
 
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    public String getRazaoSocial() { return razaoSocial; }
-    public void setRazaoSocial(String razaoSocial) { this.razaoSocial = razaoSocial; }
+    public String getRazaoSocial() {
+        return razaoSocial;
+    }
 
-    public String getCnpj() { return cnpj; }
-    public void setCnpj(String cnpj) { this.cnpj = cnpj; }
+    public void setRazaoSocial(String razaoSocial) {
+        this.razaoSocial = razaoSocial;
+    }
 
-    public String getNomeContato() { return nomeContato; }
-    public void setNomeContato(String nomeContato) { this.nomeContato = nomeContato; }
+    public String getCnpj() {
+        return cnpj;
+    }
 
-    public String getNomeEmpresa() { return nomeEmpresa; }
-    public void setNomeEmpresa(String nomeEmpresa) { this.nomeEmpresa = nomeEmpresa; }
+    public void setCnpj(String cnpj) {
+        this.cnpj = cnpj;
+    }
 
-    public String getTelefone() { return telefone; }
-    public void setTelefone(String telefone) { this.telefone = telefone; }
+    public String getNomeContato() {
+        return nomeContato;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setNomeContato(String nomeContato) {
+        this.nomeContato = nomeContato;
+    }
 
-    public String getObservacoes() { return observacoes; }
-    public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
+    public String getNomeEmpresa() {
+        return nomeEmpresa;
+    }
 
-    public LocalDateTime getDataCadastro() { return dataCadastro; }
-    public void setDataCadastro(LocalDateTime dataCadastro) { this.dataCadastro = dataCadastro; }
+    public void setNomeEmpresa(String nomeEmpresa) {
+        this.nomeEmpresa = nomeEmpresa;
+    }
 
-    public Categoria getCategoria() { return categoria; }
-    public void setCategoria(Categoria categoria) { this.categoria = categoria; }
+    public String getTelefone() {
+        return telefone;
+    }
 
-    public Endereco getEndereco() { return endereco; }
-    public void setEndereco(Endereco endereco) { this.endereco = endereco; }
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
 
-    public List<Fabricante> getFabricantes() { return fabricantes; }
-    public void setFabricantes(List<Fabricante> fabricantes) { this.fabricantes = fabricantes; }
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getObservacoes() {
+        return observacoes;
+    }
+
+    public void setObservacoes(String observacoes) {
+        this.observacoes = observacoes;
+    }
+
+    public LocalDateTime getDataCadastro() {
+        return dataCadastro;
+    }
+
+    public void setDataCadastro(LocalDateTime dataCadastro) {
+        this.dataCadastro = dataCadastro;
+    }
+
+    public Endereco getEndereco() {
+        return endereco;
+    }
+
+    public void setEndereco(Endereco endereco) {
+        this.endereco = endereco;
+    }
+
+    public List<Marca> getMarcas() {
+        return marcas;
+    }
+
+    public void setMarcas(List<Marca> marcas) {
+        this.marcas = marcas;
+    }
+
+    public List<Categoria> getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(List<Categoria> categoria) {
+        this.categoria = categoria;
+    }
 }
 
