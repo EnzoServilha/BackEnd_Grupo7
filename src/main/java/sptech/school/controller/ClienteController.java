@@ -5,7 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.cliente.ClienteRequestDto;
 import sptech.school.dto.cliente.ClienteResponseDto;
-import sptech.school.entity.Cliente;
+import sptech.school.entity.*;
+import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.mapper.ClienteMapper;
 import sptech.school.service.ClienteService;
 
@@ -60,7 +61,6 @@ public class ClienteController {
             @PathVariable Integer id,
             @RequestBody @Valid ClienteRequestDto request
     ) {
-
         Cliente cliente = ClienteMapper.toEntity(request);
 
         Cliente atualizado = clienteService.atualizar(id, cliente);
@@ -77,17 +77,78 @@ public class ClienteController {
         return ResponseEntity.noContent().build();
     }
 
+    // métodos mais especificados:
+
     // ----------------------------------------------------------------------------------------------------
-    // ENDPOINT NOVO
-    // --- Cartões da tela de contato de cliente ---
-    // Buscar lista de cartoes informações:
-    // - Nome da empresa (nome do cliente)
-    // - (ignorar porque não tem no banco) Nome do contato
-    // - Telefone
-    // - E-mail
-    // - Estado + "-" + Cidade
+    // Contar clientes
     // ----------------------------------------------------------------------------------------------------
+    @GetMapping("/qtd")
+    public ResponseEntity<Long> contarClientes() { return ResponseEntity.ok(clienteService.contarClientes()); }
 
 
-    // mais métodos provavelmente vão ser necessários
+    // ----------------------------------------------------------------------------------------------------
+    // Listar movimentacões no estoque por cliente
+    // ----------------------------------------------------------------------------------------------------
+    @GetMapping("/{id}/movimentacoes")
+    public ResponseEntity<List<MovimentacaoEstoque>> listarMovimentacoes(@PathVariable Integer id) {
+
+        List<MovimentacaoEstoque> lista = clienteService.listarMovimentacoesPorCliente(id);
+
+        if (lista.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(lista);
+    }
+
+    // ----------------------------------------------------------------------------------------------------
+    // Buscar cliente por nome da empresa OU contato
+    // ----------------------------------------------------------------------------------------------------
+    @GetMapping("/buscar")
+    public ResponseEntity<List<ClienteResponseDto>> buscar(@RequestParam String termo) {
+
+        List<Cliente> clientes = clienteService.buscarPorNomeOuContato(termo);
+
+        if (clientes.isEmpty()) return ResponseEntity.noContent().build();
+
+        return ResponseEntity.ok(ClienteMapper.toResponseDtoList(clientes));
+    }
+
+    // ----------------------------------------------------------------------------------------------------
+    // Buscar cliente por CPF/CNPJ
+    // ----------------------------------------------------------------------------------------------------
+    @GetMapping("/cpf-cnpj/{cpfCnpj}")
+    public ResponseEntity<ClienteResponseDto> buscarPorCpfCnpj(@PathVariable String cpfCnpj) {
+
+        Cliente cliente = clienteService.buscarPorCpfCnpj(cpfCnpj);
+
+        return ResponseEntity.ok(ClienteMapper.toResponseDto(cliente));
+    }
+    // ----------------------------------------------------------------------------------------------------
+    // Buscar cliente por cidade
+    // ----------------------------------------------------------------------------------------------------
+    @GetMapping("/cidade")
+    public ResponseEntity<List<ClienteResponseDto>> buscarPorCidade(@RequestParam String cidade) {
+
+        List<Cliente> clientes = clienteService.buscarPorCidade(cidade);
+
+        if (clientes.isEmpty()) return ResponseEntity.noContent().build();
+
+        return ResponseEntity.ok(ClienteMapper.toResponseDtoList(clientes));
+    }
+
+    // ----------------------------------------------------------------------------------------------------
+    // Buscar cliente por estado
+    // ----------------------------------------------------------------------------------------------------
+    @GetMapping("/estado")
+    public ResponseEntity<List<ClienteResponseDto>> buscarPorUf(@RequestParam String uf) {
+
+        List<Cliente> clientes = clienteService.buscarPorUf(uf);
+
+        if (clientes.isEmpty()) return ResponseEntity.noContent().build();
+
+        return ResponseEntity.ok(ClienteMapper.toResponseDtoList(clientes));
+    }
+
+
+    // mais métodos aqui se necessário aqui
 }

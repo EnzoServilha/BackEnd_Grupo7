@@ -14,14 +14,7 @@ import java.util.List;
 @Service
 public class EnderecoService {
 
-//    @Autowired
     private EnderecoRepository enderecoRepository;
-//    @Autowired
-//    private FabricanteRepository fabricanteRepository;
-//    @Autowired
-//    private FornecedorRepository fornecedorRepository;
-//    @Autowired
-//    private ClienteRepository clienteRepository;
 
     public EnderecoService(EnderecoRepository enderecoRepository) {
         this.enderecoRepository = enderecoRepository;
@@ -50,14 +43,14 @@ public class EnderecoService {
     */
 
     // ----------------------------------------------------------------------------------------------------
-    // Cadastrar endereço
+    // Cadastrar endereço (só de enfeite)
     // ----------------------------------------------------------------------------------------------------
     public Endereco cadastrar(Endereco endereco) {
         return enderecoRepository.save(endereco);
     }
 
     // ----------------------------------------------------------------------------------------------------
-    // Atualizar endereço por ID
+    // Atualizar endereço por ID (só de enfeite)
     // ----------------------------------------------------------------------------------------------------
     public Endereco atualizar(Integer id, Endereco enderecoAtualizado) {
 
@@ -84,6 +77,5 @@ public class EnderecoService {
         enderecoRepository.deleteById(id);
     }
 
-
-    // mais métodos provavelmente vão ser necessários
+    // mais métodos aqui se necessário aqui
 }

@@ -117,7 +117,6 @@ public class MovimentacaoEstoque {
     public Periodo getPeriodo() {
         return periodo;
     }
-
     public void setPeriodo(Periodo periodo) {
         this.periodo = periodo;
     }
