@@ -17,17 +17,14 @@ public class EnderecoService {
 //    @Autowired
     private EnderecoRepository enderecoRepository;
 //    @Autowired
-    private FabricanteRepository fabricanteRepository;
+//    private FabricanteRepository fabricanteRepository;
 //    @Autowired
-    private FornecedorRepository fornecedorRepository;
+//    private FornecedorRepository fornecedorRepository;
 //    @Autowired
-    private ClienteRepository clienteRepository;
+//    private ClienteRepository clienteRepository;
 
-    public EnderecoService(EnderecoRepository enderecoRepository, FabricanteRepository fabricanteRepository, FornecedorRepository fornecedorRepository, ClienteRepository clienteRepository) {
+    public EnderecoService(EnderecoRepository enderecoRepository) {
         this.enderecoRepository = enderecoRepository;
-        this.fabricanteRepository = fabricanteRepository;
-        this.fornecedorRepository = fornecedorRepository;
-        this.clienteRepository = clienteRepository;
     }
 
     // ----------------------------------------------------------------------------------------------------
@@ -45,57 +42,37 @@ public class EnderecoService {
                 .orElseThrow(() -> new EnderecoNaoEncontradoException(String.valueOf(id)));
     }
 
-    // ----------------------------------------------------------------------------------------------------
-    // TODO: Cadastrar endereço
-    // ----------------------------------------------------------------------------------------------------
-    // Rascunos por enquanto sla
-//    public Item cadastrar(Endereco, List<Integer> codigosAssociadosIds, List<Integer> itensSimilaresIds) {
-//
-//        return null;
-//
-//        return enderecoRepository.save(endereco);
-//    }
-//
-//    public Item cadastrar(Item item, List<Integer> codigosAssociadosIds, List<Integer> itensSimilaresIds) {
-//        item.setDataCadastro(LocalDateTime.now());
-//
-//        if (codigosAssociadosIds != null && !codigosAssociadosIds.isEmpty()) {
-//            List<CodigoAssociado> codigos = codigoAssociadoRepository.findAllById(codigosAssociadosIds);
-//            item.setCodigosAssociados(codigos);
-//        }
-//
-//        if (itensSimilaresIds != null && !itensSimilaresIds.isEmpty()) {
-//            List<Item> similares = itemRepository.findAllById(itensSimilaresIds);
-//            item.setItensSimilares(similares);
-//        }
-//
-//        return itemRepository.save(item);
-//    }
-//
-//
-//    public Curso criar(Curso curso, Integer professorId) {
-//
-////        Optional<Professor> professorOptional =
-////                professorRepository.findById(professorId);
-////
-////        if (professorOptional.isEmpty()){
-////            throw new ProfessorNaoEncontradoException(professorId);
-////        }
-//
-//        Professor professorEntidade = professorRepository.findById(professorId)
-//                .orElseThrow(() -> new ProfessorNaoEncontradoException(professorId));
-//
-////        Professor professorEntidade = professorOptional.get();
-//
-//        curso.setProfessor(professorEntidade);
-//
-//        return cursoRepository.save(curso);
-//    }
-
+    /*
+    -------------------------------------------------------------------------------------------------------
+    ADVERTÊNCIA:
+    Cadastro e atualização de endereço já são feitos pelo cadastro e atualização de cliente e fornecedor
+    -------------------------------------------------------------------------------------------------------
+    */
 
     // ----------------------------------------------------------------------------------------------------
-    // TODO: Atualizar endereço por ID
+    // Cadastrar endereço
     // ----------------------------------------------------------------------------------------------------
+    public Endereco cadastrar(Endereco endereco) {
+        return enderecoRepository.save(endereco);
+    }
+
+    // ----------------------------------------------------------------------------------------------------
+    // Atualizar endereço por ID
+    // ----------------------------------------------------------------------------------------------------
+    public Endereco atualizar(Integer id, Endereco enderecoAtualizado) {
+
+        Endereco existente = buscarPorId(id);
+
+        existente.setCep(enderecoAtualizado.getCep());
+        existente.setLogradouro(enderecoAtualizado.getLogradouro());
+        existente.setNumero(enderecoAtualizado.getNumero());
+        existente.setComplemento(enderecoAtualizado.getComplemento());
+        existente.setBairro(enderecoAtualizado.getBairro());
+        existente.setCidade(enderecoAtualizado.getCidade());
+        existente.setUf(enderecoAtualizado.getUf());
+
+        return enderecoRepository.save(existente);
+    }
 
     // ----------------------------------------------------------------------------------------------------
     // Deletar endereço por ID

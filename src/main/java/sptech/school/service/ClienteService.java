@@ -3,6 +3,7 @@ package sptech.school.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sptech.school.entity.Cliente;
+import sptech.school.entity.Endereco;
 import sptech.school.exception.ClienteNaoEncontradoException;
 import sptech.school.repository.*;
 
@@ -14,16 +15,16 @@ public class ClienteService {
 //    @Autowired
     private ClienteRepository clienteRepository;
 //    @Autowired
-    private CodigoAssociadoRepository codigoAssociadoRepository;
-//    @Autowired
     private EnderecoRepository enderecoRepository;
+//    @Autowired
+    private CodigoAssociadoRepository codigoAssociadoRepository;
 //    @Autowired
     private MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
 
-    public ClienteService(ClienteRepository clienteRepository, CodigoAssociadoRepository codigoAssociadoRepository, EnderecoRepository enderecoRepository, MovimentacaoEstoqueRepository movimentacaoEstoqueRepository) {
+    public ClienteService(ClienteRepository clienteRepository, EnderecoRepository enderecoRepository, CodigoAssociadoRepository codigoAssociadoRepository, MovimentacaoEstoqueRepository movimentacaoEstoqueRepository) {
         this.clienteRepository = clienteRepository;
-        this.codigoAssociadoRepository = codigoAssociadoRepository;
         this.enderecoRepository = enderecoRepository;
+        this.codigoAssociadoRepository = codigoAssociadoRepository;
         this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
     }
 
@@ -44,12 +45,42 @@ public class ClienteService {
     }
 
     // ----------------------------------------------------------------------------------------------------
-    // TODO: Cadastrar cliente
+    // Cadastrar cliente
     // ----------------------------------------------------------------------------------------------------
+    public Cliente cadastrar(Cliente cliente) {
+
+        cliente.setDataCadastro(java.time.LocalDateTime.now());
+
+        if (cliente.getEndereco() != null) {
+            Endereco enderecoSalvo = enderecoRepository.save(cliente.getEndereco());
+            cliente.setEndereco(enderecoSalvo);
+        }
+
+        return clienteRepository.save(cliente);
+    }
 
     // ----------------------------------------------------------------------------------------------------
-    // TODO: Atualizar cliente por ID
+    // Atualizar cliente por ID
     // ----------------------------------------------------------------------------------------------------
+    public Cliente atualizar(Integer id, Cliente clienteAtualizado) {
+
+        Cliente existente = buscarPorId(id); // Já lança exception sozinho
+
+        existente.setNomeEmpresa(clienteAtualizado.getNomeEmpresa());
+        existente.setNomeContato(clienteAtualizado.getNomeContato());
+        existente.setCpfCnpj(clienteAtualizado.getCpfCnpj());
+        existente.setTelefone(clienteAtualizado.getTelefone());
+        existente.setEmail(clienteAtualizado.getEmail());
+        existente.setObservacoes(clienteAtualizado.getObservacoes());
+
+        // atualização de endereço
+        if (clienteAtualizado.getEndereco() != null) {
+            Endereco enderecoSalvo = enderecoRepository.save(clienteAtualizado.getEndereco());
+            existente.setEndereco(enderecoSalvo);
+        }
+
+        return clienteRepository.save(existente);
+    }
 
     // ----------------------------------------------------------------------------------------------------
     // Deletar cliente por ID

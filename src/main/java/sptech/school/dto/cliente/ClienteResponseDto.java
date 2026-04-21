@@ -6,7 +6,8 @@ import java.time.LocalDateTime;
 
 public record ClienteResponseDto(
         Integer id,
-        String nome,
+        String nomeEmpresa,
+        String nomeContato,
         String cpfCnpj,
         String telefone,
         String email,

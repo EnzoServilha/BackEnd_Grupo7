@@ -16,9 +16,9 @@ public class Endereco {
     @Column(length = 150)
     private String logradouro;
 
+    // número de endereço nem sempre é numérico (ex: "S/N", "12A")
     @Column(length = 20)
     private String numero;
-    // número de endereço nem sempre é numérico (ex: "S/N", "12A")
 
     @Column(length = 100)
     private String complemento;

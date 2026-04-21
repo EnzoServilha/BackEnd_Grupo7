@@ -7,9 +7,13 @@ import sptech.school.dto.endereco.EnderecoRequestDto;
 import java.time.LocalDateTime;
 
 public record ClienteRequestDto(
+
         @NotBlank
+        @Size(max = 100)
+        String nomeEmpresa,
+
         @Size(max = 150)
-        String nome,
+        String nomeContato,
 
         @Size(max = 18)
         String cpfCnpj,

@@ -15,8 +15,11 @@ public class Cliente {
     @Column(name = "cpf_cnpj", unique = true, length = 18)
     private String cpfCnpj;
 
-    @Column(nullable = false, length = 150)
-    private String nome;
+    @Column(name = "nome_empresa", nullable = false, length = 100)
+    private String nomeEmpresa;
+
+    @Column(name = "nome_contato", length = 150)
+    private String nomeContato;
 
     @Column(length = 20)
     private String telefone;
@@ -39,8 +42,19 @@ public class Cliente {
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
+    public String getNomeEmpresa() {
+        return nomeEmpresa;
+    }
+    public void setNomeEmpresa(String nomeEmpresa) {
+        this.nomeEmpresa = nomeEmpresa;
+    }
+
+    public String getNomeContato() {
+        return nomeContato;
+    }
+    public void setNomeContato(String nomeContato) {
+        this.nomeContato = nomeContato;
+    }
 
     public String getCpfCnpj() { return cpfCnpj; }
     public void setCpfCnpj(String cpfCnpj) { this.cpfCnpj = cpfCnpj; }

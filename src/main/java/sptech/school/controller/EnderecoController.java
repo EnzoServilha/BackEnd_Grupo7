@@ -1,7 +1,9 @@
 package sptech.school.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sptech.school.dto.endereco.EnderecoRequestDto;
 import sptech.school.dto.endereco.EnderecoResponseDto;
 import sptech.school.entity.Endereco;
 import sptech.school.mapper.EnderecoMapper;
@@ -34,31 +36,43 @@ public class EnderecoController {
     // ----------------------------------------------------------------------------------------------------
     @GetMapping("/{id}")
     public ResponseEntity<EnderecoResponseDto> buscarPorId(@PathVariable Integer id) {
-        Endereco endereco = enderecoService.buscarPorId(id);
-        return ResponseEntity.ok(EnderecoMapper.toResponseDto(endereco));
+        Endereco enderecoEncontrado = enderecoService.buscarPorId(id);
+        return ResponseEntity.ok(EnderecoMapper.toResponseDto(enderecoEncontrado));
+    }
+
+    /*
+    -------------------------------------------------------------------------------------------------------
+    ADVERTÊNCIA:
+    Cadastro e atualização de endereço já são feitos pelo cadastro e atualização de cliente e fornecedor
+    -------------------------------------------------------------------------------------------------------
+    */
+
+    // ----------------------------------------------------------------------------------------------------
+    // Cadastrar endereço
+    // ----------------------------------------------------------------------------------------------------
+    @PostMapping
+    public ResponseEntity<EnderecoResponseDto> cadastrar(@RequestBody @Valid EnderecoRequestDto request) {
+        Endereco endereco = EnderecoMapper.toEntity(request);
+
+        Endereco salvo = enderecoService.cadastrar(endereco);
+
+        return ResponseEntity.status(201).body(EnderecoMapper.toResponseDto(salvo));
     }
 
     // ----------------------------------------------------------------------------------------------------
-    // TODO: Cadastrar endereço
+    // Atualizar endereço por ID
     // ----------------------------------------------------------------------------------------------------
-    // Rascunhos
-//    @PostMapping
-//    public ResponseEntity<EnderecoResponseDto> cadastrar(@RequestBody @Valid EnderecoRequestDto request) {
-//        Endereco endereco = EnderecoMapper.toEntity(request);
-//        Endereco salvo = enderecoService.cadastrar(endereco, request.codigosAssociadosIds(), request.itensSimilaresIds());
-//        return ResponseEntity.created(null).body(EnderecoMapper.toResponseDto(salvo));
-//    }
-//
-//    @PutMapping("/{id}")
-//    public ResponseEntity<EnderecoResponseDto> atualizar(@PathVariable Integer id, @RequestBody @Valid EnderecoRequestDto request) {
-//        Endereco endereco = EnderecoMapper.toEntity(request);
-//        Endereco atualizado = enderecoService.atualizar(id, endereco);
-//        return ResponseEntity.ok(EnderecoMapper.toResponseDto(atualizado));
-//    }
+    @PutMapping("/{id}")
+    public ResponseEntity<EnderecoResponseDto> atualizar(
+            @PathVariable Integer id,
+            @RequestBody @Valid EnderecoRequestDto request
+    ) {
+        Endereco endereco = EnderecoMapper.toEntity(request);
 
-    // ----------------------------------------------------------------------------------------------------
-    // TODO: Atualizar endereço por ID
-    // ----------------------------------------------------------------------------------------------------
+        Endereco atualizado = enderecoService.atualizar(id, endereco);
+
+        return ResponseEntity.ok(EnderecoMapper.toResponseDto(atualizado));
+    }
 
     // ----------------------------------------------------------------------------------------------------
     // Deletar endereço por ID

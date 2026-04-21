@@ -12,7 +12,8 @@ public class ClienteMapper {
 
     public static Cliente toEntity(ClienteRequestDto dto) {
         Cliente cliente = new Cliente();
-        cliente.setNome(dto.nome());
+        cliente.setNomeEmpresa(dto.nomeEmpresa());
+        cliente.setNomeContato(dto.nomeContato());
         cliente.setCpfCnpj(dto.cpfCnpj());
         cliente.setTelefone(dto.telefone());
         cliente.setEmail(dto.email());
@@ -28,7 +29,8 @@ public class ClienteMapper {
     public static ClienteResponseDto toResponseDto(Cliente cliente) {
         return new ClienteResponseDto(
                 cliente.getId(),
-                cliente.getNome(),
+                cliente.getNomeEmpresa(),
+                cliente.getNomeContato(),
                 cliente.getCpfCnpj(),
                 cliente.getTelefone(),
                 cliente.getEmail(),

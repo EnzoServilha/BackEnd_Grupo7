@@ -1,7 +1,9 @@
 package sptech.school.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sptech.school.dto.cliente.ClienteRequestDto;
 import sptech.school.dto.cliente.ClienteResponseDto;
 import sptech.school.entity.Cliente;
 import sptech.school.mapper.ClienteMapper;
@@ -33,17 +35,38 @@ public class ClienteController {
     // ----------------------------------------------------------------------------------------------------
     @GetMapping("/{id}")
     public ResponseEntity<ClienteResponseDto> buscarPorId(@PathVariable Integer id) {
-        Cliente cliente = clienteService.buscarPorId(id);
-        return ResponseEntity.ok(ClienteMapper.toResponseDto(cliente));
+        Cliente clienteEncontrado = clienteService.buscarPorId(id);
+        return ResponseEntity.ok(ClienteMapper.toResponseDto(clienteEncontrado));
     }
 
     // ----------------------------------------------------------------------------------------------------
-    // TODO: Cadastrar cliente
+    // Cadastrar cliente
     // ----------------------------------------------------------------------------------------------------
+    @PostMapping
+    public ResponseEntity<ClienteResponseDto> cadastrar(@RequestBody @Valid ClienteRequestDto request) {
+
+        Cliente cliente = ClienteMapper.toEntity(request);
+
+        Cliente salvo = clienteService.cadastrar(cliente);
+
+        return ResponseEntity.status(201).body(ClienteMapper.toResponseDto(salvo));
+    }
 
     // ----------------------------------------------------------------------------------------------------
-    // TODO: Atualizar cliente por ID
+    // Atualizar cliente por ID
     // ----------------------------------------------------------------------------------------------------
+    @PutMapping("/{id}")
+    public ResponseEntity<ClienteResponseDto> atualizar(
+            @PathVariable Integer id,
+            @RequestBody @Valid ClienteRequestDto request
+    ) {
+
+        Cliente cliente = ClienteMapper.toEntity(request);
+
+        Cliente atualizado = clienteService.atualizar(id, cliente);
+
+        return ResponseEntity.ok(ClienteMapper.toResponseDto(atualizado));
+    }
 
     // ----------------------------------------------------------------------------------------------------
     // Deletar cliente por ID
