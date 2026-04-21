@@ -27,7 +27,7 @@ public class ItensNaMovimentacao {
     private Integer qtd;
 
     @Column(name = "preco_unitario", precision = 10, scale = 2)
-    private BigDecimal precoUnitario;
+    private Double precoUnitario;
 
     public ItensNaMovimentacao() {}
 
@@ -43,6 +43,11 @@ public class ItensNaMovimentacao {
     public Integer getQtd() { return qtd; }
     public void setQtd(Integer qtd) { this.qtd = qtd; }
 
-    public BigDecimal getPrecoUnitario() { return precoUnitario; }
-    public void setPrecoUnitario(BigDecimal precoUnitario) { this.precoUnitario = precoUnitario; }
+    public Double getPrecoUnitario() {
+        return precoUnitario;
+    }
+
+    public void setPrecoUnitario(Double precoUnitario) {
+        this.precoUnitario = precoUnitario;
+    }
 }
