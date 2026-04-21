@@ -83,5 +83,5 @@ public class EnderecoController {
         return ResponseEntity.noContent().build();
     }
 
-    // mais métodos provavelmente vão ser necessários
+    // mais métodos aqui se necessário aqui
 }
