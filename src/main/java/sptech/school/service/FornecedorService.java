@@ -1,10 +1,17 @@
 package sptech.school.service;
 
 import org.springframework.stereotype.Service;
+import sptech.school.dto.categoria.CategoriaRequestDto;
+import sptech.school.dto.fornecedor.FornecedorRequestDto;
+import sptech.school.dto.fornecedor.FornecedorResponseDto;
+import sptech.school.dto.marca.MarcaResponseDto;
 import sptech.school.entity.Categoria;
 import sptech.school.entity.Marca;
 import sptech.school.entity.Fornecedor;
 import sptech.school.exception.EntidadeNaoEncontradaException;
+import sptech.school.mapper.CategoriaMapper;
+import sptech.school.mapper.FornecedorMapper;
+import sptech.school.mapper.MarcaMapper;
 import sptech.school.repository.FornecedorRepository;
 
 import java.util.List;
@@ -17,42 +24,44 @@ public class FornecedorService {
         this.repository = repository;
     }
 
-    public List<Fornecedor> listar() {
-        return repository.findAll();
+    public List<FornecedorResponseDto> listar() {
+        return FornecedorMapper.toResponseDtoList(repository.findAll());
     }
 
-    public Fornecedor buscarPorId(Integer id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor não encontrado", id));
+    public FornecedorResponseDto buscarPorId(Integer id) {
+        return FornecedorMapper.toResponseDto(repository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor não encontrado", id)));
     }
 
-    public Fornecedor buscarPorNomeContato(String nomeContato) {
-        return repository.findByNomeContatoContaining(nomeContato);
+    public List<FornecedorResponseDto> buscarPorNomeContato(String nomeContato) {
+        return FornecedorMapper.toResponseDtoList(repository.findByNomeContatoContaining(nomeContato)) ;
     }
 
-    public Fornecedor buscarPorNomeEmpresa(String nomeEmpresa) {
-        return repository.findByNomeEmpresaContaining(nomeEmpresa);
+    public List<FornecedorResponseDto> buscarPorNomeEmpresa(String nomeEmpresa) {
+        return FornecedorMapper.toResponseDtoList(repository.findByNomeEmpresaContaining(nomeEmpresa)) ;
     }
 
-    public List<Fornecedor> listarPorCategoria(Categoria categoria) {
-        return repository.findAllByCategoria(categoria);
+    public List<FornecedorResponseDto> listarPorCategoria(CategoriaRequestDto categoria) {
+        return FornecedorMapper.toResponseDtoList(repository.findAllByCategoria(CategoriaMapper.toEntity(categoria))) ;
     }
 
-    public List<Marca> listarFabricantesPorFornecedorId(Integer fornecedorId) {
+    public List<MarcaResponseDto> listarFabricantesPorFornecedorId(Integer fornecedorId) {
         Fornecedor fornecedor = repository.findById(fornecedorId)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor não encontrado", fornecedorId));
 
-        return fornecedor.getFabricantes();
+        return MarcaMapper.toResponseDtoList(fornecedor.getMarcas());
     }
 
-    public Fornecedor criar(Fornecedor fornecedor) {
-        return repository.save(fornecedor);
+    public FornecedorResponseDto criar(FornecedorRequestDto fornecedor) {
+        return FornecedorMapper.toResponseDto(repository.save(FornecedorMapper.toEntity(fornecedor)));
     }
 
-    public Fornecedor atualizar(Fornecedor fornecedor, Integer id) {
+    public FornecedorResponseDto atualizar(FornecedorRequestDto fornecedor, Integer id) {
         if (!repository.existsById(id)) throw new EntidadeNaoEncontradaException("Fornecedor não encontrado", id);
-        fornecedor.setId(id);
-        return repository.save(fornecedor);
+
+        Fornecedor fornecedorEntity = FornecedorMapper.toEntity(fornecedor);
+
+        fornecedorEntity.setId(id);
+        return FornecedorMapper.toResponseDto(repository.save(fornecedorEntity));
     }
 
     public void deletar(Integer id) {

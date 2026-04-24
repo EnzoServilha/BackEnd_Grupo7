@@ -19,7 +19,7 @@ public class Marca {
     @ManyToMany
     @JoinTable(
             name = "fornecedor_has_marca",
-            joinColumns = @JoinColumn(name = "fabricante_id"),
+            joinColumns = @JoinColumn(name = "marca_id"),
             inverseJoinColumns = @JoinColumn(name = "fornecedor_id")
     )
     private List<Fornecedor> fornecedores = new ArrayList<>();
