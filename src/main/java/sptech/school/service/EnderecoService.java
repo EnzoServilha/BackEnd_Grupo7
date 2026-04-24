@@ -1,13 +1,9 @@
 package sptech.school.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sptech.school.entity.Endereco;
 import sptech.school.exception.EnderecoNaoEncontradoException;
-import sptech.school.repository.ClienteRepository;
 import sptech.school.repository.EnderecoRepository;
-import sptech.school.repository.FabricanteRepository;
-import sptech.school.repository.FornecedorRepository;
 
 import java.util.List;
 

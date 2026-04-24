@@ -6,31 +6,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "categoria")
-public class Categoria {
+@Table(name = "marca")
+public class Marca {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, length = 100)
-    private String nome;
+    @Column(name = "nome_empresa", length = 45)
+    private String nomeEmpresa;
 
     @ManyToMany
     @JoinTable(
-            name = "categoria_has_fornecedor",
-            joinColumns = @JoinColumn(name = "categoria_id"),
+            name = "fornecedor_has_marca",
+            joinColumns = @JoinColumn(name = "marca_id"),
             inverseJoinColumns = @JoinColumn(name = "fornecedor_id")
     )
     private List<Fornecedor> fornecedores = new ArrayList<>();
 
-    public Categoria() {}
+    public Integer getId() {
+        return id;
+    }
 
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
+    public String getNomeEmpresa() {
+        return nomeEmpresa;
+    }
+
+    public void setNomeEmpresa(String nomeEmpresa) {
+        this.nomeEmpresa = nomeEmpresa;
+    }
 
     public List<Fornecedor> getFornecedores() {
         return fornecedores;
@@ -40,3 +48,4 @@ public class Categoria {
         this.fornecedores = fornecedores;
     }
 }
+

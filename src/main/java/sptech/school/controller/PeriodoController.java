@@ -11,7 +11,7 @@ import sptech.school.service.PeriodoService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/periodo")
+@RequestMapping("/periodos")
 public class PeriodoController {
     private final PeriodoService periodoService;
 
@@ -43,7 +43,7 @@ public class PeriodoController {
         return ResponseEntity.status(200).body(periodoService.cadastrarPeriodo(descricao));
     }
 
-    @PostMapping()
+    @PutMapping("/atualizarPeriodo")
     public List<ItensNaMovimentacao> atualizarPeriodo (){
         return periodoService.transferirSaldoParaNovoPeriodo();
     }

@@ -20,11 +20,7 @@ public class FornecedorMapper {
         fornecedor.setEmail(dto.email());
         fornecedor.setObservacoes(dto.observacoes());
         fornecedor.setDataCadastro(dto.dataCadastro());
-        if (dto.categoriaId() != null) {
-            Categoria categoria = new Categoria();
-            categoria.setId(dto.categoriaId());
-            fornecedor.setCategoria(categoria);
-        }
+
         if (dto.enderecoId() != null) {
             Endereco endereco = new Endereco();
             endereco.setId(dto.enderecoId());
@@ -44,7 +40,8 @@ public class FornecedorMapper {
                 fornecedor.getEmail(),
                 fornecedor.getObservacoes(),
                 fornecedor.getDataCadastro(),
-                fornecedor.getCategoria() != null ? CategoriaMapper.toResponseDto(fornecedor.getCategoria()) : null,
+                fornecedor.getCategoria() != null ? CategoriaMapper.toResponseDtoList(fornecedor.getCategoria()) : null,
+                fornecedor.getMarcas() != null ? MarcaMapper.toResponseDtoList(fornecedor.getMarcas()) : null,
                 fornecedor.getEndereco() != null ? EnderecoMapper.toResponseDto(fornecedor.getEndereco()) : null
         );
     }

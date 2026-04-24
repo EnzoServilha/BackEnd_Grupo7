@@ -7,7 +7,7 @@ import sptech.school.entity.Fornecedor;
 import java.util.List;
 
 public interface FornecedorRepository extends JpaRepository<Fornecedor, Integer> {
-    Fornecedor findByNomeContatoContaining(String nomeContato);
-    Fornecedor findByNomeEmpresaContaining(String nomeEmpresa);
+    List<Fornecedor> findByNomeContatoContaining(String nomeContato);
+    List<Fornecedor> findByNomeEmpresaContaining(String nomeEmpresa);
     List<Fornecedor> findAllByCategoria(Categoria categoria);
 }

@@ -32,7 +32,7 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
 
 
     @Query("""
-    SELECT itm.item_id, 
+    SELECT itm.item.id, 
            SUM(CASE WHEN t.nome = 'compra' THEN itm.qtd 
                     WHEN t.nome = 'venda' THEN itm.qtd * -1 
                     ELSE 0 END)
@@ -40,7 +40,7 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
     JOIN ItensNaMovimentacao itm ON itm.movimentacaoEstoque.id = me.id
     JOIN me.tipo t
     WHERE me.periodo.id = :idPeriodo
-    GROUP BY itm.item_id
+    GROUP BY itm.item.id
 """)
     List<PeriodoQtdPecasDTO> pegarSaldoPorItemDoPeriodo(@Param("idPeriodo") Integer idPeriodo);
 

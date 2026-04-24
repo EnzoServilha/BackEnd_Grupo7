@@ -35,7 +35,7 @@ public class CodigoAssociadoMapper {
         CodigoAssociadoResponseDto.ClienteResumo clienteResumo = null;
         if (codigoAssociado.getCliente() != null) {
             Cliente cliente = codigoAssociado.getCliente();
-            clienteResumo = new CodigoAssociadoResponseDto.ClienteResumo(cliente.getId(), cliente.getNome(), cliente.getEmail());
+            clienteResumo = new CodigoAssociadoResponseDto.ClienteResumo(cliente.getId(), cliente.getNomeContato(), cliente.getEmail());
         }
         return new CodigoAssociadoResponseDto(
                 codigoAssociado.getId(),
