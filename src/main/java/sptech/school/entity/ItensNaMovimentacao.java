@@ -26,7 +26,7 @@ public class ItensNaMovimentacao {
     @Column
     private Integer qtd;
 
-    @Column(name = "preco_unitario", precision = 10, scale = 2)
+    @Column(name = "preco_unitario", precision = 10)
     private Double precoUnitario;
 
     public ItensNaMovimentacao() {}

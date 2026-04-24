@@ -19,10 +19,10 @@ public class MovimentacaoEstoque {
     @JoinColumn(name = "fk_usuario", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "total_gasto_impostos", precision = 10, scale = 2)
+    @Column(name = "total_gasto_impostos", precision = 10)
     private Double totalGastoImpostos;
 
-    @Column(name = "preco_frete", precision = 10, scale = 2)
+    @Column(name = "preco_frete", precision = 10)
     private Double precoFrete;
 
     @Column(name = "data_movimentacao")

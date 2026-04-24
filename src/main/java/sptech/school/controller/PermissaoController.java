@@ -2,9 +2,7 @@ package sptech.school.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.permissao.PermissaoRequestDto;
 import sptech.school.dto.permissao.PermissaoResponseDto;
@@ -15,8 +13,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/permissoes")
 public class PermissaoController {
-    @Autowired
-    private PermissaoService permissaoService;
+    private final PermissaoService permissaoService;
+
+    public PermissaoController(PermissaoService permissaoService) {
+        this.permissaoService = permissaoService;
+    }
 
     @PostMapping
     @SecurityRequirement(name = "Bearer")

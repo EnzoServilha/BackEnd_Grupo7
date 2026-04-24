@@ -1,6 +1,7 @@
 package sptech.school.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import sptech.school.dto.permissao.PermissaoRequestDto;
 import sptech.school.dto.permissao.PermissaoResponseDto;
 import sptech.school.entity.Permissao;
@@ -10,10 +11,14 @@ import sptech.school.repository.PermissaoRepository;
 
 import java.util.List;
 
+@Service
 public class PermissaoService {
 
-    @Autowired
-    private PermissaoRepository permissaoRepository;
+    private final PermissaoRepository permissaoRepository;
+
+    public PermissaoService(PermissaoRepository permissaoRepository) {
+        this.permissaoRepository = permissaoRepository;
+    }
 
     public PermissaoResponseDto criar(PermissaoRequestDto dto) {
         Permissao permissao = PermissaoMapper.toEntity(dto);
