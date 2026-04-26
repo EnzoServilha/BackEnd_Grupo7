@@ -3,21 +3,54 @@ package sptech.school.service;
 import org.springframework.stereotype.Service;
 import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoRequestDto;
 import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoResponseDto;
+import sptech.school.entity.Item;
 import sptech.school.entity.ItensNaMovimentacao;
+import sptech.school.entity.MovimentacaoEstoque;
+import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.exceptions.ItemNaMovimentacaoNaoEncontrado;
 import sptech.school.mapper.ItensNaMovimentacaoMapper;
-import sptech.school.repository.ItemMovimentacaoRepository;
+import sptech.school.repository.ItemRepository;
+import sptech.school.repository.ItensNaMovimentacaoRepository;
+import sptech.school.repository.MovimentacaoEstoqueRepository;
+
+import java.util.List;
 
 @Service
 public class ItemNaMovimentacaoService {
-    private ItemMovimentacaoRepository itemMovimentacaoRepository;
+    private ItensNaMovimentacaoRepository itemMovimentacaoRepository;
+    private ItemRepository itemRepository;
+    private MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
 
-    public ItemNaMovimentacaoService(ItemMovimentacaoRepository itemMovimentacaoRepository) {
+    public ItemNaMovimentacaoService(ItensNaMovimentacaoRepository itemMovimentacaoRepository, ItemRepository itemRepository, MovimentacaoEstoqueRepository movimentacaoEstoqueRepository) {
         this.itemMovimentacaoRepository = itemMovimentacaoRepository;
+        this.itemRepository = itemRepository;
+        this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
+    }
+
+    public List<ItensNaMovimentacaoResponseDto> listar(){
+        return ItensNaMovimentacaoMapper.toResponseDtoList(itemMovimentacaoRepository.findAll());
+    }
+
+    public List<ItensNaMovimentacaoResponseDto> listarPorItem(Integer id){
+        return ItensNaMovimentacaoMapper.toResponseDtoList(itemMovimentacaoRepository.findAllByItemId(id));
+    }
+
+    public List<ItensNaMovimentacaoResponseDto> listarPorMovimentacao(Integer id){
+        return ItensNaMovimentacaoMapper.toResponseDtoList(itemMovimentacaoRepository.findAllByMovimentacaoEstoqueId(id));
     }
 
     public ItensNaMovimentacaoResponseDto criar(ItensNaMovimentacaoRequestDto requestDto){
-        return ItensNaMovimentacaoMapper.toResponseDto(itemMovimentacaoRepository.save(ItensNaMovimentacaoMapper.toEntity(requestDto)));
+
+        ItensNaMovimentacao itensNaMovimentacao =   itemMovimentacaoRepository.save(ItensNaMovimentacaoMapper.toEntity(requestDto));
+
+        MovimentacaoEstoque movimentacaoEstoque = movimentacaoEstoqueRepository.findById(requestDto.movimentacaoEstoqueId()).orElseThrow(() -> new EntidadeNaoEncontradaException("Movimentação de estoque não encontrada", requestDto.movimentacaoEstoqueId()));
+
+        Item item = itemRepository.findById(requestDto.itemId()).orElseThrow(() -> new EntidadeNaoEncontradaException("Item não encontrado", requestDto.itemId()));
+
+        itensNaMovimentacao.setItem(item);
+        itensNaMovimentacao.setMovimentacaoEstoque(movimentacaoEstoque);
+
+        return  ItensNaMovimentacaoMapper.toResponseDto(itemMovimentacaoRepository.save(itensNaMovimentacao));
     }
 
     public ItensNaMovimentacaoResponseDto editar(ItensNaMovimentacaoRequestDto requestDto, Integer id){

@@ -29,7 +29,7 @@ public class ItensNaMovimentacaoMapper {
     public static ItensNaMovimentacaoResponseDto toResponseDto(ItensNaMovimentacao itens) {
         return new ItensNaMovimentacaoResponseDto(
                 itens.getId(),
-                itens.getMovimentacaoEstoque() != null ? itens.getMovimentacaoEstoque().getId() : null,
+                itens.getMovimentacaoEstoque() != null ? MovimentacaoEstoqueMapper.toResponse(itens.getMovimentacaoEstoque()) : null,
                 itens.getItem() != null ? ItemMapper.toResponseDto(itens.getItem()) : null,
                 itens.getQtd(),
                 itens.getPrecoUnitario()
