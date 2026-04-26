@@ -15,46 +15,23 @@ import sptech.school.repository.FornecedorRepository;
 public class CategoriaService {
 
     private final CategoriaRepository repository;
-    private final FornecedorRepository fornecedorRepository;
 
-    public CategoriaService(CategoriaRepository repository, FornecedorRepository fornecedorRepository) {
+    public CategoriaService(CategoriaRepository repository) {
         this.repository = repository;
-        this.fornecedorRepository = fornecedorRepository;
     }
 
     public CategoriaResponseDto buscarPorNome(String nome) {
         return CategoriaMapper.toResponseDto(repository.findByNomeContaining(nome));
     }
 
+    public CategoriaResponseDto buscarPorId(Integer id) {
+        return CategoriaMapper.toResponseDto(repository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Categoria não encontrada com id: ", id)));
+    }
+
     public CategoriaResponseDto criar(CategoriaRequestDto fabricante) {
         return CategoriaMapper.toResponseDto(repository.save(CategoriaMapper.toEntity(fabricante)));
     }
 
-    @Transactional
-    public CategoriaResponseDto associarCategoriaaFornecedor(Integer categoriaId, Integer fornecedorId) {
-        Categoria categoria = repository.findById(categoriaId).orElseThrow(() -> new EntidadeNaoEncontradaException("Marca não encontrada", categoriaId));
-
-        Fornecedor fornecedor = fornecedorRepository.findById(fornecedorId).orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor não encontrado", fornecedorId));
-
-        if (!categoria.getFornecedores().contains(fornecedor)) {
-            categoria.getFornecedores().add(fornecedor);
-        }
-
-        return CategoriaMapper.toResponseDto(repository.save(categoria));
-    }
-
-    @Transactional
-    public CategoriaResponseDto desassociarCategoriaaFornecedor(Integer categoriaId, Integer fornecedorId) {
-        Categoria categoria = repository.findById(categoriaId).orElseThrow(() -> new EntidadeNaoEncontradaException("Marca não encontrada", categoriaId));
-
-        Fornecedor fornecedor = fornecedorRepository.findById(fornecedorId).orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor não encontrado", fornecedorId));
-
-        categoria.getFornecedores().remove(fornecedor);
-
-        fornecedor.getMarcas().remove(categoria);
-
-        return CategoriaMapper.toResponseDto(repository.save(categoria));
-    }
 
     public void deletar(Integer id) {
         if (!repository.existsById(id)) throw new EntidadeNaoEncontradaException("Marca não encontrada", id);

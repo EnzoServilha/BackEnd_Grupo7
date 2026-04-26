@@ -26,20 +26,16 @@ public class MarcaController {
         return ResponseEntity.status(200).body(service.buscarPorNome(nome));
     }
 
+    @GetMapping("/porId/{id}")
+    public ResponseEntity<MarcaResponseDto> buscarPorId(@PathVariable Integer id){
+        return ResponseEntity.status(200).body(service.buscarPorId(id));
+    }
+
     @PostMapping
     public ResponseEntity<MarcaResponseDto> criar(@RequestBody @Valid MarcaRequestDto requestDto){
         return ResponseEntity.status(200).body(service.criar(requestDto));
     }
 
-    @PutMapping("/associar/{fornecedorId}/{categoriaId}")
-    public ResponseEntity<MarcaResponseDto> associarCategoriaaFornecedor(@PathVariable Integer fornecedorId, @PathVariable Integer categoriaId){
-        return ResponseEntity.status(200).body(service.associarMarcaaFornecedor(categoriaId,fornecedorId));
-    }
-
-    @PutMapping("/desassociar/{fornecedorId}/{categoriaId}")
-    public ResponseEntity<MarcaResponseDto> desassociarCategoriaaFornecedor(@PathVariable Integer fornecedorId, @PathVariable Integer categoriaId){
-        return ResponseEntity.status(200).body(service.desassociarMarcaaFornecedor(categoriaId,fornecedorId));
-    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Null> deletar(@PathVariable Integer id){
