@@ -12,20 +12,16 @@ public class FornecedorMapper {
 
     public static Fornecedor toEntity(FornecedorRequestDto dto) {
         Fornecedor fornecedor = new Fornecedor();
-        fornecedor.setRazaoSocial(dto.razaoSocial());
-        fornecedor.setCnpj(dto.cnpj());
-        fornecedor.setNomeContato(dto.nomeContato());
-        fornecedor.setNomeEmpresa(dto.nomeEmpresa());
-        fornecedor.setTelefone(dto.telefone());
-        fornecedor.setEmail(dto.email());
-        fornecedor.setObservacoes(dto.observacoes());
-        fornecedor.setDataCadastro(dto.dataCadastro());
+        fornecedor.setRazaoSocial(dto.getRazaoSocial());
+        fornecedor.setCnpj(dto.getCnpj());
+        fornecedor.setNomeContato(dto.getNomeContato());
+        fornecedor.setNomeEmpresa(dto.getNomeEmpresa());
+        fornecedor.setTelefone(dto.getTelefone());
+        fornecedor.setEmail(dto.getEmail());
+        fornecedor.setObservacoes(dto.getObservacoes());
+        fornecedor.setDataCadastro(dto.getDataCadastro());
 
-        if (dto.enderecoId() != null) {
-            Endereco endereco = new Endereco();
-            endereco.setId(dto.enderecoId());
-            fornecedor.setEndereco(endereco);
-        }
+
         return fornecedor;
     }
 

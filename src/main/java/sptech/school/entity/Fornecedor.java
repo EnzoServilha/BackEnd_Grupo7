@@ -14,7 +14,7 @@ public class Fornecedor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "razao_social", nullable = false, length = 150)
+    @Column(name = "razao_social", length = 150)
     private String razaoSocial;
 
     @Column(unique = true, length = 18)
@@ -38,14 +38,24 @@ public class Fornecedor {
     @Column
     private LocalDateTime dataCadastro;
 
-    @ManyToMany(mappedBy = "fornecedores")
+    @ManyToMany
+    @JoinTable(
+            name = "fornecedor_categoria", // Nome da tabela que o banco vai criar
+            joinColumns = @JoinColumn(name = "fornecedor_id"),
+            inverseJoinColumns = @JoinColumn(name = "categoria_id")
+    )
     private List<Categoria> categoria = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "endereco_id")
     private Endereco endereco;
 
-    @ManyToMany(mappedBy = "fornecedores")
+    @ManyToMany
+    @JoinTable(
+            name = "fornecedor_marca",
+            joinColumns = @JoinColumn(name = "fornecedor_id"),
+            inverseJoinColumns = @JoinColumn(name = "marca_id")
+    )
     private List<Marca> marcas = new ArrayList<>();
 
     public Integer getId() {

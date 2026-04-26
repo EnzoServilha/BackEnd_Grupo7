@@ -1,6 +1,5 @@
 package sptech.school.controller;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Null;
 import org.springframework.http.ResponseEntity;
@@ -43,14 +42,14 @@ public class FornecedorController {
         return ResponseEntity.status(200).body(service.buscarPorNomeEmpresa(empresa));
     }
 
-    @GetMapping("/buscarPorCategoria")
-    public  ResponseEntity<List<FornecedorResponseDto>> listarPorCategoria(@RequestBody CategoriaRequestDto categoria){
-        return ResponseEntity.status(200).body(service.listarPorCategoria(categoria));
+    @GetMapping("/buscarPorCategoria/{idCategoria}")
+    public  ResponseEntity<List<FornecedorResponseDto>> listarPorCategoria(@PathVariable Integer idCategoria){
+        return ResponseEntity.status(200).body(service.listarPorCategoria(idCategoria));
     }
 
-    @GetMapping("/buscarPorFabricante/{idFornecedor}")
-    public  ResponseEntity<List<MarcaResponseDto>> listarFabricantesPorFornecedorId(@PathVariable Integer idFornecedor){
-        return ResponseEntity.status(200).body(service.listarFabricantesPorFornecedorId(idFornecedor));
+    @GetMapping("/buscarPorMarca/{idMarca}")
+    public  ResponseEntity<List<FornecedorResponseDto>> listarPorMarca(@PathVariable Integer idMarca){
+        return ResponseEntity.status(200).body(service.listarPorMarca(idMarca));
     }
 
     @PostMapping

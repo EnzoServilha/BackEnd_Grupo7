@@ -16,12 +16,7 @@ public class Marca {
     @Column(name = "nome_empresa", length = 45)
     private String nomeEmpresa;
 
-    @ManyToMany
-    @JoinTable(
-            name = "fornecedor_has_marca",
-            joinColumns = @JoinColumn(name = "marca_id"),
-            inverseJoinColumns = @JoinColumn(name = "fornecedor_id")
-    )
+    @ManyToMany(mappedBy = "marcas")
     private List<Fornecedor> fornecedores = new ArrayList<>();
 
     public Integer getId() {

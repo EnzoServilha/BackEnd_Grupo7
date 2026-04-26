@@ -23,4 +23,4 @@ logging.level.org.springframework.security=TRACE
 
 jwt.validity=${JWT_VALIDITY:3600}
 
-jwt.secret=${JWT_SECRET:}
+jwt.secret=${JWT_SECRET:ZmFjdWxkYWRlc3B0ZWNoMjAyNnNlY3JldGtleWp3dGJhc2U2NA==}
