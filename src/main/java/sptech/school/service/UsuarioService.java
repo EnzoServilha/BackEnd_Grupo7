@@ -22,6 +22,7 @@ import sptech.school.entity.Usuario;
 import sptech.school.repository.PermissaoRepository;
 import sptech.school.repository.UsuarioRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -46,6 +47,7 @@ public class UsuarioService {
 
     String senhaCriptografada = passwordEncoder.encode(novoUsuario.getSenha());
     novoUsuario.setSenha(senhaCriptografada);
+    novoUsuario.setDataCadastro(LocalDateTime.now());
 
     this.usuarioRepository.save(novoUsuario);
   }
