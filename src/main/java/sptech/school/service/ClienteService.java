@@ -2,9 +2,15 @@ package sptech.school.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sptech.school.dto.cliente.ClienteRequestDto;
+import sptech.school.dto.cliente.ClienteResponseDto;
+import sptech.school.dto.fornecedor.FornecedorRequestDto;
+import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.entity.*;
 import sptech.school.exception.ClienteNaoEncontradoException;
 import sptech.school.exception.EntidadeNaoEncontradaException;
+import sptech.school.mapper.ClienteMapper;
+import sptech.school.mapper.FornecedorMapper;
 import sptech.school.repository.*;
 
 import java.util.List;
@@ -14,73 +20,46 @@ public class ClienteService {
 
     private ClienteRepository clienteRepository;
     private EnderecoRepository enderecoRepository;
-    private CodigoAssociadoRepository codigoAssociadoRepository;
-    private MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
 
-    public ClienteService(ClienteRepository clienteRepository, EnderecoRepository enderecoRepository, CodigoAssociadoRepository codigoAssociadoRepository, MovimentacaoEstoqueRepository movimentacaoEstoqueRepository) {
+    public ClienteService(ClienteRepository clienteRepository, EnderecoRepository enderecoRepository) {
         this.clienteRepository = clienteRepository;
         this.enderecoRepository = enderecoRepository;
-        this.codigoAssociadoRepository = codigoAssociadoRepository;
-        this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
     }
 
-
-    // ----------------------------------------------------------------------------------------------------
-    // Listar todos os clientes (
-    // ----------------------------------------------------------------------------------------------------
-    public List<Cliente> listarTodos() {
-        return clienteRepository.findAll();
-    }
-
-    // ----------------------------------------------------------------------------------------------------
-    // Buscar endereço por ID
-    // ----------------------------------------------------------------------------------------------------
     public Cliente buscarPorId(Integer id) {
         return clienteRepository.findById(id)
                 .orElseThrow(() -> new ClienteNaoEncontradoException(String.valueOf(id)));
     }
 
-    // ----------------------------------------------------------------------------------------------------
-    // Cadastrar cliente
-    // ----------------------------------------------------------------------------------------------------
-    public Cliente cadastrar(Cliente cliente) {
 
-        cliente.setDataCadastro(java.time.LocalDateTime.now());
-
-        if (cliente.getEndereco() != null) {
-            Endereco enderecoSalvo = enderecoRepository.save(cliente.getEndereco());
-            cliente.setEndereco(enderecoSalvo);
-        }
-
-        return clienteRepository.save(cliente);
+    public List<Cliente> listarTodos() {
+        return clienteRepository.findAll();
     }
 
-    // ----------------------------------------------------------------------------------------------------
-    // Atualizar cliente por ID
-    // ----------------------------------------------------------------------------------------------------
-    public Cliente atualizar(Integer id, Cliente clienteAtualizado) {
+    public ClienteResponseDto cadastrar(ClienteRequestDto cliente) {
 
-        Cliente existente = buscarPorId(id); // Já lança exception sozinho
+        Cliente entidade = ClienteMapper.toEntity(cliente);
 
-        existente.setNomeEmpresa(clienteAtualizado.getNomeEmpresa());
-        existente.setNomeContato(clienteAtualizado.getNomeContato());
-        existente.setCpfCnpj(clienteAtualizado.getCpfCnpj());
-        existente.setTelefone(clienteAtualizado.getTelefone());
-        existente.setEmail(clienteAtualizado.getEmail());
-        existente.setObservacoes(clienteAtualizado.getObservacoes());
+        preencher(entidade, cliente);
 
-        // atualização de endereço
-        if (clienteAtualizado.getEndereco() != null) {
-            Endereco enderecoSalvo = enderecoRepository.save(clienteAtualizado.getEndereco());
-            existente.setEndereco(enderecoSalvo);
-        }
+        entidade.setDataCadastro(java.time.LocalDateTime.now());
 
-        return clienteRepository.save(existente);
+
+        return ClienteMapper.toResponseDto(clienteRepository.save(entidade));
     }
 
-    // ----------------------------------------------------------------------------------------------------
-    // Deletar cliente por ID
-    // ----------------------------------------------------------------------------------------------------
+    public ClienteResponseDto atualizar(ClienteRequestDto cliente, Integer id) {
+        if (!clienteRepository.existsById(id)) throw new EntidadeNaoEncontradaException("Cliente não encontrado", id);
+
+        Cliente entidade = ClienteMapper.toEntity(cliente);
+
+        entidade.setId(id);
+
+        preencher(entidade, cliente);
+
+        return ClienteMapper.toResponseDto(clienteRepository.save(entidade));
+    }
+
     public void deletar(Integer id) {
         if (!clienteRepository.existsById(id)) {
             throw new ClienteNaoEncontradoException(String.valueOf(id));
@@ -88,51 +67,14 @@ public class ClienteService {
         clienteRepository.deleteById(id);
     }
 
-
-    // métodos mais especificados:
-
-    // ----------------------------------------------------------------------------------------------------
-    // Contar clientes
-    // ----------------------------------------------------------------------------------------------------
-    public long contarClientes() { return clienteRepository.count(); }
+    public void preencher(Cliente entidade, ClienteRequestDto cliente){
+        if (cliente.enderecoId() != null) {
+            Endereco endereco = enderecoRepository.findById(cliente.enderecoId())
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Endereço não encontrado", cliente.enderecoId()));
 
 
-    // ----------------------------------------------------------------------------------------------------
-    // Listar movimentações no estoque por cliente
-    // ----------------------------------------------------------------------------------------------------
-    public List<MovimentacaoEstoque> listarMovimentacoesPorCliente(Integer clienteId) {
-
-        if (!clienteRepository.existsById(clienteId)) {
-            throw new ClienteNaoEncontradoException(String.valueOf(clienteId));
+            entidade.setEndereco(endereco);
         }
-        return movimentacaoEstoqueRepository.findByClienteId(clienteId);
+
     }
-
-    // ----------------------------------------------------------------------------------------------------
-    // Buscar cliente por nome da empresa OU contato
-    // ----------------------------------------------------------------------------------------------------
-    public List<Cliente> buscarPorNomeOuContato(String termo) {
-        return clienteRepository
-                .findByNomeEmpresaContainingIgnoreCaseOrNomeContatoContainingIgnoreCase(termo, termo);
-    }
-
-    // ----------------------------------------------------------------------------------------------------
-    // Buscar cliente por CPF/CNPJ
-    // ----------------------------------------------------------------------------------------------------
-    public Cliente buscarPorCpfCnpj(String cpfCnpj) {
-        return clienteRepository.findByCpfCnpj(cpfCnpj)
-                .orElseThrow(() -> new ClienteNaoEncontradoException(cpfCnpj));
-    }
-    // ----------------------------------------------------------------------------------------------------
-    // Buscar clientes por cidade
-    // ----------------------------------------------------------------------------------------------------
-    public List<Cliente> buscarPorCidade(String cidade) { return clienteRepository.findByCidade(cidade); }
-
-    // ----------------------------------------------------------------------------------------------------
-    // Buscar clientes por estado
-    // ----------------------------------------------------------------------------------------------------
-    public List<Cliente> buscarPorUf(String uf) { return clienteRepository.findByUf(uf); }
-
-
-    // mais métodos aqui se necessário aqui
 }

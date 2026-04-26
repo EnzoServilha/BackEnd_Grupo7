@@ -20,9 +20,7 @@ public class ClienteMapper {
         cliente.setObservacoes(dto.observacoes());
 //        cliente.setDataCadastro(dto.dataCadastro());
         cliente.setDataCadastro(LocalDateTime.now());
-        if (dto.endereco() != null) {
-            cliente.setEndereco(EnderecoMapper.toEntity(dto.endereco()));
-        }
+
         return cliente;
     }
 
