@@ -17,8 +17,9 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
     @Query("""
         SELECT COALESCE(SUM(
             CASE 
-                WHEN t.nome = 'compra' THEN itm.qtd 
-                WHEN t.nome = 'venda' THEN itm.qtd * -1 
+                WHEN t.nome = 'ENTRADA' THEN itm.qtd 
+                WHEN t.nome = 'AJUSTE' THEN itm.qtd 
+                WHEN t.nome = 'SAIDA' THEN itm.qtd * -1 
                 ELSE 0 
             END
         ), 0)
@@ -30,12 +31,16 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
     """)
     Integer pegarTotalDePecasDoPeriodo(@Param("idPeriodo") Integer idPeriodo);
 
+    // Esse "new sptech.school.dto.periodo.PeriodoQtdPecasDTO(" serve para indicar o tipo de objeto que ele deve
+    // devolver, já que aqui ele n devolve só um campo e nem um objeto de classe padrão
 
     @Query("""
-    SELECT itm.item.id, 
-           SUM(CASE WHEN t.nome = 'compra' THEN itm.qtd 
-                    WHEN t.nome = 'venda' THEN itm.qtd * -1 
-                    ELSE 0 END)
+    SELECT new sptech.school.dto.periodo.PeriodoQtdPecasDTO(itm.item.id, 
+           SUM(CASE 
+                WHEN t.nome = 'ENTRADA' THEN itm.qtd 
+                WHEN t.nome = 'AJUSTE' THEN itm.qtd 
+                WHEN t.nome = 'SAIDA' THEN itm.qtd * -1 
+                ELSE 0 END))
     FROM MovimentacaoEstoque me
     JOIN ItensNaMovimentacao itm ON itm.movimentacaoEstoque.id = me.id
     JOIN me.tipo t

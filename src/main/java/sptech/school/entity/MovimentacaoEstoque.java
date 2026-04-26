@@ -1,8 +1,6 @@
 package sptech.school.entity;
 
 import jakarta.persistence.*;
-
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -63,33 +61,25 @@ public class MovimentacaoEstoque {
     @OneToMany(mappedBy = "movimentacaoEstoque")
     private List<ItensNaMovimentacao> itens;
 
+    // --- NOVO CAMPO ASSOCIAÇÃO ---
     @ManyToOne
     @JoinColumn(name = "periodo_id")
     private Periodo periodo;
 
     public MovimentacaoEstoque() {}
 
+    // Getters e Setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
-    public Double getTotalGastoImpostos() {
-        return totalGastoImpostos;
-    }
+    public Double getTotalGastoImpostos() { return totalGastoImpostos; }
+    public void setTotalGastoImpostos(Double totalGastoImpostos) { this.totalGastoImpostos = totalGastoImpostos; }
 
-    public void setTotalGastoImpostos(Double totalGastoImpostos) {
-        this.totalGastoImpostos = totalGastoImpostos;
-    }
-
-    public Double getPrecoFrete() {
-        return precoFrete;
-    }
-
-    public void setPrecoFrete(Double precoFrete) {
-        this.precoFrete = precoFrete;
-    }
+    public Double getPrecoFrete() { return precoFrete; }
+    public void setPrecoFrete(Double precoFrete) { this.precoFrete = precoFrete; }
 
     public LocalDateTime getDataMovimentacao() { return dataMovimentacao; }
     public void setDataMovimentacao(LocalDateTime dataMovimentacao) { this.dataMovimentacao = dataMovimentacao; }
@@ -124,13 +114,6 @@ public class MovimentacaoEstoque {
     public List<ItensNaMovimentacao> getItens() { return itens; }
     public void setItens(List<ItensNaMovimentacao> itens) { this.itens = itens; }
 
-    public Periodo getPeriodo() {
-        return periodo;
-    }
-    public void setPeriodo(Periodo periodo) {
-        this.periodo = periodo;
-    }
+    public Periodo getPeriodo() { return periodo; }
+    public void setPeriodo(Periodo periodo) { this.periodo = periodo; }
 }
-
-
-
