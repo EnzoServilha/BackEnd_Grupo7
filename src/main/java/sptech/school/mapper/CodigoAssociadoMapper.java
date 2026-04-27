@@ -13,16 +13,7 @@ public class CodigoAssociadoMapper {
     public static CodigoAssociado toEntity(CodigoAssociadoRequestDto dto) {
         CodigoAssociado codigoAssociado = new CodigoAssociado();
         codigoAssociado.setCodigo(dto.codigo());
-        if (dto.fornecedorId() != null) {
-            Fornecedor fornecedor = new Fornecedor();
-            fornecedor.setId(dto.fornecedorId());
-            codigoAssociado.setFornecedor(fornecedor);
-        }
-        if (dto.clienteId() != null) {
-            Cliente cliente = new Cliente();
-            cliente.setId(dto.clienteId());
-            codigoAssociado.setCliente(cliente);
-        }
+
         return codigoAssociado;
     }
 

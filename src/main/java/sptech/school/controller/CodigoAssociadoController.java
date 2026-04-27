@@ -44,16 +44,12 @@ public class CodigoAssociadoController {
 
     @PostMapping
     public ResponseEntity<CodigoAssociadoResponseDto> cadastrar(@RequestBody @Valid CodigoAssociadoRequestDto request) {
-        CodigoAssociado entity = CodigoAssociadoMapper.toEntity(request);
-        CodigoAssociado salvo = codigoAssociadoService.cadastrar(entity);
-        return ResponseEntity.created(null).body(CodigoAssociadoMapper.toResponseDto(salvo));
+        return ResponseEntity.created(null).body(codigoAssociadoService.cadastrar(request));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CodigoAssociadoResponseDto> atualizar(@PathVariable Integer id, @RequestBody @Valid CodigoAssociadoRequestDto request) {
-        CodigoAssociado entity = CodigoAssociadoMapper.toEntity(request);
-        CodigoAssociado atualizado = codigoAssociadoService.atualizar(id, entity);
-        return ResponseEntity.ok(CodigoAssociadoMapper.toResponseDto(atualizado));
+        return ResponseEntity.ok(codigoAssociadoService.atualizar(id, request));
     }
 
     @DeleteMapping("/{id}")

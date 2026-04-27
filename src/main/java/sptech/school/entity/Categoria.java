@@ -16,12 +16,7 @@ public class Categoria {
     @Column(nullable = false, length = 100)
     private String nome;
 
-    @ManyToMany
-    @JoinTable(
-            name = "categoria_has_fornecedor",
-            joinColumns = @JoinColumn(name = "categoria_id"),
-            inverseJoinColumns = @JoinColumn(name = "fornecedor_id")
-    )
+    @ManyToMany(mappedBy = "categoria")
     private List<Fornecedor> fornecedores = new ArrayList<>();
 
     public Categoria() {}

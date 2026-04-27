@@ -27,9 +27,7 @@ public record ClienteRequestDto(
         String observacoes,
 
         LocalDateTime dataCadastro,
-
-//        Integer enderecoId
-        EnderecoRequestDto endereco
+        Integer enderecoId
 ) {
 }
 

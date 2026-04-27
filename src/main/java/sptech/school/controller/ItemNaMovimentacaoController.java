@@ -8,6 +8,8 @@ import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoRequestDto;
 import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoResponseDto;
 import sptech.school.service.ItemNaMovimentacaoService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/itensNaMovimentacao")
 public class ItemNaMovimentacaoController {
@@ -16,6 +18,22 @@ public class ItemNaMovimentacaoController {
 
     public ItemNaMovimentacaoController(ItemNaMovimentacaoService service) {
         this.service = service;
+    }
+
+
+    @GetMapping
+    public ResponseEntity<List<ItensNaMovimentacaoResponseDto>> listar(){
+        return ResponseEntity.ok(service.listar());
+    }
+
+    @GetMapping("/item/{id}")
+    public ResponseEntity<List<ItensNaMovimentacaoResponseDto>> listarPorItem(@PathVariable Integer id){
+        return ResponseEntity.ok(service.listarPorItem(id));
+    }
+
+    @GetMapping("/movimentacao/{id}")
+    public ResponseEntity<List<ItensNaMovimentacaoResponseDto>> listarPorMovimentacao(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.listarPorMovimentacao(id));
     }
 
     @PostMapping

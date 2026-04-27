@@ -23,20 +23,16 @@ public class CategoriaController {
         return ResponseEntity.status(200).body(service.buscarPorNome(nome));
     }
 
+    @GetMapping("/porId/{id}")
+    public ResponseEntity<CategoriaResponseDto> buscarPorId(@PathVariable Integer id){
+        return ResponseEntity.status(200).body(service.buscarPorId(id));
+    }
+
     @PostMapping
     public ResponseEntity<CategoriaResponseDto> criar(@RequestBody @Valid CategoriaRequestDto requestDto){
         return ResponseEntity.status(200).body(service.criar(requestDto));
     }
 
-    @PutMapping("/associar/{fornecedorId}/{categoriaId}")
-    public ResponseEntity<CategoriaResponseDto> associarCategoriaaFornecedor(@PathVariable Integer fornecedorId, @PathVariable Integer categoriaId){
-        return ResponseEntity.status(200).body(service.associarCategoriaaFornecedor(categoriaId,fornecedorId));
-    }
-
-    @PutMapping("/desassociar/{fornecedorId}/{categoriaId}")
-    public ResponseEntity<CategoriaResponseDto> desassociarCategoriaaFornecedor(@PathVariable Integer fornecedorId, @PathVariable Integer categoriaId){
-        return ResponseEntity.status(200).body(service.desassociarCategoriaaFornecedor(categoriaId,fornecedorId));
-    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Null> deletar(@PathVariable Integer id){
