@@ -8,10 +8,7 @@ import sptech.school.entity.ItensNaMovimentacao;
 import sptech.school.entity.MovimentacaoEstoque;
 import sptech.school.entity.Periodo;
 import sptech.school.exception.EntidadeConflitanteException;
-import sptech.school.repository.ItemRepository;
-import sptech.school.repository.ItensNaMovimentacaoRepository;
-import sptech.school.repository.MovimentacaoEstoqueRepository;
-import sptech.school.repository.PeriodoRepository;
+import sptech.school.repository.*;
 
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -21,18 +18,21 @@ import java.util.List;
 @Service
 public class PeriodoService {
 
-
+    private final TipoRepository tipoRepository;
     private final PeriodoRepository periodoRepository;
     private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
     private final ItensNaMovimentacaoRepository itensNaMovimentacaoRepository;
     private final ItemRepository itemRepository;
+    private final UsuarioRepository usuarioRepository;
 
 
-    public PeriodoService(PeriodoRepository periodoRepository, MovimentacaoEstoqueRepository movimentacaoEstoqueRepository, ItensNaMovimentacaoRepository itensNaMovimentacaoRepository, ItemRepository itemRepository) {
+    public PeriodoService(TipoRepository tipoRepository, PeriodoRepository periodoRepository, MovimentacaoEstoqueRepository movimentacaoEstoqueRepository, ItensNaMovimentacaoRepository itensNaMovimentacaoRepository, ItemRepository itemRepository, UsuarioRepository usuarioRepository) {
+        this.tipoRepository = tipoRepository;
         this.periodoRepository = periodoRepository;
         this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
         this.itensNaMovimentacaoRepository = itensNaMovimentacaoRepository;
         this.itemRepository = itemRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     public Periodo buscarUltimoPeriodo() {
@@ -60,10 +60,13 @@ public class PeriodoService {
     }
 
     public Integer contarEstoque (Integer id){
+
         return periodoRepository.pegarTotalDePecasDoPeriodo(id);
+
     }
 
     public Periodo fecharEstoque (Integer id, Integer qtd){
+
         Periodo periodo = periodoRepository.findById(id).orElseThrow(()-> new EntidadeConflitanteException("Problema na hora de buscar o período a ser fechado"));
 
         periodo.setQtdPecas(qtd);
@@ -75,7 +78,7 @@ public class PeriodoService {
     // PARTE DE ATUALIZAR O NOVO PERÍODO:
 
     @Transactional
-    public List<ItensNaMovimentacao> transferirSaldoParaNovoPeriodo() {
+    public List<ItensNaMovimentacao> transferirSaldoParaNovoPeriodo(Long idUsuario) {
 
 
         List<Periodo> todos = periodoRepository.findAllByOrderByIdDesc();
@@ -96,7 +99,8 @@ public class PeriodoService {
         //Faz um unico insert na MovimentacaoEstoque, que vai ter tudo
         MovimentacaoEstoque novaMov = new MovimentacaoEstoque();
         novaMov.setPeriodo(atual);
-        novaMov.setObservacoes("Saldo vindo do período anterior: " + penultimo.getAnotacao());
+        novaMov.setUsuario(usuarioRepository.findById(idUsuario).orElseThrow(()-> new RuntimeException("O id de usuario passado é invalido")));
+        novaMov.setTipo(tipoRepository.findById(3).orElseThrow(()->new RuntimeException("Tipo ajuste n encontrado")));
         MovimentacaoEstoque movSalva = movimentacaoEstoqueRepository.save(novaMov);
 
 

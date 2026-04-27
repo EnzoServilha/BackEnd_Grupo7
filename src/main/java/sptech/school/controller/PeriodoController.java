@@ -2,7 +2,7 @@ package sptech.school.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoResponseDto;
+        import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoResponseDto;
 import sptech.school.entity.ItensNaMovimentacao;
 import sptech.school.entity.Periodo;
 import sptech.school.service.ItensSimilaresService;
@@ -43,8 +43,8 @@ public class PeriodoController {
         return ResponseEntity.status(200).body(periodoService.cadastrarPeriodo(descricao));
     }
 
-    @PutMapping("/atualizarPeriodo")
-    public List<ItensNaMovimentacao> atualizarPeriodo (){
-        return periodoService.transferirSaldoParaNovoPeriodo();
+    @PutMapping("/atualizarPeriodo/{id}")
+    public List<ItensNaMovimentacao> atualizarPeriodo (@PathVariable Long id){
+        return periodoService.transferirSaldoParaNovoPeriodo(id);
     }
 }

@@ -25,6 +25,11 @@ public class PeriodoQtdPecasDTO {
         this.qtd = qtd;
     }
 
+    public PeriodoQtdPecasDTO(Integer id, Long qtd) {
+        this.id = id;
+        this.qtd = qtd.intValue();
+    }
+
     public PeriodoQtdPecasDTO() {
     }
 }
