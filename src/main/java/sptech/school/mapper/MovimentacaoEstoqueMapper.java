@@ -128,6 +128,7 @@ public class MovimentacaoEstoqueMapper {
                 entity.getTipo() != null ? TipoMapper.toResponseDto(entity.getTipo()) : null,
                 entity.getStatus() != null ? StatusMapper.toResponseDto(entity.getStatus()) : null,
                 entity.getCliente() != null ? ClienteMapper.toResponseDto(entity.getCliente()) : null,
+                entity.getPeriodo() != null ? PeriodoMapper.toResponseDto(entity.getPeriodo()) : null,
                 entity.getFornecedor() != null ? FornecedorMapper.toResponseDto(entity.getFornecedor()) : null,
                 entity.getMovimentacaoOriginal() != null ? entity.getMovimentacaoOriginal().getId() : null,
                 entity.getNumeroNotaFiscal(),
