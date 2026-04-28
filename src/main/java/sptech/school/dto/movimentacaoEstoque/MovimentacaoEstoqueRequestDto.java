@@ -1,11 +1,14 @@
 package sptech.school.dto.movimentacaoEstoque;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record MovimentacaoEstoqueRequestDto(
-        Integer usuarioId,
+        @NotNull
+        Long usuarioId,
         Double totalGastoImpostos,
         Double precoFrete,
         LocalDate dataEntregaPrevista,
@@ -16,7 +19,10 @@ public record MovimentacaoEstoqueRequestDto(
         Integer clienteId,
         Integer fornecedorId,
         Integer movimentacaoOriginalId,
-        String numeroNotaFiscal
+        String numeroNotaFiscal,
+
+        @NotNull
+        Integer periodoId
 ) {
 }
 

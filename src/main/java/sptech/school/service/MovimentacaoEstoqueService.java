@@ -1,9 +1,13 @@
 package sptech.school.service;
 
 import org.springframework.stereotype.Service;
+import sptech.school.dto.cliente.ClienteRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
+import sptech.school.entity.Cliente;
+import sptech.school.entity.Endereco;
 import sptech.school.entity.MovimentacaoEstoque;
+import sptech.school.entity.Usuario;
 import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.exceptions.MovimentacaoNaoEncontrada;
 import sptech.school.mapper.MovimentacaoEstoqueMapper;
@@ -20,19 +24,16 @@ public class MovimentacaoEstoqueService {
     private StatusRepository statusRepository;
     private ClienteRepository clienteRepository;
     private FornecedorRepository fornecedorRepository;
+    private PeriodoRepository periodoRepository;
 
-    public MovimentacaoEstoqueService(MovimentacaoRepository movimentacaoRepository,
-            UsuarioRepository usuarioRepository,
-            TipoRepository tipoRepository,
-            StatusRepository statusRepository,
-            ClienteRepository clienteRepository,
-            FornecedorRepository fornecedorRepository) {
+    public MovimentacaoEstoqueService(MovimentacaoRepository movimentacaoRepository, UsuarioRepository usuarioRepository, TipoRepository tipoRepository, StatusRepository statusRepository, ClienteRepository clienteRepository, FornecedorRepository fornecedorRepository, PeriodoRepository periodoRepository) {
         this.movimentacaoRepository = movimentacaoRepository;
         this.usuarioRepository = usuarioRepository;
         this.tipoRepository = tipoRepository;
         this.statusRepository = statusRepository;
         this.clienteRepository = clienteRepository;
         this.fornecedorRepository = fornecedorRepository;
+        this.periodoRepository = periodoRepository;
     }
 
     public MovimentacaoEstoqueResponseDto buscarPorId(Integer id){
@@ -62,11 +63,10 @@ public class MovimentacaoEstoqueService {
 
     public MovimentacaoEstoqueResponseDto criar(MovimentacaoEstoqueRequestDto request){
 
-        validarRelacionamentos(request);
-
         MovimentacaoEstoque movimentacao = MovimentacaoEstoqueMapper.toEntity(request);
 
         movimentacao.setDataMovimentacao(LocalDateTime.now());
+        preencher(movimentacao, request);
 
         return  MovimentacaoEstoqueMapper.toResponse(movimentacaoRepository.save(movimentacao));
     }
@@ -75,11 +75,12 @@ public class MovimentacaoEstoqueService {
 
          existe(id);
 
-         validarRelacionamentos(request);
 
          MovimentacaoEstoque movimentacao = MovimentacaoEstoqueMapper.toEntity(request);
 
          movimentacao.setId(id);
+
+         preencher(movimentacao, request);
 
          return MovimentacaoEstoqueMapper.toResponse(movimentacaoRepository.save(movimentacao));
     }
@@ -97,30 +98,43 @@ public class MovimentacaoEstoqueService {
         }
     }
 
-    private void validarRelacionamentos(MovimentacaoEstoqueRequestDto request) {
 
-        if (request.usuarioId() != null && !usuarioRepository.existsById(request.usuarioId().longValue())) {
-            throw new EntidadeNaoEncontradaException("Usuário não encontrado", request.usuarioId());
+    public void preencher(MovimentacaoEstoque entidade, MovimentacaoEstoqueRequestDto requestDto){
+        if (requestDto.usuarioId() != null) {
+            Usuario usuario = usuarioRepository.findById(requestDto.usuarioId())
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Endereço não encontrado", requestDto.usuarioId()));
+
+
+            entidade.setUsuario(usuario);
         }
 
-        if (request.tipoId() != null && !tipoRepository.existsById(request.tipoId())) {
-            throw new EntidadeNaoEncontradaException("Tipo não encontrado", request.tipoId());
+        if(requestDto.tipoId() != null){
+            entidade.setTipo(tipoRepository.findById(requestDto.tipoId())
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Tipo não encontrado", requestDto.tipoId())));
         }
 
-        if (request.statusId() != null && !statusRepository.existsById(request.statusId())) {
-            throw new EntidadeNaoEncontradaException("Status não encontrado", request.statusId());
+        if(requestDto.statusId() != null){
+            entidade.setStatus(statusRepository.findById(requestDto.statusId())
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Status não encontrado", requestDto.statusId())));
         }
 
-        if (request.clienteId() != null && !clienteRepository.existsById(request.clienteId())) {
-            throw new EntidadeNaoEncontradaException("Cliente não encontrado", request.clienteId());
+        if(requestDto.clienteId() != null){
+            entidade.setCliente(clienteRepository.findById(requestDto.clienteId())
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente não encontrado", requestDto.clienteId())));
         }
 
-        if (request.fornecedorId() != null && !fornecedorRepository.existsById(request.fornecedorId())) {
-            throw new EntidadeNaoEncontradaException("Fornecedor não encontrado", request.fornecedorId());
+        if(requestDto.fornecedorId() != null){
+            entidade.setFornecedor(fornecedorRepository.findById(requestDto.fornecedorId())
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor não encontrado", requestDto.fornecedorId())));
         }
 
-        if (request.movimentacaoOriginalId() != null && !movimentacaoRepository.existsById(request.movimentacaoOriginalId())) {
-            throw new MovimentacaoNaoEncontrada("Movimentação original não encontrada");
+        if (requestDto.movimentacaoOriginalId() != null) {
+            entidade.setMovimentacaoOriginal(movimentacaoRepository.findById(requestDto.movimentacaoOriginalId())
+                    .orElseThrow(() -> new MovimentacaoNaoEncontrada("Movimentação original não encontrada")));
         }
+
+            entidade.setPeriodo(periodoRepository.findById(requestDto.periodoId())
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Período não encontrado", requestDto.periodoId())));
+
     }
 }
