@@ -19,7 +19,7 @@ INSERT INTO periodo (data_criacao, anotacao, qtd_pecas)
 VALUES (NOW(), 'Inventário mensal - Setor de Amortecedores', 42);
 
 INSERT INTO periodo (data_criacao, anotacao, qtd_pecas)
-VALUES (NOW(), 'Reposição de estoque emergencial', 12);
+VALUES (NOW(), 'Reposição de estoque emergencial', 0);
 
 -- 3. ENDEREÇOS
 INSERT INTO endereco (cep, logradouro, numero, bairro, cidade, uf)
@@ -35,6 +35,7 @@ VALUES ('Distribuidora de Pecas Brasil LTDA', '12.345.678/0001-90', 'Marcos Oliv
 
 INSERT INTO fornecedor (razao_social, cnpj, nome_contato, nome_empresa, telefone, email, observacoes, data_cadastro, endereco_id)
 VALUES ('Importadora Global S.A.', '98.765.432/0001-11', 'Ana Costa', 'Global Imports', '(21) 3344-5566', 'vendas@global.com', 'Importado de pecas asiaticas', NOW(), 2);
+
 
 -- 5. ITENS
 INSERT INTO item (codigo_interno, marca, ano, descricao, localizacao)
