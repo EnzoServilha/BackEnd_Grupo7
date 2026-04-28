@@ -4,8 +4,8 @@ INSERT INTO permissao (nome) VALUES ('ROLE_USER');
 INSERT INTO usuario (nome, email, senha, data_cadastro, permissao_id)
 VALUES ('Admin', 'admin@teste.com', '$2a$10$0/TKTGxdREbWaWjWYhwf6e9P1fPOAMMNqEnZgOG95jnSkHSfkkIrC', NOW(), 1);
 
-<<<<<<< ajustes-pos-testes
-=======
+-- <<<<<<< ajustes-pos-testes
+-- =======
 -- 1. TIPOS, STATUS E CATEGORIAS (Básico)
 INSERT INTO tipo (id, nome) VALUES (1, 'ENTRADA'), (2, 'SAIDA'), (3, 'AJUSTE');
 INSERT INTO status (id, nome) VALUES (1, 'PENDENTE'), (2, 'CONCLUIDO'), (3, 'CANCELADO');
@@ -53,4 +53,4 @@ VALUES (1, 1, 10, 150.00);
 
 -- 7. FECHAMENTO
 INSERT INTO fechamento_mes (mes, ano, qtd, fk_item) VALUES (1, 2026, 50, 1);
->>>>>>> main
+-- >>>>>>> main
