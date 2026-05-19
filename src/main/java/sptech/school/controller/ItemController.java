@@ -69,7 +69,9 @@ public class ItemController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ItemResponseDto> atualizar(@PathVariable Integer id, @RequestBody @Valid ItemRequestDto request) {
+    public ResponseEntity<ItemResponseDto> atualizar(
+            @PathVariable Integer id,
+            @RequestBody @Valid ItemRequestDto request) {
         Item item = ItemMapper.toEntity(request);
         Item atualizado = itemService.atualizar(id, item);
         return ResponseEntity.ok(ItemMapper.toResponseDto(atualizado));
@@ -82,13 +84,17 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/codigos-associados/{codigoAssociadoId}")
-    public ResponseEntity<ItemResponseDto> adicionarCodigoAssociado(@PathVariable Integer itemId, @PathVariable Integer codigoAssociadoId) {
+    public ResponseEntity<ItemResponseDto> adicionarCodigoAssociado(
+            @PathVariable Integer itemId,
+            @PathVariable Integer codigoAssociadoId) {
         Item item = itemService.adicionarCodigoAssociado(itemId, codigoAssociadoId);
         return ResponseEntity.ok(ItemMapper.toResponseDto(item));
     }
 
     @DeleteMapping("/{itemId}/codigos-associados/{codigoAssociadoId}")
-    public ResponseEntity<Void> removerCodigoAssociado(@PathVariable Integer itemId, @PathVariable Integer codigoAssociadoId) {
+    public ResponseEntity<Void> removerCodigoAssociado(
+            @PathVariable Integer itemId,
+            @PathVariable Integer codigoAssociadoId) {
         itemService.removerCodigoAssociado(itemId, codigoAssociadoId);
         return ResponseEntity.noContent().build();
     }
