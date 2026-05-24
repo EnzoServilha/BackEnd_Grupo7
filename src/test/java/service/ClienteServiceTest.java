@@ -30,41 +30,39 @@ public class ClienteServiceTest {
     private ClienteRepository clienteRepository;
 
     @Mock
-    private  EnderecoRepository enderecoRepository;
+    private EnderecoRepository enderecoRepository;
 
     @InjectMocks
     private ClienteService clienteService;
 
 
-
     @Nested
     @DisplayName("Função Atualizar")
-    class AtualizarTeste{
+    class AtualizarTeste {
 
         @Test
         @DisplayName("Deve atualizar corretamente o cliente")
-        void deveAtualizar (){
+        void deveAtualizar() {
 
-            ClienteRequestDto clientePassado = new ClienteRequestDto("Empresa", "contato","18487221801","98452-7389",
-                    "teste@email.com","", LocalDateTime.now(),1);
+            ClienteRequestDto clientePassado = new ClienteRequestDto("Empresa", "contato", "18487221801", "98452-7389",
+                    "teste@email.com", "", LocalDateTime.now(), 1);
 
-                    Integer id = 1;
+            Integer id = 1;
 
-                     Cliente entidade = ClienteMapper.toEntity(clientePassado);
+            Cliente entidade = ClienteMapper.toEntity(clientePassado);
 
-                     entidade.setId(id);
+            entidade.setId(id);
 
 
             Endereco endereco = new Endereco();
 
             endereco.setId(1);
 
-                     Mockito.when(clienteRepository.existsById(1))
-                                     .thenReturn(true);
+            Mockito.when(clienteRepository.existsById(1))
+                    .thenReturn(true);
 
-                     Mockito.when(enderecoRepository.findById(clientePassado.enderecoId()))
-                                     .thenReturn(Optional.of(endereco));
-
+            Mockito.when(enderecoRepository.findById(clientePassado.enderecoId()))
+                    .thenReturn(Optional.of(endereco));
 
 
             Mockito.when(clienteRepository.save(Mockito.any(Cliente.class)))
@@ -77,7 +75,7 @@ public class ClienteServiceTest {
 
         @Test
         @DisplayName("Deve lançar EntidadeNaoEncontradaException se nãoa char o cliente")
-        void lancarEntidadeNaoEncontradaException(){
+        void lancarEntidadeNaoEncontradaException() {
 
             Integer id = 1;
 
@@ -95,7 +93,7 @@ public class ClienteServiceTest {
             Mockito.when(clienteRepository.existsById(2))
                     .thenReturn(false);
 
-            Assertions.assertThrows(EntidadeNaoEncontradaException.class, ()-> clienteService.atualizar(clientePassado, 2) );
+            Assertions.assertThrows(EntidadeNaoEncontradaException.class, () -> clienteService.atualizar(clientePassado, 2));
 
         }
 
@@ -103,90 +101,92 @@ public class ClienteServiceTest {
 
     @Nested
     @DisplayName("Função cadastrar")
-    class cadastrarCliente{
-    @Test
-    @DisplayName("Deve cadastrar corretamente")
-    void cadastrarCorretamente () {
+    class cadastrarCliente {
+        @Test
+        @DisplayName("Deve cadastrar corretamente")
+        void cadastrarCorretamente() {
 
-        Integer id = 1;
-
-
-        ClienteRequestDto clientePassado = new ClienteRequestDto(
-                "Empresa de Teste LTDA",
-                "João da Silva",
-                "18487221801",
-                "11984527389",
-                "teste@email.com",
-                "Observação de teste",
-                LocalDateTime.now(),
-                id
-        );
-
-        Endereco endereco = new Endereco();
-
-        endereco.setId(1);
-
-        Cliente entidade = ClienteMapper.toEntity(clientePassado);
+            Integer id = 1;
 
 
+            ClienteRequestDto clientePassado = new ClienteRequestDto(
+                    "Empresa de Teste LTDA",
+                    "João da Silva",
+                    "18487221801",
+                    "11984527389",
+                    "teste@email.com",
+                    "Observação de teste",
+                    LocalDateTime.now(),
+                    id
+            );
+
+            Endereco endereco = new Endereco();
+
+            endereco.setId(1);
+
+            Cliente entidade = ClienteMapper.toEntity(clientePassado);
 
 
-        Mockito.when(enderecoRepository.findById(clientePassado.enderecoId()))
-                .thenReturn(Optional.of(endereco));
+            Mockito.when(enderecoRepository.findById(clientePassado.enderecoId()))
+                    .thenReturn(Optional.of(endereco));
 
-        Mockito.when(clienteRepository.save(Mockito.any(Cliente.class)))
-                        .thenReturn(entidade);
-
-
-        ClienteResponseDto resposta = ClienteMapper.toResponseDto(entidade);
+            Mockito.when(clienteRepository.save(Mockito.any(Cliente.class)))
+                    .thenReturn(entidade);
 
 
-        Assertions.assertEquals(resposta, clienteService.cadastrar(clientePassado));
-
-    }
+            ClienteResponseDto resposta = ClienteMapper.toResponseDto(entidade);
 
 
+            Assertions.assertEquals(resposta, clienteService.cadastrar(clientePassado));
+
+        }
 
 
     }
 
-    @Test
-    @DisplayName("O preencher deve lançar EntidadeNaoEncontradaException se não achar o endereço correto")
-    void preencherComEnderecoErrado(){
-
-        ClienteRequestDto clientePassado = new ClienteRequestDto("Empresa", "contato","18487221801","98452-7389",
-                "teste@email.com","", LocalDateTime.now(),1);
-
-        Integer id = 1;
-
-        Cliente entidade = ClienteMapper.toEntity(clientePassado);
-
-        entidade.setId(id);
-
-        Mockito.when(enderecoRepository.findById(clientePassado.enderecoId()))
-                .thenReturn(Optional.empty());
+    @Nested
+    @DisplayName("Teste do metodo preencher")
+    class preencher {
 
 
-        Assertions.assertThrows(EntidadeNaoEncontradaException.class, () -> clienteService.preencher(entidade,clientePassado));
+        @Test
+        @DisplayName("O preencher deve lançar EntidadeNaoEncontradaException se não achar o endereço correto")
+        void preencherComEnderecoErrado() {
 
-    }
+            ClienteRequestDto clientePassado = new ClienteRequestDto("Empresa", "contato", "18487221801", "98452-7389",
+                    "teste@email.com", "", LocalDateTime.now(), 1);
 
-    @Test
-    @DisplayName("O preencher não deve fazer nada se o enderecoId for null")
-    void preencherComEnderecoNull() {
+            Integer id = 1;
 
-        ClienteRequestDto clientePassado = new ClienteRequestDto("Empresa", "contato","18487221801","98452-7389",
-                "teste@email.com","", LocalDateTime.now(),null);
+            Cliente entidade = ClienteMapper.toEntity(clientePassado);
 
-        Integer id = 1;
+            entidade.setId(id);
 
-        Cliente entidade = ClienteMapper.toEntity(clientePassado);
-
-        entidade.setId(id);
+            Mockito.when(enderecoRepository.findById(clientePassado.enderecoId()))
+                    .thenReturn(Optional.empty());
 
 
-        clienteService.preencher(entidade, clientePassado);
+            Assertions.assertThrows(EntidadeNaoEncontradaException.class, () -> clienteService.preencher(entidade, clientePassado));
 
-        Assertions.assertNull(entidade.getEndereco());
+        }
+
+        @Test
+        @DisplayName("O preencher não deve fazer nada se o enderecoId for null")
+        void preencherComEnderecoNull() {
+
+            ClienteRequestDto clientePassado = new ClienteRequestDto("Empresa", "contato", "18487221801", "98452-7389",
+                    "teste@email.com", "", LocalDateTime.now(), null);
+
+            Integer id = 1;
+
+            Cliente entidade = ClienteMapper.toEntity(clientePassado);
+
+            entidade.setId(id);
+
+
+            clienteService.preencher(entidade, clientePassado);
+
+            Assertions.assertNull(entidade.getEndereco());
+        }
     }
 }
