@@ -3,6 +3,7 @@ package sptech.school.service;
 import org.springframework.stereotype.Service;
 import sptech.school.dto.marca.MarcaRequestDto;
 import sptech.school.dto.marca.MarcaResponseDto;
+import sptech.school.entity.Marca;
 import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.mapper.MarcaMapper;
 import sptech.school.repository.MarcaRepository;
@@ -16,7 +17,9 @@ public class MarcaService {
     }
 
     public MarcaResponseDto buscarPorNome(String nome) {
-        return MarcaMapper.toResponseDto(repository.findByNomeEmpresaContaining(nome));
+        Marca marca = repository.findByNomeEmpresaContaining(nome);
+        if (marca == null) return null;
+        return MarcaMapper.toResponseDto(marca);
     }
 
     public MarcaResponseDto buscarPorId(Integer id) {
