@@ -3,6 +3,7 @@ package sptech.school.service;
 import org.springframework.stereotype.Service;
 import sptech.school.dto.categoria.CategoriaRequestDto;
 import sptech.school.dto.categoria.CategoriaResponseDto;
+import sptech.school.entity.Categoria;
 import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.mapper.CategoriaMapper;
 import sptech.school.repository.CategoriaRepository;
@@ -17,7 +18,9 @@ public class CategoriaService {
     }
 
     public CategoriaResponseDto buscarPorNome(String nome) {
-        return CategoriaMapper.toResponseDto(repository.findByNomeContaining(nome));
+        Categoria categoria = repository.findByNomeContaining(nome);
+        if (categoria == null) return null;
+        return CategoriaMapper.toResponseDto(categoria);
     }
 
     public CategoriaResponseDto buscarPorId(Integer id) {
