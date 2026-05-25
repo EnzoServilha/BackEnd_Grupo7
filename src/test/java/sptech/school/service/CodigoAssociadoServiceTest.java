@@ -3,10 +3,25 @@ package sptech.school.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import sptech.school.repository.ClienteRepository;
+import sptech.school.repository.CodigoAssociadoRepository;
+import sptech.school.repository.FornecedorRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class CodigoAssociadoServiceTest {
+
+    @Mock
+    private CodigoAssociadoRepository codigoAssociadoRepository;
+    @Mock
+    private FornecedorRepository fornecedorRepository;
+    @Mock
+    private ClienteRepository clienteRepository;
+
+    @InjectMocks
+    private CodigoAssociadoService codigoAssociadoService;
 
     @Nested
     @DisplayName("Cenários do método listarTodos()")

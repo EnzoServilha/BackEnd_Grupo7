@@ -3,10 +3,21 @@ package sptech.school.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import sptech.school.repository.ItemRepository;
 
 class ItensSimilaresServiceTest {
+
+    @Mock
+    private ItemRepository itemRepository;
+//    @Mock
+//    private ItensSimilaresRepository itemSimilaresRepository;
+//    @Mock
+//    private CodigoAssociadoRepository codigoAssociadoRepository;
+
+    @InjectMocks
+    private ItensSimilaresService itensSimilaresService;
 
     @Nested
     @DisplayName("Cenários do método listarSimilares()")
