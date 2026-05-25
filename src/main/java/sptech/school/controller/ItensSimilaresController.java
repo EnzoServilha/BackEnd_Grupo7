@@ -30,13 +30,15 @@ public class ItensSimilaresController {
     }
 
     @PostMapping("/{similarId}")
-    public ResponseEntity<ItemResponseDto> adicionarSimilar(@PathVariable Integer itemId, @PathVariable Integer similarId) {
+    public ResponseEntity<ItemResponseDto> adicionarSimilar(@PathVariable Integer itemId,
+                                                            @PathVariable Integer similarId) {
         Item item = itensSimilaresService.adicionarSimilar(itemId, similarId);
         return ResponseEntity.ok(ItemMapper.toResponseDto(item));
     }
 
     @DeleteMapping("/{similarId}")
-    public ResponseEntity<Void> removerSimilar(@PathVariable Integer itemId, @PathVariable Integer similarId) {
+    public ResponseEntity<Void> removerSimilar(@PathVariable Integer itemId,
+                                               @PathVariable Integer similarId) {
         itensSimilaresService.removerSimilar(itemId, similarId);
         return ResponseEntity.noContent().build();
     }

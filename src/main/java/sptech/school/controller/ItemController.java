@@ -92,9 +92,8 @@ public class ItemController {
     }
 
     @DeleteMapping("/{itemId}/codigos-associados/{codigoAssociadoId}")
-    public ResponseEntity<Void> removerCodigoAssociado(
-            @PathVariable Integer itemId,
-            @PathVariable Integer codigoAssociadoId) {
+    public ResponseEntity<Void> removerCodigoAssociado(@PathVariable Integer itemId,
+                                                       @PathVariable Integer codigoAssociadoId) {
         itemService.removerCodigoAssociado(itemId, codigoAssociadoId);
         return ResponseEntity.noContent().build();
     }

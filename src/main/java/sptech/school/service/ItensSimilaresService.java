@@ -3,6 +3,7 @@ package sptech.school.service;
 import org.springframework.stereotype.Service;
 import sptech.school.entity.Item;
 import sptech.school.exception.EntidadeNaoEncontradaException;
+import sptech.school.exception.ItemSimilarJaAssociadoException;
 import sptech.school.repository.ItemRepository;
 
 import java.util.ArrayList;
@@ -29,6 +30,21 @@ public class ItensSimilaresService {
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", itemId));
         Item similar = itemRepository.findById(similarId)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Item Similar", similarId));
+
+
+        // impede A -> A
+        if (itemId.equals(similarId)) {
+            throw new ItemSimilarJaAssociadoException("Um item não pode ser associado a ele mesmo");
+        }
+
+        // impede B -> A | quando já existe A -> B
+        if (similar.getItensSimilares() != null &&
+                similar.getItensSimilares()
+                        .stream()
+                        .anyMatch(i -> i.getId().equals(itemId))) {
+            throw new ItemSimilarJaAssociadoException("Os itens já estão associados como similares");
+        }
+
         if (item.getItensSimilares() == null) {
             item.setItensSimilares(new ArrayList<>());
         }

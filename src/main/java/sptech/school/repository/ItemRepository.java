@@ -16,8 +16,8 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     @Query("SELECT i FROM Item i " +
             "WHERE LOWER(i.codigoInterno) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-            "OR LOWER(i.marca) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-            "OR LOWER(i.descricao) LIKE LOWER(CONCAT('%', :termo, '%'))")
+            "OR    LOWER(i.marca)         LIKE LOWER(CONCAT('%', :termo, '%')) " +
+            "OR    LOWER(i.descricao)     LIKE LOWER(CONCAT('%', :termo, '%'))")
     List<Item> pesquisarPorTermo(@Param("termo") String termo);
 
     @Query("SELECT DISTINCT i FROM Item i " +

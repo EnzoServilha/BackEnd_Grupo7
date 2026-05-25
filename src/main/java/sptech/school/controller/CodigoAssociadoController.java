@@ -47,9 +47,8 @@ public class CodigoAssociadoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CodigoAssociadoResponseDto> atualizar(
-            @PathVariable Integer id,
-            @RequestBody @Valid CodigoAssociadoRequestDto request) {
+    public ResponseEntity<CodigoAssociadoResponseDto> atualizar(@PathVariable Integer id,
+                                                                @RequestBody @Valid CodigoAssociadoRequestDto request) {
         return ResponseEntity.ok(codigoAssociadoService.atualizar(id, request));
     }
 
