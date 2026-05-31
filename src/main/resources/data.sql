@@ -47,10 +47,16 @@ INSERT INTO item_similar (fk_item, fk_item_similar) VALUES (1, 2), (2, 1);
 
 -- 6. MOVIMENTAÇÕES (Agora o periodo_id 1 existe!)
 INSERT INTO movimentacao_estoque (fk_usuario, tipo_id, status_id, periodo_id, numero_nota_fiscal)
-VALUES (1, 1, 2, 3, 'NF-2026-ABC');
+VALUES
+(1, 1, 2, 1, 'NF-2026-P1'),
+(1, 1, 2, 2, 'NF-2026-P2'),
+(1, 1, 2, 3, 'NF-2026-P3');
 
 INSERT INTO itens_na_movimentacao (movimentacao_estoque_id, item_id, qtd, preco_unitario)
-VALUES (1, 1, 10, 150.00);
+VALUES
+(1, 1, 150, 150.00),
+(2, 1, 42, 150.00),
+(3, 1, 10, 150.00);
 
 -- 7. FECHAMENTO
 INSERT INTO fechamento_mes (mes, ano, qtd, fk_item) VALUES (1, 2026, 50, 1);
