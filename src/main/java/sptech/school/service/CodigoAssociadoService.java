@@ -44,10 +44,10 @@ public class CodigoAssociadoService {
 
         CodigoAssociado entity = CodigoAssociadoMapper.toEntity(codigoAssociado);
 
-            preencher(codigoAssociado, entity);
+        preencher(codigoAssociado, entity);
 
-            CodigoAssociado salvo = codigoAssociadoRepository.save(entity);
-            return CodigoAssociadoMapper.toResponseDto(salvo);
+        CodigoAssociado salvo = codigoAssociadoRepository.save(entity);
+        return CodigoAssociadoMapper.toResponseDto(salvo);
 
     }
 
