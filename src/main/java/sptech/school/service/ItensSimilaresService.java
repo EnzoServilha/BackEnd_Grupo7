@@ -57,9 +57,21 @@ public class ItensSimilaresService {
     public Item removerSimilar(Integer itemId, Integer similarId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", itemId));
+        Item similar = itemRepository.findById(similarId)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Item Similar", similarId));
+
+        // Caso exista item -> similar
         if (item.getItensSimilares() != null) {
             item.getItensSimilares().removeIf(s -> s.getId().equals(similarId));
         }
+
+        // Caso exista similar -> item
+        if (similar.getItensSimilares() != null) {
+            similar.getItensSimilares().removeIf(s -> s.getId().equals(itemId));
+
+            itemRepository.save(similar);
+        }
+
         return itemRepository.save(item);
     }
 }
