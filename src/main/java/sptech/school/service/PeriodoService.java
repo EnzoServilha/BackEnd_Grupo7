@@ -63,9 +63,11 @@ public class PeriodoService {
 
     }
 
-    public Periodo fecharEstoque (Integer id, Integer qtd){
+    public Periodo fecharEstoque (){
 
-        Periodo periodo = periodoRepository.findById(id).orElseThrow(()-> new EntidadeConflitanteException("Problema na hora de buscar o período a ser fechado"));
+        Periodo periodo = buscarUltimoPeriodo();
+        if (periodo == null) throw new RuntimeException("Período não encontrado");
+        Integer qtd = contarEstoque(periodo.getId());
 
         periodo.setQtdPecas(qtd);
 
@@ -76,7 +78,7 @@ public class PeriodoService {
     // PARTE DE ATUALIZAR O NOVO PERÍODO:
 
     @Transactional
-    public List<ItensNaMovimentacao> transferirSaldoParaNovoPeriodo(Long idUsuario) {
+    public List<PeriodoQtdPecasDTO> transferirSaldoParaNovoPeriodo(Long idUsuario) {
 
 
         List<Periodo> todos = periodoRepository.findAllByOrderByIdDesc();
@@ -116,8 +118,7 @@ public class PeriodoService {
             itensNaMovimentacaoList.add(itensNaMovimentacaoRepository.save(itemMovAtual));
 
         }
-
-        return itensNaMovimentacaoList;
+        return saldos;
     }
 
     }

@@ -2,6 +2,8 @@ package sptech.school.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sptech.school.dto.periodo.PeriodoQtdPecasDTO;
+import sptech.school.dto.periodo.PeriodoResponseDto;
 import sptech.school.entity.ItensNaMovimentacao;
 import sptech.school.entity.Periodo;
 import sptech.school.service.PeriodoService;
@@ -29,11 +31,11 @@ public class PeriodoController {
 
     @PutMapping("/fechar")
     public ResponseEntity<Periodo> fecharPeriodo (){
-        Periodo periodoAtual = periodoService.buscarUltimoPeriodo();
+//        Periodo periodoAtual = periodoService.buscarUltimoPeriodo();
+//
+//        Integer qtd = periodoService.contarEstoque(periodoAtual.getId());
 
-        Integer qtd = periodoService.contarEstoque(periodoAtual.getId());
-
-        return ResponseEntity.status(200).body(periodoService.fecharEstoque(periodoAtual.getId(), qtd));
+        return ResponseEntity.status(200).body(periodoService.fecharEstoque());
     }
 
     @PostMapping()
@@ -42,7 +44,7 @@ public class PeriodoController {
     }
 
     @PutMapping("/atualizarPeriodo/{id}")
-    public List<ItensNaMovimentacao> atualizarPeriodo (@PathVariable Long id){
-        return periodoService.transferirSaldoParaNovoPeriodo(id);
+    public ResponseEntity<List<PeriodoQtdPecasDTO>> atualizarPeriodo (@PathVariable Long id){
+        return ResponseEntity.ok(periodoService.transferirSaldoParaNovoPeriodo(id));
     }
 }
