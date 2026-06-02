@@ -27,6 +27,9 @@ public record ClienteRequestDto(
 
         LocalDateTime dataCadastro,
         Integer enderecoId
+
+
+
 ) {
 }
 
