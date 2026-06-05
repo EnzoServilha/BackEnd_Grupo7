@@ -21,7 +21,7 @@ public class EtiquetaController {
         byte[] pdf = etiquetaService.gerarEtiquetaPdf(itemId);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=etiqueta-item-" + itemId + ".pdf")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=etiqueta-item-" + itemId + ".pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
