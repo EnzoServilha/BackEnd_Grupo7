@@ -90,6 +90,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- JasperReports - Geração de etiquetas PDF -->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>6.20.5</version>
+        </dependency>
+
     </dependencies>
 
 

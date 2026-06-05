@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Etiqueta 70 x 50 mm em orientação Landscape
+    Conversão: 1 mm = 72 / 25.4 ≈ 2.8346 px (unidade do JasperReports)
+      largura : 70 mm × 2.8346 ≈ 198 px
+      altura  : 50 mm × 2.8346 ≈ 142 px
+-->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+                  http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="etiqueta"
+              pageWidth="198"
+              pageHeight="142"
+              orientation="Landscape"
+              columnWidth="198"
+              leftMargin="0"
+              rightMargin="0"
+              topMargin="0"
+              bottomMargin="0">
+
+    <parameter name="codigoInterno" class="java.lang.String"/>
+    <parameter name="marca" class="java.lang.String"/>
+    <parameter name="descricao" class="java.lang.String"/>
+    <parameter name="localizacao" class="java.lang.String"/>
+
+    <title>
+        <band height="142" splitType="Stretch">
+
+            <!-- Código Interno -->
+            <textField>
+                <reportElement x="6" y="6" width="186" height="16"/>
+                <textElement>
+                    <font fontName="SansSerif" size="10" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{codigoInterno}]]></textFieldExpression>
+            </textField>
+
+            <!-- Marca -->
+            <textField>
+                <reportElement x="6" y="24" width="186" height="14"/>
+                <textElement>
+                    <font fontName="SansSerif" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{marca}]]></textFieldExpression>
+            </textField>
+
+            <!-- Descrição -->
+            <textField>
+                <reportElement x="6" y="42" width="186" height="60"/>
+                <textElement>
+                    <font fontName="SansSerif" size="7"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{descricao}]]></textFieldExpression>
+            </textField>
+
+            <!-- Localização -->
+            <textField>
+                <reportElement x="6" y="106" width="186" height="30"/>
+                <textElement>
+                    <font fontName="SansSerif" size="8" isItalic="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{localizacao}]]></textFieldExpression>
+            </textField>
+
+        </band>
+    </title>
+
+</jasperReport>
