@@ -35,7 +35,7 @@ public class EtiquetaService {
             parameters.put("codigoInterno", item.getCodigoInterno() != null ? item.getCodigoInterno() : "");
             parameters.put("marca", item.getMarca() != null ? item.getMarca() : "");
             parameters.put("descricao", item.getDescricao() != null ? item.getDescricao() : "");
-            parameters.put("localizacao", item.getLocalizacao() != null ? item.getLocalizacao() : "");
+            parameters.put("dataCadastro", item.getDataCadastro() != null ? item.getDataCadastro().toString() : "");
 
             JasperPrint jasperPrint = JasperFillManager.fillReport(
                     jasperReport, parameters, new JREmptyDataSource());
