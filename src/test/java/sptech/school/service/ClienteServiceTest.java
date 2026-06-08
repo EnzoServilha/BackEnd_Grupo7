@@ -1,4 +1,4 @@
-package service;
+package sptech.school.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +17,6 @@ import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.mapper.ClienteMapper;
 import sptech.school.repository.ClienteRepository;
 import sptech.school.repository.EnderecoRepository;
-import sptech.school.service.ClienteService;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

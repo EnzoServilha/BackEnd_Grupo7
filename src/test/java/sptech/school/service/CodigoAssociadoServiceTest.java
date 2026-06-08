@@ -118,7 +118,7 @@ class CodigoAssociadoServiceTest {
                             EntidadeNaoEncontradaException.class,
                             () -> codigoAssociadoService.buscarPorId(id)
                     );
-            Assertions.assertEquals("Código Associado 1",
+            Assertions.assertEquals("Código Associado com identificador '1' não encontrado(a)",
                     exception.getMessage());
         }
     }

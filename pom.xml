@@ -103,6 +103,13 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Exportação para PDF -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.4</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -136,7 +143,7 @@
                         <goals><goal>check</goal></goals>
                         <configuration>
                             <includes>
-                                <include>school/sptech/exerciciotestesunitariosspring/service/*</include>
+                                <include>school/sptech/service/*</include>
                             </includes>
                             <rules>
                                 <rule>
