@@ -6,6 +6,7 @@ import sptech.school.dto.permissao.PermissaoResponseDto;
 import sptech.school.entity.Permissao;
 import sptech.school.exception.PermissaoNaoEncontradaException;
 import sptech.school.mapper.PermissaoMapper;
+import sptech.school.observer.publisher.EventPeriodoManager;
 import sptech.school.repository.PermissaoRepository;
 
 import java.util.List;
@@ -14,9 +15,11 @@ import java.util.List;
 public class PermissaoService {
 
     private final PermissaoRepository permissaoRepository;
+    private final EventPeriodoManager eventPeriodoManager;
 
-    public PermissaoService(PermissaoRepository permissaoRepository) {
+    public PermissaoService(PermissaoRepository permissaoRepository, EventPeriodoManager eventPeriodoManager) {
         this.permissaoRepository = permissaoRepository;
+        this.eventPeriodoManager = eventPeriodoManager;
     }
 
     public PermissaoResponseDto criar(PermissaoRequestDto dto) {
@@ -25,6 +28,7 @@ public class PermissaoService {
     }
 
     public List<PermissaoResponseDto> listarTodos() {
+        eventPeriodoManager.notifyListeners();
         return PermissaoMapper.toResponseDtoList(permissaoRepository.findAll());
     }
 
