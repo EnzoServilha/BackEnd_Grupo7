@@ -12,14 +12,14 @@ INSERT INTO status (id, nome) VALUES (1, 'PENDENTE'), (2, 'CONCLUIDO'), (3, 'CAN
 INSERT INTO categoria (nome) VALUES ('Peças Automotivas'), ('Ferramentas'), ('Eletrônicos');
 
 -- 2. PERIODOS (Movi para cá para garantir que o ID 1 exista antes das movimentações)
-INSERT INTO periodo (data_criacao, anotacao, qtd_pecas)
-VALUES (NOW(), 'Fechamento do primeiro trimestre de estoque', 150); -- Este será o ID 1
+INSERT INTO periodo (data_criacao, anotacao, qtd_pecas, fechado, data_fechamento)
+VALUES (NOW(), 'Fechamento do primeiro trimestre de estoque', 150, TRUE, NOW()); -- Este será o ID 1
 
-INSERT INTO periodo (data_criacao, anotacao, qtd_pecas)
-VALUES (NOW(), 'Inventário mensal - Setor de Amortecedores', 42);
+INSERT INTO periodo (data_criacao, anotacao, qtd_pecas, fechado, data_fechamento)
+VALUES (NOW(), 'Inventário mensal - Setor de Amortecedores', 42, TRUE, NOW());
 
-INSERT INTO periodo (data_criacao, anotacao, qtd_pecas)
-VALUES (NOW(), 'Reposição de estoque emergencial', 0);
+INSERT INTO periodo (data_criacao, anotacao, qtd_pecas, fechado)
+VALUES (NOW(), 'Reposição de estoque emergencial', 0, FALSE);
 
 -- 3. ENDEREÇOS
 INSERT INTO endereco (cep, logradouro, numero, bairro, cidade, uf)

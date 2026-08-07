@@ -23,6 +23,12 @@ public class Periodo {
     @Column (name = "qtd_pecas")
     private Integer qtdPecas;
 
+    @Column(nullable = false)
+    private Boolean fechado = false;
+
+    @Column(name = "data_fechamento")
+    private LocalDateTime dataFechamento;
+
 
     public Integer getId() {
         return id;
@@ -54,6 +60,22 @@ public class Periodo {
 
     public void setQtdPecas(Integer qtdPecas) {
         this.qtdPecas = qtdPecas;
+    }
+
+    public Boolean getFechado() {
+        return fechado;
+    }
+
+    public void setFechado(Boolean fechado) {
+        this.fechado = fechado;
+    }
+
+    public LocalDateTime getDataFechamento() {
+        return dataFechamento;
+    }
+
+    public void setDataFechamento(LocalDateTime dataFechamento) {
+        this.dataFechamento = dataFechamento;
     }
 
 

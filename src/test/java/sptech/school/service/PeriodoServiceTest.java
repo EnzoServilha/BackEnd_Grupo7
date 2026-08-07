@@ -7,23 +7,40 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
+import sptech.school.dto.periodo.FechamentoPeriodoResponseDto;
+import sptech.school.dto.periodo.PeriodoQtdPecasDTO;
 import sptech.school.dto.periodo.PeriodoResponseDto;
-import sptech.school.entity.Periodo;
+import sptech.school.entity.*;
 import sptech.school.exception.EntidadeConflitanteException;
 import sptech.school.mapper.PeriodoMapper;
-import sptech.school.repository.PeriodoRepository;
+import sptech.school.repository.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PeriodoService")
 class PeriodoServiceTest {
     @Mock
     private PeriodoRepository periodoRepository;
+    @Mock
+    private TipoRepository tipoRepository;
+    @Mock
+    private MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+    @Mock
+    private ItensNaMovimentacaoRepository itensNaMovimentacaoRepository;
+    @Mock
+    private ItemRepository itemRepository;
+    @Mock
+    private UsuarioRepository usuarioRepository;
+    @Mock
+    private StatusRepository statusRepository;
 
     @InjectMocks
     private PeriodoService periodoService;
@@ -61,35 +78,79 @@ class PeriodoServiceTest {
     }
 
     @Nested
-    @DisplayName("Fechar estoque")
-    class FecharEstoqueTest {
+    @DisplayName("Fechar período")
+    class FecharPeriodoTest {
         @Test
-        @DisplayName("Deve fechar estoque corretamente")
-        void fecharEstoqueComSucesso() {
-            int qtdPecas = 45;
-            Periodo ultimoPeriodo = new Periodo();
-            ultimoPeriodo.setId(2);
-            ultimoPeriodo.setQtdPecas(0);
+        @DisplayName("Deve fechar, criar novo período e transferir o saldo por item")
+        void fecharPeriodoComSucesso() {
+            Periodo periodoAberto = new Periodo();
+            periodoAberto.setId(2);
+            periodoAberto.setFechado(false);
+            List<PeriodoQtdPecasDTO> saldos = List.of(
+                    new PeriodoQtdPecasDTO(1, 8),
+                    new PeriodoQtdPecasDTO(2, 4)
+            );
+            Usuario usuario = new Usuario();
+            usuario.setId(1L);
+            Tipo ajuste = new Tipo();
+            ajuste.setNome("AJUSTE");
+            Status concluido = new Status();
+            concluido.setNome("CONCLUIDO");
+            Item item1 = new Item();
+            item1.setId(1);
+            Item item2 = new Item();
+            item2.setId(2);
 
-            when(periodoRepository.findFirstByOrderByIdDesc()).thenReturn(ultimoPeriodo);
-            when(periodoRepository.pegarTotalDePecasDoPeriodo(ultimoPeriodo.getId())).thenReturn(qtdPecas);
-            when(periodoRepository.save(Mockito.any(Periodo.class))).thenReturn(ultimoPeriodo);
+            when(periodoRepository.findFirstByFechadoFalseOrderByIdDesc()).thenReturn(Optional.of(periodoAberto));
+            when(periodoRepository.pegarSaldoPorItemDoPeriodo(2)).thenReturn(saldos);
+            when(periodoRepository.save(any(Periodo.class))).thenAnswer(invocation -> {
+                Periodo periodo = invocation.getArgument(0);
+                if (periodo.getId() == null) periodo.setId(3);
+                return periodo;
+            });
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(tipoRepository.findByNome("AJUSTE")).thenReturn(Optional.of(ajuste));
+            when(statusRepository.findByNome("CONCLUIDO")).thenReturn(Optional.of(concluido));
+            when(movimentacaoEstoqueRepository.save(any(MovimentacaoEstoque.class))).thenAnswer(invocation -> {
+                MovimentacaoEstoque movimentacao = invocation.getArgument(0);
+                movimentacao.setId(10);
+                return movimentacao;
+            });
+            when(itemRepository.findById(1)).thenReturn(Optional.of(item1));
+            when(itemRepository.findById(2)).thenReturn(Optional.of(item2));
 
-            Periodo periodo = periodoService.fecharEstoque();
+            FechamentoPeriodoResponseDto response = periodoService.fecharPeriodo(1L, "Novo período");
 
-            assertEquals(qtdPecas, periodo.getQtdPecas());
-            assertEquals(ultimoPeriodo.getId(), periodo.getId());
+            assertTrue(periodoAberto.getFechado());
+            assertNotNull(periodoAberto.getDataFechamento());
+            assertEquals(12, periodoAberto.getQtdPecas());
+            assertEquals(3, response.novoPeriodo().getId());
+            assertFalse(response.novoPeriodo().getFechado());
+            assertEquals(10, response.movimentacaoAjusteId());
+            assertEquals(saldos, response.saldosTransferidos());
+
+            ArgumentCaptor<MovimentacaoEstoque> movimentacaoCaptor = ArgumentCaptor.forClass(MovimentacaoEstoque.class);
+            verify(movimentacaoEstoqueRepository).save(movimentacaoCaptor.capture());
+            assertEquals("AJUSTE", movimentacaoCaptor.getValue().getTipo().getNome());
+            assertEquals("CONCLUIDO", movimentacaoCaptor.getValue().getStatus().getNome());
+            assertEquals(3, movimentacaoCaptor.getValue().getPeriodo().getId());
+
+            @SuppressWarnings("unchecked")
+            ArgumentCaptor<List<ItensNaMovimentacao>> itensCaptor = ArgumentCaptor.forClass(List.class);
+            verify(itensNaMovimentacaoRepository).saveAll(itensCaptor.capture());
+            assertEquals(2, itensCaptor.getValue().size());
+            assertEquals(8, itensCaptor.getValue().get(0).getQtd());
+            assertEquals(4, itensCaptor.getValue().get(1).getQtd());
         }
 
         @Test
-        @DisplayName("Deve lançar exceção quando período for null")
-        void fecharEstoqueNull() {
-            Periodo ultimoPeriodo = null;
+        @DisplayName("Não deve criar movimentação quando não houver período aberto")
+        void fecharPeriodoSemPeriodoAberto() {
+            when(periodoRepository.findFirstByFechadoFalseOrderByIdDesc()).thenReturn(Optional.empty());
 
-            when(periodoRepository.findFirstByOrderByIdDesc()).thenReturn(ultimoPeriodo);
-
-            assertThrows(RuntimeException.class,
-                    () -> periodoService.fecharEstoque());
+            assertThrows(EntidadeConflitanteException.class,
+                    () -> periodoService.fecharPeriodo(1L, "Novo período"));
+            verifyNoInteractions(movimentacaoEstoqueRepository, itensNaMovimentacaoRepository);
         }
     }
 
@@ -110,12 +171,26 @@ class PeriodoServiceTest {
             periodo.setAnotacao(descricao);
             periodo.setDataCriacao(agora);
 
+            when(periodoRepository.findFirstByFechadoFalseOrderByIdDesc()).thenReturn(Optional.empty());
             when(periodoRepository.save(Mockito.any(Periodo.class))).thenReturn(periodo);
 
             Periodo periodoCadastrado = periodoService.cadastrarPeriodo(descricao);
 
             assertEquals(agora, periodoCadastrado.getDataCriacao());
             assertEquals(qtdPecas, periodoCadastrado.getQtdPecas());
+        }
+
+        @Test
+        @DisplayName("Não deve cadastrar quando já existir período aberto")
+        void cadastrarPeriodoComPeriodoAberto() {
+            Periodo periodoAberto = new Periodo();
+            periodoAberto.setFechado(false);
+            when(periodoRepository.findFirstByFechadoFalseOrderByIdDesc())
+                    .thenReturn(Optional.of(periodoAberto));
+
+            assertThrows(EntidadeConflitanteException.class,
+                    () -> periodoService.cadastrarPeriodo("Outro período"));
+            verify(periodoRepository, never()).save(any(Periodo.class));
         }
     }
 }
