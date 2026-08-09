@@ -41,12 +41,12 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
     // Esse "new PeriodoQtdPecasDTO(" serve para indicar o tipo de objeto que ele deve
     // devolver, já que aqui ele n devolve só um campo e nem um objeto de classe padrão
     @Query("""
-    SELECT new PeriodoQtdPecasDTO(itm.item.id, 
+    SELECT new sptech.school.dto.periodo.PeriodoQtdPecasDTO(itm.item.id,
            SUM(CASE 
                 WHEN t.nome = 'ENTRADA' THEN itm.qtd 
                 WHEN t.nome = 'AJUSTE' THEN itm.qtd 
                 WHEN t.nome = 'SAIDA' THEN itm.qtd * -1 
-                ELSE 0 END))
+                ELSE 0 END), itm.item.descricao)
     FROM MovimentacaoEstoque me
     JOIN ItensNaMovimentacao itm ON itm.movimentacaoEstoque.id = me.id
     JOIN me.tipo t

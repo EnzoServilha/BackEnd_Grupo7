@@ -1,5 +1,6 @@
 package sptech.school.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
@@ -33,6 +34,7 @@ public class MovimentacaoEstoqueService {
         this.periodoRepository = periodoRepository;
     }
 
+    @Transactional
     public MovimentacaoEstoqueResponseDto buscarPorId(Integer id){
         MovimentacaoEstoque movimentacao = movimentacaoRepository.findById(id).orElseThrow(() -> new MovimentacaoNaoEncontrada("Movimentação não encontrada"));
 
@@ -40,10 +42,12 @@ public class MovimentacaoEstoqueService {
         return MovimentacaoEstoqueMapper.toResponse(movimentacao);
     }
 
+    @Transactional
     public List<MovimentacaoEstoqueResponseDto> listar(){
         return MovimentacaoEstoqueMapper.toResponseDtoList(movimentacaoRepository.findAll());
     }
 
+    @Transactional
     public List<MovimentacaoEstoqueResponseDto> buscarPorTipo(String tipo){
         List<MovimentacaoEstoque> movimentacao = movimentacaoRepository.buscarPorTipo(tipo);
 
@@ -51,6 +55,7 @@ public class MovimentacaoEstoqueService {
         return MovimentacaoEstoqueMapper.toResponseDtoList(movimentacao);
     }
 
+    @Transactional
     public List<MovimentacaoEstoqueResponseDto> buscarPorStatus(String status){
         List<MovimentacaoEstoque> movimentacao = movimentacaoRepository.buscarPorStatus(status);
 

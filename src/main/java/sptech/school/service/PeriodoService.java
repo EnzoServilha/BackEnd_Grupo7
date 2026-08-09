@@ -75,6 +75,7 @@ public class PeriodoService {
 
     }
 
+    @Transactional
     public List<PeriodoQtdPecasDTO> consultarEstoqueAtual() {
         Periodo periodoAberto = buscarPeriodoAberto();
         return periodoRepository.pegarSaldoPorItemDoPeriodo(periodoAberto.getId());

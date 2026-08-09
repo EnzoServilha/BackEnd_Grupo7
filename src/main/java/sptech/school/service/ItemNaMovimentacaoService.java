@@ -1,11 +1,13 @@
 package sptech.school.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoRequestDto;
 import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoResponseDto;
 import sptech.school.entity.Item;
 import sptech.school.entity.ItensNaMovimentacao;
 import sptech.school.entity.MovimentacaoEstoque;
+import sptech.school.exception.EntidadeConflitanteException;
 import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.exception.ItemNaMovimentacaoNaoEncontrado;
 import sptech.school.mapper.ItensNaMovimentacaoMapper;
@@ -39,14 +41,19 @@ public class ItemNaMovimentacaoService {
         return ItensNaMovimentacaoMapper.toResponseDtoList(itemMovimentacaoRepository.findAllByMovimentacaoEstoqueId(id));
     }
 
+    @Transactional
     public ItensNaMovimentacaoResponseDto criar(ItensNaMovimentacaoRequestDto requestDto){
-
-        ItensNaMovimentacao itensNaMovimentacao =   itemMovimentacaoRepository.save(ItensNaMovimentacaoMapper.toEntity(requestDto));
-
         MovimentacaoEstoque movimentacaoEstoque = movimentacaoEstoqueRepository.findById(requestDto.movimentacaoEstoqueId()).orElseThrow(() -> new EntidadeNaoEncontradaException("Movimentação de estoque não encontrada", requestDto.movimentacaoEstoqueId()));
 
         Item item = itemRepository.findById(requestDto.itemId()).orElseThrow(() -> new EntidadeNaoEncontradaException("Item não encontrado", requestDto.itemId()));
 
+        if (itemMovimentacaoRepository.existsByMovimentacaoEstoqueIdAndItemId(
+            requestDto.movimentacaoEstoqueId(), requestDto.itemId())) {
+            throw new EntidadeConflitanteException(
+                "O item já está cadastrado nessa movimentação");
+        }
+
+        ItensNaMovimentacao itensNaMovimentacao = ItensNaMovimentacaoMapper.toEntity(requestDto);
         itensNaMovimentacao.setItem(item);
         itensNaMovimentacao.setMovimentacaoEstoque(movimentacaoEstoque);
 

@@ -9,7 +9,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-//import sptech.school.dto.*;
 import sptech.school.dto.usuario.*;
 import sptech.school.entity.Usuario;
 import sptech.school.mapper.UsuarioMapper;
@@ -22,7 +21,6 @@ import java.util.List;
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
-    // Nome do cookie — definido em um só lugar para evitar typos
     public static final String COOKIE_NOME = "authToken";
 
     @Value("${jwt.validity}")

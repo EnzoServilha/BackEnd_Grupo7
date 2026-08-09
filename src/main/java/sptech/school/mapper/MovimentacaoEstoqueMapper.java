@@ -76,7 +76,9 @@ public class MovimentacaoEstoqueMapper {
 
         Double calculo = 0.0;
         for(ItensNaMovimentacao t : itens){
-            calculo += t.getPrecoUnitario() * t.getQtd();
+            double precoUnitario = t.getPrecoUnitario() != null ? t.getPrecoUnitario() : 0.0;
+            int quantidade = t.getQtd() != null ? t.getQtd() : 0;
+            calculo += precoUnitario * quantidade;
         }
         return calculo;
     }
