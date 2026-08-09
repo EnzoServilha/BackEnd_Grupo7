@@ -59,5 +59,4 @@ VALUES
 (3, 1, 10, 150.00);
 
 -- 7. FECHAMENTO
-INSERT INTO fechamento_mes (mes, ano, qtd, fk_item) VALUES (1, 2026, 50, 1);
 -- >>>>>>> main

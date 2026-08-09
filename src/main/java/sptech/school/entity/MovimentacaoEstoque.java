@@ -3,6 +3,7 @@ package sptech.school.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -17,11 +18,11 @@ public class MovimentacaoEstoque {
     @JoinColumn(name = "fk_usuario", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "total_gasto_impostos", precision = 10)
-    private Double totalGastoImpostos;
+    @Column(name = "total_gasto_impostos", precision = 10, scale = 2)
+    private BigDecimal totalGastoImpostos;
 
-    @Column(name = "preco_frete", precision = 10)
-    private Double precoFrete;
+    @Column(name = "preco_frete", precision = 10, scale = 2)
+    private BigDecimal precoFrete;
 
     @Column(name = "data_movimentacao")
     private LocalDateTime dataMovimentacao;
@@ -75,11 +76,11 @@ public class MovimentacaoEstoque {
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
-    public Double getTotalGastoImpostos() { return totalGastoImpostos; }
-    public void setTotalGastoImpostos(Double totalGastoImpostos) { this.totalGastoImpostos = totalGastoImpostos; }
+    public BigDecimal getTotalGastoImpostos() { return totalGastoImpostos; }
+    public void setTotalGastoImpostos(BigDecimal totalGastoImpostos) { this.totalGastoImpostos = totalGastoImpostos; }
 
-    public Double getPrecoFrete() { return precoFrete; }
-    public void setPrecoFrete(Double precoFrete) { this.precoFrete = precoFrete; }
+    public BigDecimal getPrecoFrete() { return precoFrete; }
+    public void setPrecoFrete(BigDecimal precoFrete) { this.precoFrete = precoFrete; }
 
     public LocalDateTime getDataMovimentacao() { return dataMovimentacao; }
     public void setDataMovimentacao(LocalDateTime dataMovimentacao) { this.dataMovimentacao = dataMovimentacao; }

@@ -1,6 +1,7 @@
 package sptech.school.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 
 @Entity
 @Table(
@@ -24,8 +25,8 @@ public class ItensNaMovimentacao {
     @Column
     private Integer qtd;
 
-    @Column(name = "preco_unitario", precision = 10)
-    private Double precoUnitario;
+    @Column(name = "preco_unitario", precision = 10, scale = 2)
+    private BigDecimal precoUnitario;
 
     public ItensNaMovimentacao() {}
 
@@ -41,11 +42,11 @@ public class ItensNaMovimentacao {
     public Integer getQtd() { return qtd; }
     public void setQtd(Integer qtd) { this.qtd = qtd; }
 
-    public Double getPrecoUnitario() {
+    public BigDecimal getPrecoUnitario() {
         return precoUnitario;
     }
 
-    public void setPrecoUnitario(Double precoUnitario) {
+    public void setPrecoUnitario(BigDecimal precoUnitario) {
         this.precoUnitario = precoUnitario;
     }
 }

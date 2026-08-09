@@ -4,6 +4,7 @@ import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
 import sptech.school.entity.*;
 
+import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -51,34 +52,34 @@ public class MovimentacaoEstoqueMapper {
         return movimentacao;
     }
 
-    public static Double valorTotal(Double valorProdutos, MovimentacaoEstoque e){
+    public static BigDecimal valorTotal(BigDecimal valorProdutos, MovimentacaoEstoque e){
 
-        Double frete = e.getPrecoFrete();
+        BigDecimal frete = e.getPrecoFrete();
 
         if(e.getPrecoFrete() == null){
-            frete = 0.0;
+            frete = BigDecimal.ZERO;
         }
 
-        Double impostos = e.getTotalGastoImpostos();
+        BigDecimal impostos = e.getTotalGastoImpostos();
 
         if(e.getTotalGastoImpostos() == null){
-            impostos = 0.0;
+            impostos = BigDecimal.ZERO;
         }
 
-        return frete + impostos + valorProdutos;
+        return frete.add(impostos).add(valorProdutos);
 
     }
 
-    public static Double valorProdutos(List<ItensNaMovimentacao> itens){
+    public static BigDecimal valorProdutos(List<ItensNaMovimentacao> itens){
         if(itens == null || itens.isEmpty()){
-            return 0.0;
+            return BigDecimal.ZERO;
         }
 
-        Double calculo = 0.0;
+        BigDecimal calculo = BigDecimal.ZERO;
         for(ItensNaMovimentacao t : itens){
-            double precoUnitario = t.getPrecoUnitario() != null ? t.getPrecoUnitario() : 0.0;
+            BigDecimal precoUnitario = t.getPrecoUnitario() != null ? t.getPrecoUnitario() : BigDecimal.ZERO;
             int quantidade = t.getQtd() != null ? t.getQtd() : 0;
-            calculo += precoUnitario * quantidade;
+            calculo = calculo.add(precoUnitario.multiply(BigDecimal.valueOf(quantidade)));
         }
         return calculo;
     }
@@ -114,7 +115,7 @@ public class MovimentacaoEstoqueMapper {
     public static MovimentacaoEstoqueResponseDto toResponse(MovimentacaoEstoque entity){
 
 
-        Double valorP = valorProdutos(entity.getItens());
+        BigDecimal valorP = valorProdutos(entity.getItens());
 
         MovimentacaoEstoqueResponseDto response = new MovimentacaoEstoqueResponseDto(
                 entity.getId(),
