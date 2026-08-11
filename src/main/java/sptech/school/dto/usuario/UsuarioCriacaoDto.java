@@ -2,12 +2,14 @@ package sptech.school.dto.usuario;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class UsuarioCriacaoDto {
 
-  @Size(min = 3, max = 10)
+  @NotBlank
+  @Size(min = 3, max = 100)
   @Schema(description = "Nome do usuário", example = "John Doe")
   private String nome;
 

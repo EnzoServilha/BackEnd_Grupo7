@@ -12,7 +12,7 @@ public class CodigoAssociado {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "codigo", nullable = false)
+    @Column(name = "codigo", nullable = false, length = 255)
     private String codigo;
 
     @ManyToOne

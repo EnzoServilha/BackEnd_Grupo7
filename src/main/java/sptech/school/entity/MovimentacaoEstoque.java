@@ -64,7 +64,7 @@ public class MovimentacaoEstoque {
 
     // --- NOVO CAMPO ASSOCIAÇÃO ---
     @ManyToOne
-    @JoinColumn(name = "periodo_id")
+    @JoinColumn(name = "periodo_id", nullable = false)
     private Periodo periodo;
 
     public MovimentacaoEstoque() {}

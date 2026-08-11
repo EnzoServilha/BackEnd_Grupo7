@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 
 public record CodigoAssociadoRequestDto(
         @NotBlank
-        @Size(max = 100)
+        @Size(max = 255)
         String codigo,
 
         Integer fornecedorId,
