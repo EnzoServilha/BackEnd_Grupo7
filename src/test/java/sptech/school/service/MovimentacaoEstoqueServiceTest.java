@@ -48,11 +48,11 @@ class MovimentacaoEstoqueServiceTest {
         @Test
         @DisplayName("Deve lançar MovimentacaoNaoEncontrada ao tentar deletar id inexistente")
         void testandoLancarExcecaoComIdInexistenteAoDeletar() {
-            when(movimentacaoRepository.existsById(99)).thenReturn(false);
+            when(movimentacaoRepository.findById(99)).thenReturn(Optional.empty());
 
             assertThrows(MovimentacaoNaoEncontrada.class, () -> service.deletar(99));
 
-            verify(movimentacaoRepository).existsById(99);
+            verify(movimentacaoRepository).findById(99);
         }
     }
 }

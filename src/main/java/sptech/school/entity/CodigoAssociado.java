@@ -6,7 +6,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "codigo_associado")
-public class CodigoAssociado {
+public class CodigoAssociado extends EntidadeAtivavel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

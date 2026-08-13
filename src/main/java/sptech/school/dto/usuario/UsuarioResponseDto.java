@@ -9,7 +9,9 @@ public record UsuarioResponseDto(
         String nome,
         String email,
         LocalDateTime dataCadastro,
-        PermissaoResponseDto permissao
+        PermissaoResponseDto permissao,
+        Boolean ativo,
+        Long desativadoPorId
 ) {
 }
 

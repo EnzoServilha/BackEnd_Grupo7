@@ -1,7 +1,6 @@
 package sptech.school.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Null;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.status.StatusRequestDto;
@@ -21,12 +20,6 @@ public class StatusController {
     @PostMapping
     public ResponseEntity<StatusResponseDto> criar(@RequestBody @Valid StatusRequestDto requestDto) {
         return ResponseEntity.status(201).body(service.criar(requestDto));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Null> deletar(@PathVariable Integer id) {
-        service.deletar(id);
-        return ResponseEntity.status(204).build();
     }
 }
 

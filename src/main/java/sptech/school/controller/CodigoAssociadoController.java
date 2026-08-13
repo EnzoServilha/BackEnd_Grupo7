@@ -2,12 +2,15 @@ package sptech.school.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.codigoAssociado.CodigoAssociadoRequestDto;
 import sptech.school.dto.codigoAssociado.CodigoAssociadoResponseDto;
 import sptech.school.entity.CodigoAssociado;
 import sptech.school.mapper.CodigoAssociadoMapper;
 import sptech.school.service.CodigoAssociadoService;
+import sptech.school.service.UsuarioService;
 
 import java.util.List;
 
@@ -16,9 +19,11 @@ import java.util.List;
 public class CodigoAssociadoController {
 
     private final CodigoAssociadoService codigoAssociadoService;
+    private final UsuarioService usuarioService;
 
-    public CodigoAssociadoController(CodigoAssociadoService codigoAssociadoService) {
+    public CodigoAssociadoController(CodigoAssociadoService codigoAssociadoService, UsuarioService usuarioService) {
         this.codigoAssociadoService = codigoAssociadoService;
+        this.usuarioService = usuarioService;
     }
 
     @GetMapping
@@ -26,6 +31,14 @@ public class CodigoAssociadoController {
         List<CodigoAssociado> codigos = codigoAssociadoService.listarTodos();
         if (codigos.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(CodigoAssociadoMapper.toResponseDtoList(codigos));
+    }
+
+    @GetMapping("/administracao")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<CodigoAssociadoResponseDto>> listarAdministrativo(
+            @RequestParam(defaultValue = "todos") String ativo) {
+        return ResponseEntity.ok(CodigoAssociadoMapper.toResponseDtoList(
+                codigoAssociadoService.listarAdministrativo(ativo)));
     }
 
     @GetMapping("/{id}")
@@ -53,8 +66,21 @@ public class CodigoAssociadoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
-        codigoAssociadoService.deletar(id);
+    public ResponseEntity<Void> deletar(@PathVariable Integer id, Authentication authentication) {
+        codigoAssociadoService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/desativacao")
+    public ResponseEntity<Void> desativar(@PathVariable Integer id, Authentication authentication) {
+        codigoAssociadoService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/reativacao")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> reativar(@PathVariable Integer id) {
+        codigoAssociadoService.reativar(id);
         return ResponseEntity.noContent().build();
     }
 }

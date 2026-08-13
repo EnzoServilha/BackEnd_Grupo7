@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import sptech.school.config.GerenciadorTokenJwt;
 
@@ -14,6 +15,7 @@ import sptech.school.dto.usuario.*;
 
 import sptech.school.entity.Permissao;
 import sptech.school.exception.PermissaoNaoEncontradaException;
+import sptech.school.exception.EntidadeConflitanteException;
 import sptech.school.exception.SenhaInvalidaException;
 import sptech.school.exception.UsuarioNaoEncontradoException;
 import sptech.school.mapper.UsuarioMapper;
@@ -60,7 +62,7 @@ public class UsuarioService {
     final Authentication authentication = this.authenticationManager.authenticate(credentials);
 
     Usuario usuarioAutenticado =
-            usuarioRepository.findByEmail(usuario.getEmail())
+          usuarioRepository.findByEmailAndAtivoTrue(usuario.getEmail())
                     .orElseThrow(
                             () -> new ResponseStatusException(404, "Email do usuário não cadastrado", null)
                     );
@@ -74,19 +76,36 @@ public class UsuarioService {
 
   public List<UsuarioResponseDto> listarTodos() {
 
-    List<Usuario> usuariosEncontrados = usuarioRepository.findAll();
+        List<Usuario> usuariosEncontrados = usuarioRepository.findAll().stream()
+          .filter(usuario -> Boolean.TRUE.equals(usuario.getAtivo())).toList();
     return UsuarioMapper.toResponseDtoList(usuariosEncontrados);
 
   }
 
+  public List<UsuarioResponseDto> listarAdministrativo(String ativo) {
+    return UsuarioMapper.toResponseDtoList(FiltroAtivacao.filtrar(usuarioRepository.findAll(), ativo));
+  }
+
   public UsuarioResponseDto buscarPorId(Long id) {
-    Usuario usuario = usuarioRepository.findById(id)
+        Usuario usuario = usuarioRepository.findById(id)
+          .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
             .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
     return UsuarioMapper.toResponseDto(usuario);
   }
 
+  public Usuario buscarPorIdIncluindoInativo(Long id) {
+    return usuarioRepository.findById(id)
+            .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
+  }
+
+  public Usuario buscarAtivoPorEmail(String email) {
+    return usuarioRepository.findByEmailAndAtivoTrue(email)
+            .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
+  }
+
   public void atualizar(Long id, UsuarioCriacaoDto dto) {
-    Usuario usuario = usuarioRepository.findById(id)
+        Usuario usuario = usuarioRepository.findById(id)
+          .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
             .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
     usuario.setNome(dto.getNome());
     usuario.setEmail(dto.getEmail());
@@ -94,15 +113,36 @@ public class UsuarioService {
     usuarioRepository.save(usuario);
   }
 
-  public void deletar(Long id) {
-    if (!usuarioRepository.existsById(id)) {
-      throw new UsuarioNaoEncontradoException("Usuário não encontrado");
+  @Transactional
+  public void desativar(Long id, Usuario usuarioExecutor) {
+    Usuario usuario = buscarPorIdIncluindoInativo(id);
+    if (usuarioExecutor != null && id.equals(usuarioExecutor.getId())) {
+      throw new EntidadeConflitanteException("Um administrador não pode desativar a própria conta");
     }
-    usuarioRepository.deleteById(id);
+    if (Boolean.TRUE.equals(usuario.getAtivo())
+            && usuario.getPermissao() != null
+            && "ROLE_ADMIN".equals(usuario.getPermissao().getNome())
+            && usuarioRepository.countByPermissaoNomeAndAtivoTrue("ROLE_ADMIN") <= 1) {
+      throw new EntidadeConflitanteException("O último administrador ativo não pode ser desativado");
+    }
+    usuario.desativar(usuarioExecutor);
+    usuarioRepository.save(usuario);
+  }
+
+  public void deletar(Long id) {
+    desativar(id, null);
+  }
+
+  @Transactional
+  public void reativar(Long id) {
+    Usuario usuario = buscarPorIdIncluindoInativo(id);
+    usuario.reativar();
+    usuarioRepository.save(usuario);
   }
 
   public void atualizarPermissao(Long id, Integer permissaoId) {
-    Usuario usuario = usuarioRepository.findById(id)
+        Usuario usuario = usuarioRepository.findById(id)
+          .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
             .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
 
     Permissao permissao = permissaoRepository.findById(permissaoId)
@@ -114,7 +154,8 @@ public class UsuarioService {
   }
 
   public void alterarSenha(Long id, UsuarioSenhaDto dto) {
-    Usuario usuario = usuarioRepository.findById(id)
+        Usuario usuario = usuarioRepository.findById(id)
+          .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
             .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
 
     if (!passwordEncoder.matches(dto.getSenhaAtual(), usuario.getSenha())) {
@@ -127,7 +168,7 @@ public class UsuarioService {
 
   public UsuarioResponseDto buscarUsuarioLogado() {
     String email = SecurityContextHolder.getContext().getAuthentication().getName();
-    Usuario usuario = usuarioRepository.findByEmail(email)
+    Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(email)
             .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
     return UsuarioMapper.toResponseDto(usuario);
   }

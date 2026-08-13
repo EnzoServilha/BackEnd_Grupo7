@@ -3,19 +3,33 @@ package sptech.school.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Null;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.categoria.CategoriaRequestDto;
 import sptech.school.dto.categoria.CategoriaResponseDto;
 import sptech.school.service.CategoriaService;
+import sptech.school.service.UsuarioService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/categorias")
 public class CategoriaController {
 
     private CategoriaService service;
+    private final UsuarioService usuarioService;
 
-    public CategoriaController(CategoriaService service) {
+    public CategoriaController(CategoriaService service, UsuarioService usuarioService) {
         this.service = service;
+        this.usuarioService = usuarioService;
+    }
+
+    @GetMapping("/administracao")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<CategoriaResponseDto>> listarAdministrativo(
+            @RequestParam(defaultValue = "todos") String ativo) {
+        return ResponseEntity.ok(service.listarAdministrativo(ativo));
     }
 
     @GetMapping("/{nome}")
@@ -35,10 +49,22 @@ public class CategoriaController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Null> deletar(@PathVariable Integer id){
-
-        service.deletar(id);
+    public ResponseEntity<Null> deletar(@PathVariable Integer id, Authentication authentication){
+        service.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
 
         return ResponseEntity.status(204).build();
+    }
+
+    @PatchMapping("/{id}/desativacao")
+    public ResponseEntity<Void> desativar(@PathVariable Integer id, Authentication authentication) {
+        service.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/reativacao")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> reativar(@PathVariable Integer id) {
+        service.reativar(id);
+        return ResponseEntity.noContent().build();
     }
 }

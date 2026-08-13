@@ -1,6 +1,7 @@
 package sptech.school.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sptech.school.entity.CodigoAssociado;
 import sptech.school.entity.Item;
 import sptech.school.exception.EntidadeNaoEncontradaException;
@@ -23,21 +24,28 @@ public class ItemService {
     }
 
     public List<Item> listarTodos() {
-        return itemRepository.findAll();
+        return itemRepository.findAll().stream().filter(item -> Boolean.TRUE.equals(item.getAtivo())).toList();
+    }
+
+    public List<Item> listarAdministrativo(String ativo) {
+        return FiltroAtivacao.filtrar(itemRepository.findAll(), ativo);
     }
 
     public Item buscarPorId(Integer id) {
         return itemRepository.findById(id)
+            .filter(item -> Boolean.TRUE.equals(item.getAtivo()))
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", id));
     }
 
     public Item buscarPorCodigoInterno(String codigoInterno) {
         return itemRepository.findByCodigoInterno(codigoInterno)
+            .filter(item -> Boolean.TRUE.equals(item.getAtivo()))
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", codigoInterno));
     }
 
     public List<Item> listarPorMarca(String marca) {
-        return itemRepository.findByMarcaContainingIgnoreCase(marca);
+        return itemRepository.findByMarcaContainingIgnoreCase(marca).stream()
+            .filter(item -> Boolean.TRUE.equals(item.getAtivo())).toList();
     }
 
     public List<Item> pesquisar(String termo) {
@@ -52,12 +60,20 @@ public class ItemService {
         item.setDataCadastro(LocalDateTime.now());
 
         if (codigosAssociadosIds != null && !codigosAssociadosIds.isEmpty()) {
-            List<CodigoAssociado> codigos = codigoAssociadoRepository.findAllById(codigosAssociadosIds);
+                List<CodigoAssociado> codigos = codigoAssociadoRepository.findAllById(codigosAssociadosIds).stream()
+                    .filter(codigo -> Boolean.TRUE.equals(codigo.getAtivo())).toList();
+            if (codigos.size() != codigosAssociadosIds.size()) {
+                throw new EntidadeNaoEncontradaException("Código Associado ativo", codigosAssociadosIds);
+            }
             item.setCodigosAssociados(codigos);
         }
 
         if (itensSimilaresIds != null && !itensSimilaresIds.isEmpty()) {
-            List<Item> similares = itemRepository.findAllById(itensSimilaresIds);
+                List<Item> similares = itemRepository.findAllById(itensSimilaresIds).stream()
+                    .filter(similar -> Boolean.TRUE.equals(similar.getAtivo())).toList();
+            if (similares.size() != itensSimilaresIds.size()) {
+                throw new EntidadeNaoEncontradaException("Item similar ativo", itensSimilaresIds);
+            }
             item.setItensSimilares(similares);
         }
 
@@ -74,17 +90,32 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
+    @Transactional
+    public void desativar(Integer id, sptech.school.entity.Usuario usuarioExecutor) {
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", id));
+        item.desativar(usuarioExecutor);
+        itemRepository.save(item);
+    }
+
     public void deletar(Integer id) {
-        if (!itemRepository.existsById(id)) {
-            throw new EntidadeNaoEncontradaException("Item", id);
-        }
-        itemRepository.deleteById(id);
+        desativar(id, null);
+    }
+
+    @Transactional
+    public void reativar(Integer id) {
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", id));
+        item.reativar();
+        itemRepository.save(item);
     }
 
     public Item adicionarCodigoAssociado(Integer itemId, Integer codigoAssociadoId) {
         Item item = itemRepository.findById(itemId)
+            .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", itemId));
         CodigoAssociado codigo = codigoAssociadoRepository.findById(codigoAssociadoId)
+            .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Código Associado", codigoAssociadoId));
         if (item.getCodigosAssociados() == null) {
             item.setCodigosAssociados(new ArrayList<>());

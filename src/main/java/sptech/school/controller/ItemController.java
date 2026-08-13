@@ -2,12 +2,15 @@ package sptech.school.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.item.ItemRequestDto;
 import sptech.school.dto.item.ItemResponseDto;
 import sptech.school.entity.Item;
 import sptech.school.mapper.ItemMapper;
 import sptech.school.service.ItemService;
+import sptech.school.service.UsuarioService;
 
 import java.util.List;
 
@@ -16,9 +19,11 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemService;
+    private final UsuarioService usuarioService;
 
-    public ItemController(ItemService itemService) {
+    public ItemController(ItemService itemService, UsuarioService usuarioService) {
         this.itemService = itemService;
+        this.usuarioService = usuarioService;
     }
 
     @GetMapping
@@ -26,6 +31,13 @@ public class ItemController {
         List<Item> itens = itemService.listarTodos();
         if (itens.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(ItemMapper.toResponseDtoList(itens));
+    }
+
+    @GetMapping("/administracao")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<ItemResponseDto>> listarAdministrativo(
+            @RequestParam(defaultValue = "todos") String ativo) {
+        return ResponseEntity.ok(ItemMapper.toResponseDtoList(itemService.listarAdministrativo(ativo)));
     }
 
     @GetMapping("/{id}")
@@ -78,8 +90,21 @@ public class ItemController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
-        itemService.deletar(id);
+    public ResponseEntity<Void> deletar(@PathVariable Integer id, Authentication authentication) {
+        itemService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/desativacao")
+    public ResponseEntity<Void> desativar(@PathVariable Integer id, Authentication authentication) {
+        itemService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/reativacao")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> reativar(@PathVariable Integer id) {
+        itemService.reativar(id);
         return ResponseEntity.noContent().build();
     }
 

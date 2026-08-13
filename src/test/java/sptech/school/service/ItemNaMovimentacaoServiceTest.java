@@ -10,6 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import sptech.school.exception.ItemNaMovimentacaoNaoEncontrado;
 import sptech.school.repository.ItensNaMovimentacaoRepository;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,11 +33,11 @@ class ItemNaMovimentacaoServiceTest {
         @Test
         @DisplayName("Deve lançar ItemNaMovimentacaoNaoEncontrado ao tentar deletar id inexistente")
         void testandoLancarExcecaoComIdInexistenteAoDeletar() {
-            when(itemMovimentacaoRepository.existsById(99)).thenReturn(false);
+            when(itemMovimentacaoRepository.findById(99)).thenReturn(Optional.empty());
 
             assertThrows(ItemNaMovimentacaoNaoEncontrado.class, () -> service.deletar(99));
 
-            verify(itemMovimentacaoRepository).existsById(99);
+            verify(itemMovimentacaoRepository).findById(99);
         }
     }
 }

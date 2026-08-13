@@ -53,8 +53,14 @@ public class MovimentacaoEstoqueController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Null> deletar(@PathVariable Integer id){
 
-        service.deletar(id);
+        service.cancelar(id);
 
-        return ResponseEntity.status(200).build();
+        return ResponseEntity.status(204).build();
+    }
+
+    @PatchMapping("/{id}/cancelamento")
+    public ResponseEntity<Void> cancelar(@PathVariable Integer id) {
+        service.cancelar(id);
+        return ResponseEntity.noContent().build();
     }
 }

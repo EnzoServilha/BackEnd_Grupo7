@@ -44,11 +44,4 @@ public class PermissaoController {
     public ResponseEntity<PermissaoResponseDto> atualizar(@PathVariable Integer id, @RequestBody @Valid PermissaoRequestDto dto) {
         return ResponseEntity.ok(permissaoService.atualizar(id, dto));
     }
-
-    @DeleteMapping("/{id}")
-    @SecurityRequirement(name = "Bearer")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
-        permissaoService.deletar(id);
-        return ResponseEntity.noContent().build();
-    }
 }

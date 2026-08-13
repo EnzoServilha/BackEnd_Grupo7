@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.usuario.*;
 import sptech.school.entity.Usuario;
@@ -118,6 +120,14 @@ public class UsuarioController {
         return ResponseEntity.ok(usuariosEncontrados);
     }
 
+    @GetMapping("/administracao")
+    @SecurityRequirement(name = "Bearer")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UsuarioResponseDto>> listarAdministrativo(
+            @RequestParam(defaultValue = "todos") String ativo) {
+        return ResponseEntity.ok(usuarioService.listarAdministrativo(ativo));
+    }
+
 
     @GetMapping("/{id}")
     @SecurityRequirement(name = "Bearer")
@@ -134,8 +144,25 @@ public class UsuarioController {
 
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "Bearer")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        usuarioService.deletar(id);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deletar(@PathVariable Long id, Authentication authentication) {
+        usuarioService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/desativacao")
+    @SecurityRequirement(name = "Bearer")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> desativar(@PathVariable Long id, Authentication authentication) {
+        usuarioService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/reativacao")
+    @SecurityRequirement(name = "Bearer")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> reativar(@PathVariable Long id) {
+        usuarioService.reativar(id);
         return ResponseEntity.noContent().build();
     }
 

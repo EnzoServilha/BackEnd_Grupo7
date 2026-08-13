@@ -36,7 +36,9 @@ public class FornecedorMapper {
                 fornecedor.getDataCadastro(),
                 fornecedor.getCategoria() != null ? CategoriaMapper.toResponseDtoList(fornecedor.getCategoria()) : null,
                 fornecedor.getMarcas() != null ? MarcaMapper.toResponseDtoList(fornecedor.getMarcas()) : null,
-                fornecedor.getEndereco() != null ? EnderecoMapper.toResponseDto(fornecedor.getEndereco()) : null
+                fornecedor.getEndereco() != null ? EnderecoMapper.toResponseDto(fornecedor.getEndereco()) : null,
+                fornecedor.getAtivo(),
+                fornecedor.getDesativadoPor() != null ? fornecedor.getDesativadoPor().getId() : null
         );
     }
 

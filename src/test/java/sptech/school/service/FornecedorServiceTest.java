@@ -584,29 +584,31 @@ class FornecedorServiceTest {
 
 
     @Nested
-    @DisplayName("deletar()")
+    @DisplayName("desativar()")
     class DeletarTest {
 
         @Test
-        @DisplayName("Deve deletar fornecedor com sucesso")
+        @DisplayName("Deve desativar fornecedor sem exclusão física")
         void deletarComSucesso() {
-            when(repository.existsById(1)).thenReturn(true);
+            Fornecedor fornecedor = criarFornecedor(1, "Empresa A", "João");
+            when(repository.findById(1)).thenReturn(Optional.of(fornecedor));
 
             fornecedorService.deletar(1);
 
-            Mockito.verify(repository).existsById(1);
-            Mockito.verify(repository).deleteById(1);
+            assertFalse(fornecedor.getAtivo());
+            Mockito.verify(repository).save(fornecedor);
+            Mockito.verify(repository, never()).deleteById(Mockito.any());
         }
 
         @Test
         @DisplayName("Deve lançar EntidadeNaoEncontradaException quando fornecedor não existir")
         void deletarNaoEncontrado() {
-            when(repository.existsById(99)).thenReturn(false);
+            when(repository.findById(99)).thenReturn(Optional.empty());
 
             assertThrows(EntidadeNaoEncontradaException.class, () ->
                     fornecedorService.deletar(99));
 
-            Mockito.verify(repository).existsById(99);
+            Mockito.verify(repository).findById(99);
             Mockito.verify(repository, never()).deleteById(Mockito.any());
         }
     }

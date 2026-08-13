@@ -7,6 +7,7 @@ import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
 import sptech.school.entity.MovimentacaoEstoque;
 import sptech.school.entity.Usuario;
 import sptech.school.exception.EntidadeNaoEncontradaException;
+import sptech.school.exception.EntidadeConflitanteException;
 import sptech.school.exception.MovimentacaoNaoEncontrada;
 import sptech.school.mapper.MovimentacaoEstoqueMapper;
 import sptech.school.repository.*;
@@ -74,8 +75,9 @@ public class MovimentacaoEstoqueService {
     }
 
     public MovimentacaoEstoqueResponseDto editar(MovimentacaoEstoqueRequestDto request, Integer id){
-
-         existe(id);
+         MovimentacaoEstoque existente = movimentacaoRepository.findById(id)
+             .orElseThrow(() -> new MovimentacaoNaoEncontrada("Movimentação não encontrada para edição"));
+         validarPendente(existente);
 
 
          MovimentacaoEstoque movimentacao = MovimentacaoEstoqueMapper.toEntity(request);
@@ -87,10 +89,21 @@ public class MovimentacaoEstoqueService {
          return MovimentacaoEstoqueMapper.toResponse(movimentacaoRepository.save(movimentacao));
     }
 
-    public void deletar(Integer id){
-        existe(id);
+    @Transactional
+    public void cancelar(Integer id){
+        MovimentacaoEstoque movimentacao = movimentacaoRepository.findById(id)
+                .orElseThrow(() -> new MovimentacaoNaoEncontrada("Movimentação não encontrada"));
+        if (movimentacao.getStatus() != null && "CANCELADO".equals(movimentacao.getStatus().getNome())) {
+            return;
+        }
+        validarPendente(movimentacao);
+        movimentacao.setStatus(statusRepository.findByNome("CANCELADO")
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Status CANCELADO não encontrado", "CANCELADO")));
+        movimentacaoRepository.save(movimentacao);
+    }
 
-        movimentacaoRepository.deleteById(id);
+    public void deletar(Integer id){
+        cancelar(id);
     }
 
     public void existe(Integer id){
@@ -104,7 +117,8 @@ public class MovimentacaoEstoqueService {
     public void preencher(MovimentacaoEstoque entidade, MovimentacaoEstoqueRequestDto requestDto){
         if (requestDto.usuarioId() != null) {
             Usuario usuario = usuarioRepository.findById(requestDto.usuarioId())
-                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Endereço não encontrado", requestDto.usuarioId()));
+                    .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Usuário ativo não encontrado", requestDto.usuarioId()));
 
 
             entidade.setUsuario(usuario);
@@ -122,12 +136,14 @@ public class MovimentacaoEstoqueService {
 
         if(requestDto.clienteId() != null){
             entidade.setCliente(clienteRepository.findById(requestDto.clienteId())
-                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente não encontrado", requestDto.clienteId())));
+                    .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente ativo não encontrado", requestDto.clienteId())));
         }
 
         if(requestDto.fornecedorId() != null){
             entidade.setFornecedor(fornecedorRepository.findById(requestDto.fornecedorId())
-                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor não encontrado", requestDto.fornecedorId())));
+                    .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor ativo não encontrado", requestDto.fornecedorId())));
         }
 
         if (requestDto.movimentacaoOriginalId() != null) {
@@ -138,5 +154,11 @@ public class MovimentacaoEstoqueService {
             entidade.setPeriodo(periodoRepository.findById(requestDto.periodoId())
                     .orElseThrow(() -> new EntidadeNaoEncontradaException("Período não encontrado", requestDto.periodoId())));
 
+    }
+
+    private void validarPendente(MovimentacaoEstoque movimentacao) {
+        if (movimentacao.getStatus() == null || !"PENDENTE".equals(movimentacao.getStatus().getNome())) {
+            throw new EntidadeConflitanteException("Somente movimentações pendentes podem ser alteradas ou canceladas");
+        }
     }
 }

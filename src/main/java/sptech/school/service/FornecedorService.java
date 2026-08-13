@@ -1,6 +1,7 @@
 package sptech.school.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sptech.school.dto.fornecedor.FornecedorRequestDto;
 import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.entity.Categoria;
@@ -32,19 +33,28 @@ public class FornecedorService {
     }
 
     public List<FornecedorResponseDto> listar() {
-        return FornecedorMapper.toResponseDtoList(repository.findAll());
+        return FornecedorMapper.toResponseDtoList(repository.findAll().stream()
+            .filter(fornecedor -> Boolean.TRUE.equals(fornecedor.getAtivo())).toList());
+    }
+
+    public List<FornecedorResponseDto> listarAdministrativo(String ativo) {
+        return FornecedorMapper.toResponseDtoList(FiltroAtivacao.filtrar(repository.findAll(), ativo));
     }
 
     public FornecedorResponseDto buscarPorId(Integer id) {
-        return FornecedorMapper.toResponseDto(repository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor não encontrado", id)));
+        return FornecedorMapper.toResponseDto(repository.findById(id)
+            .filter(fornecedor -> Boolean.TRUE.equals(fornecedor.getAtivo()))
+            .orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor não encontrado", id)));
     }
 
     public List<FornecedorResponseDto> buscarPorNomeContato(String nomeContato) {
-        return FornecedorMapper.toResponseDtoList(repository.findByNomeContatoContaining(nomeContato)) ;
+        return FornecedorMapper.toResponseDtoList(repository.findByNomeContatoContaining(nomeContato).stream()
+            .filter(fornecedor -> Boolean.TRUE.equals(fornecedor.getAtivo())).toList()) ;
     }
 
     public List<FornecedorResponseDto> buscarPorNomeEmpresa(String nomeEmpresa) {
-        return FornecedorMapper.toResponseDtoList(repository.findByNomeEmpresaContaining(nomeEmpresa)) ;
+        return FornecedorMapper.toResponseDtoList(repository.findByNomeEmpresaContaining(nomeEmpresa).stream()
+            .filter(fornecedor -> Boolean.TRUE.equals(fornecedor.getAtivo())).toList()) ;
     }
 
     public List<FornecedorResponseDto> listarPorCategoria(Integer idCategoria) {
@@ -71,6 +81,11 @@ public class FornecedorService {
 
     public FornecedorResponseDto atualizar(FornecedorRequestDto fornecedor, Integer id) {
         if (!repository.existsById(id)) throw new EntidadeNaoEncontradaException("Fornecedor não encontrado", id);
+        repository.findById(id).ifPresent(encontrado -> {
+            if (!Boolean.TRUE.equals(encontrado.getAtivo())) {
+                throw new EntidadeNaoEncontradaException("Fornecedor não encontrado", id);
+            }
+        });
 
         Fornecedor fornecedorEntity = FornecedorMapper.toEntity(fornecedor);
 
@@ -81,16 +96,32 @@ public class FornecedorService {
         return FornecedorMapper.toResponseDto(repository.save(fornecedorEntity));
     }
 
+    @Transactional
+    public void desativar(Integer id, sptech.school.entity.Usuario usuarioExecutor) {
+        Fornecedor fornecedor = repository.findById(id)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor não encontrado", id));
+        fornecedor.desativar(usuarioExecutor);
+        repository.save(fornecedor);
+    }
+
     public void deletar(Integer id) {
-        if (!repository.existsById(id)) throw new EntidadeNaoEncontradaException("Fornecedor não encontrado", id);
-        repository.deleteById(id);
+        desativar(id, null);
+    }
+
+    @Transactional
+    public void reativar(Integer id) {
+        Fornecedor fornecedor = repository.findById(id)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor não encontrado", id));
+        fornecedor.reativar();
+        repository.save(fornecedor);
     }
 
     public void preencher(Fornecedor novoFornecedor, FornecedorRequestDto fornecedor){
         if (fornecedor.getMarcaId() != null && !fornecedor.getMarcaId().isEmpty()) {
-            List<Marca> marcasEncontradas = marcaRepository.findAllById(fornecedor.getMarcaId());
+                List<Marca> marcasEncontradas = marcaRepository.findAllById(fornecedor.getMarcaId()).stream()
+                    .filter(marca -> Boolean.TRUE.equals(marca.getAtivo())).toList();
 
-            if (marcasEncontradas.isEmpty()) {
+            if (marcasEncontradas.size() != fornecedor.getMarcaId().size()) {
                 throw new EntidadeNaoEncontradaException("Nenhuma marca encontrada para os IDs fornecidos", fornecedor.getMarcaId());
             }
 
@@ -98,9 +129,10 @@ public class FornecedorService {
         }
 
         if (fornecedor.getCategoriaId() != null && !fornecedor.getCategoriaId().isEmpty()) {
-            List<Categoria> categoriasEncontradas = categoriaRepository.findAllById(fornecedor.getCategoriaId());
+                List<Categoria> categoriasEncontradas = categoriaRepository.findAllById(fornecedor.getCategoriaId()).stream()
+                    .filter(categoria -> Boolean.TRUE.equals(categoria.getAtivo())).toList();
 
-            if(categoriasEncontradas.isEmpty()){
+            if(categoriasEncontradas.size() != fornecedor.getCategoriaId().size()){
                 throw new EntidadeNaoEncontradaException("Nenhuma categoria encontrada para os IDs fornecidos", fornecedor.getCategoriaId());
             }
 
@@ -109,6 +141,7 @@ public class FornecedorService {
 
         if (fornecedor.getEnderecoId() != null) {
             Endereco endereco = enderecoRepository.findById(fornecedor.getEnderecoId())
+                    .filter(enderecoEncontrado -> Boolean.TRUE.equals(enderecoEncontrado.getAtivo()))
                     .orElseThrow(() -> new EntidadeNaoEncontradaException("Endereço não encontrado", fornecedor.getEnderecoId()));
             novoFornecedor.setEndereco(endereco);
         }

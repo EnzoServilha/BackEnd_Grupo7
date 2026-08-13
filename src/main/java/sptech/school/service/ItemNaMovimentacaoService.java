@@ -44,8 +44,11 @@ public class ItemNaMovimentacaoService {
     @Transactional
     public ItensNaMovimentacaoResponseDto criar(ItensNaMovimentacaoRequestDto requestDto){
         MovimentacaoEstoque movimentacaoEstoque = movimentacaoEstoqueRepository.findById(requestDto.movimentacaoEstoqueId()).orElseThrow(() -> new EntidadeNaoEncontradaException("Movimentação de estoque não encontrada", requestDto.movimentacaoEstoqueId()));
+        validarPendente(movimentacaoEstoque);
 
-        Item item = itemRepository.findById(requestDto.itemId()).orElseThrow(() -> new EntidadeNaoEncontradaException("Item não encontrado", requestDto.itemId()));
+        Item item = itemRepository.findById(requestDto.itemId())
+            .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
+            .orElseThrow(() -> new EntidadeNaoEncontradaException("Item ativo não encontrado", requestDto.itemId()));
 
         if (itemMovimentacaoRepository.existsByMovimentacaoEstoqueIdAndItemId(
             requestDto.movimentacaoEstoqueId(), requestDto.itemId())) {
@@ -60,25 +63,34 @@ public class ItemNaMovimentacaoService {
         return  ItensNaMovimentacaoMapper.toResponseDto(itemMovimentacaoRepository.save(itensNaMovimentacao));
     }
 
+    @Transactional
     public ItensNaMovimentacaoResponseDto editar(ItensNaMovimentacaoRequestDto requestDto, Integer id){
-        existe(id);
-
-        ItensNaMovimentacao itens = ItensNaMovimentacaoMapper.toEntity(requestDto);
-
-        itens.setId(id);
+        ItensNaMovimentacao itens = itemMovimentacaoRepository.findById(id)
+                .orElseThrow(() -> new ItemNaMovimentacaoNaoEncontrado("Item na movimentação não encontrado"));
+        validarPendente(itens.getMovimentacaoEstoque());
+        itens.setQtd(requestDto.qtd());
+        itens.setPrecoUnitario(requestDto.precoUnitario());
 
         return ItensNaMovimentacaoMapper.toResponseDto(itemMovimentacaoRepository.save(itens));
     }
 
+    @Transactional
     public void deletar(Integer id){
-        existe(id);
-
+        ItensNaMovimentacao item = itemMovimentacaoRepository.findById(id)
+                .orElseThrow(() -> new ItemNaMovimentacaoNaoEncontrado("Item na movimentação não encontrado"));
+        validarPendente(item.getMovimentacaoEstoque());
         itemMovimentacaoRepository.deleteById(id);
     }
 
     public void existe(Integer id){
         if(!itemMovimentacaoRepository.existsById(id)){
             throw new ItemNaMovimentacaoNaoEncontrado("Item na movimentação não encontrado");
+        }
+    }
+
+    private void validarPendente(MovimentacaoEstoque movimentacao) {
+        if (movimentacao.getStatus() == null || !"PENDENTE".equals(movimentacao.getStatus().getNome())) {
+            throw new EntidadeConflitanteException("Itens só podem ser alterados em movimentações pendentes");
         }
     }
 }

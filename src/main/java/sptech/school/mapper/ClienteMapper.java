@@ -17,7 +17,6 @@ public class ClienteMapper {
         cliente.setTelefone(dto.telefone());
         cliente.setEmail(dto.email());
         cliente.setObservacoes(dto.observacoes());
-//        cliente.setDataCadastro(dto.dataCadastro());
         cliente.setDataCadastro(LocalDateTime.now());
 
         return cliente;
@@ -33,7 +32,9 @@ public class ClienteMapper {
                 cliente.getEmail(),
                 cliente.getObservacoes(),
                 cliente.getDataCadastro(),
-                cliente.getEndereco() != null ? EnderecoMapper.toResponseDto(cliente.getEndereco()) : null
+                cliente.getEndereco() != null ? EnderecoMapper.toResponseDto(cliente.getEndereco()) : null,
+                cliente.getAtivo(),
+                cliente.getDesativadoPor() != null ? cliente.getDesativadoPor().getId() : null
         );
     }
 

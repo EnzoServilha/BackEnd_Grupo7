@@ -7,7 +7,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "marca")
-public class Marca {
+public class Marca extends EntidadeAtivavel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
