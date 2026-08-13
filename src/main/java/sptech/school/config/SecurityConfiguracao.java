@@ -8,7 +8,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
@@ -41,13 +40,10 @@ import java.util.List;
  * <ul>
  *   <li>{@code @Configuration}: indica que esta classe contém definições de beans Spring</li>
  *   <li>{@code @EnableWebSecurity}: ativa a configuração do Spring Security via código Java</li>
- *   <li>{@code @EnableMethodSecurity}: habilita anotações de segurança nos métodos
- *       (ex: {@code @PreAuthorize("hasRole('ADMIN')")})</li>
  * </ul>
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 public class SecurityConfiguracao {
 
     @Autowired

@@ -2,6 +2,7 @@ package sptech.school.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
@@ -15,8 +16,9 @@ public class Item extends EntidadeAtivavel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotBlank
     @Size(max = 50)
-    @Column(name = "codigo_interno", length = 50)
+    @Column(name = "codigo_interno", length = 50, nullable = false)
     private String codigoInterno;
 
     @Size(max = 50)

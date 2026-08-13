@@ -80,17 +80,11 @@ public class FornecedorService {
     }
 
     public FornecedorResponseDto atualizar(FornecedorRequestDto fornecedor, Integer id) {
-        if (!repository.existsById(id)) throw new EntidadeNaoEncontradaException("Fornecedor não encontrado", id);
-        repository.findById(id).ifPresent(encontrado -> {
-            if (!Boolean.TRUE.equals(encontrado.getAtivo())) {
-                throw new EntidadeNaoEncontradaException("Fornecedor não encontrado", id);
-            }
-        });
+        Fornecedor fornecedorEntity = repository.findById(id)
+                .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Fornecedor não encontrado", id));
 
-        Fornecedor fornecedorEntity = FornecedorMapper.toEntity(fornecedor);
-
-        fornecedorEntity.setId(id);
-
+        FornecedorMapper.atualizar(fornecedorEntity, fornecedor);
         preencher(fornecedorEntity, fornecedor);
 
         return FornecedorMapper.toResponseDto(repository.save(fornecedorEntity));

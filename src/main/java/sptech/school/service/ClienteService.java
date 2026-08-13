@@ -55,12 +55,11 @@ public class ClienteService {
     }
 
     public ClienteResponseDto atualizar(ClienteRequestDto cliente, Integer id) {
-        if (!clienteRepository.existsById(id)) throw new EntidadeNaoEncontradaException("Cliente não encontrado", id);
+        Cliente entidade = clienteRepository.findById(id)
+            .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
+            .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente não encontrado", id));
 
-        Cliente entidade = ClienteMapper.toEntity(cliente);
-
-        entidade.setId(id);
-
+        ClienteMapper.atualizar(entidade, cliente);
         preencher(entidade, cliente);
 
         return ClienteMapper.toResponseDto(clienteRepository.save(entidade));

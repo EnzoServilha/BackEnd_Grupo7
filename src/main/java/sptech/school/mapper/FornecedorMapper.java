@@ -17,10 +17,17 @@ public class FornecedorMapper {
         fornecedor.setTelefone(dto.getTelefone());
         fornecedor.setEmail(dto.getEmail());
         fornecedor.setObservacoes(dto.getObservacoes());
-        fornecedor.setDataCadastro(dto.getDataCadastro());
-
-
         return fornecedor;
+    }
+
+    public static void atualizar(Fornecedor fornecedor, FornecedorRequestDto dto) {
+        fornecedor.setRazaoSocial(dto.getRazaoSocial());
+        fornecedor.setCnpj(dto.getCnpj());
+        fornecedor.setNomeContato(dto.getNomeContato());
+        fornecedor.setNomeEmpresa(dto.getNomeEmpresa());
+        fornecedor.setTelefone(dto.getTelefone());
+        fornecedor.setEmail(dto.getEmail());
+        fornecedor.setObservacoes(dto.getObservacoes());
     }
 
     public static FornecedorResponseDto toResponseDto(Fornecedor fornecedor) {

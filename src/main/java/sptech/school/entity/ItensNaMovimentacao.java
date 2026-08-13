@@ -1,6 +1,8 @@
 package sptech.school.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 
 @Entity
@@ -22,10 +24,12 @@ public class ItensNaMovimentacao {
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
-    @Column
+    @Positive
+    @Column(nullable = false)
     private Integer qtd;
 
-    @Column(name = "preco_unitario", precision = 10, scale = 2)
+    @PositiveOrZero
+    @Column(name = "preco_unitario", precision = 10, scale = 2, nullable = false)
     private BigDecimal precoUnitario;
 
     public ItensNaMovimentacao() {}

@@ -18,12 +18,6 @@ public class MovimentacaoEstoqueMapper {
         movimentacao.setDataEntrega(dto.dataEntrega());
         movimentacao.setObservacoes(dto.observacoes());
         movimentacao.setNumeroNotaFiscal(dto.numeroNotaFiscal());
-        if (dto.usuarioId() != null) {
-            Usuario usuario = new Usuario();
-            //Estava sendo passado como integer, mas o id do usuário é do tipo Long, então foi necessário converter
-            usuario.setId(Long.valueOf(dto.usuarioId()));
-            movimentacao.setUsuario(usuario);
-        }
         if (dto.tipoId() != null) {
             Tipo tipo = new Tipo();
             tipo.setId(dto.tipoId());
@@ -50,6 +44,15 @@ public class MovimentacaoEstoqueMapper {
             movimentacao.setMovimentacaoOriginal(original);
         }
         return movimentacao;
+    }
+
+    public static void atualizar(MovimentacaoEstoque movimentacao, MovimentacaoEstoqueRequestDto dto) {
+        movimentacao.setTotalGastoImpostos(dto.totalGastoImpostos());
+        movimentacao.setPrecoFrete(dto.precoFrete());
+        movimentacao.setDataEntregaPrevista(dto.dataEntregaPrevista());
+        movimentacao.setDataEntrega(dto.dataEntrega());
+        movimentacao.setObservacoes(dto.observacoes());
+        movimentacao.setNumeroNotaFiscal(dto.numeroNotaFiscal());
     }
 
     public static BigDecimal valorTotal(BigDecimal valorProdutos, MovimentacaoEstoque e){
@@ -89,9 +92,9 @@ public class MovimentacaoEstoqueMapper {
             return 0;
         }
 
-        Integer calculo = 0;
+        int calculo = 0;
         for(ItensNaMovimentacao t : itens){
-            calculo += t.getQtd();
+            calculo += t.getQtd() != null ? t.getQtd() : 0;
         }
         return calculo;
     }

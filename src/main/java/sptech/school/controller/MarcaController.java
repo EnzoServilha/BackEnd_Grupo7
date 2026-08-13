@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Null;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.marca.MarcaRequestDto;
 import sptech.school.dto.marca.MarcaResponseDto;
@@ -26,7 +25,6 @@ public class MarcaController {
     }
 
     @GetMapping("/administracao")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<MarcaResponseDto>> listarAdministrativo(
             @RequestParam(defaultValue = "todos") String ativo) {
         return ResponseEntity.ok(service.listarAdministrativo(ativo));
@@ -62,7 +60,6 @@ public class MarcaController {
     }
 
     @PatchMapping("/{id}/reativacao")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> reativar(@PathVariable Integer id) {
         service.reativar(id);
         return ResponseEntity.noContent().build();

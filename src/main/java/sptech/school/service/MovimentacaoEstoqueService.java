@@ -64,27 +64,23 @@ public class MovimentacaoEstoqueService {
         return MovimentacaoEstoqueMapper.toResponseDtoList(movimentacao);
     }
 
-    public MovimentacaoEstoqueResponseDto criar(MovimentacaoEstoqueRequestDto request){
+    public MovimentacaoEstoqueResponseDto criar(MovimentacaoEstoqueRequestDto request, String emailUsuario){
 
         MovimentacaoEstoque movimentacao = MovimentacaoEstoqueMapper.toEntity(request);
 
         movimentacao.setDataMovimentacao(LocalDateTime.now());
-        preencher(movimentacao, request);
+        preencher(movimentacao, request, emailUsuario);
 
         return  MovimentacaoEstoqueMapper.toResponse(movimentacaoRepository.save(movimentacao));
     }
 
-    public MovimentacaoEstoqueResponseDto editar(MovimentacaoEstoqueRequestDto request, Integer id){
-         MovimentacaoEstoque existente = movimentacaoRepository.findById(id)
+    public MovimentacaoEstoqueResponseDto editar(MovimentacaoEstoqueRequestDto request, Integer id, String emailUsuario){
+         MovimentacaoEstoque movimentacao = movimentacaoRepository.findById(id)
              .orElseThrow(() -> new MovimentacaoNaoEncontrada("Movimentação não encontrada para edição"));
-         validarPendente(existente);
+         validarPendente(movimentacao);
 
-
-         MovimentacaoEstoque movimentacao = MovimentacaoEstoqueMapper.toEntity(request);
-
-         movimentacao.setId(id);
-
-         preencher(movimentacao, request);
+         MovimentacaoEstoqueMapper.atualizar(movimentacao, request);
+         preencher(movimentacao, request, emailUsuario);
 
          return MovimentacaoEstoqueMapper.toResponse(movimentacaoRepository.save(movimentacao));
     }
@@ -114,15 +110,10 @@ public class MovimentacaoEstoqueService {
     }
 
 
-    public void preencher(MovimentacaoEstoque entidade, MovimentacaoEstoqueRequestDto requestDto){
-        if (requestDto.usuarioId() != null) {
-            Usuario usuario = usuarioRepository.findById(requestDto.usuarioId())
-                    .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
-                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Usuário ativo não encontrado", requestDto.usuarioId()));
-
-
-            entidade.setUsuario(usuario);
-        }
+    public void preencher(MovimentacaoEstoque entidade, MovimentacaoEstoqueRequestDto requestDto, String emailUsuario){
+        Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Usuário ativo não encontrado", emailUsuario));
+        entidade.setUsuario(usuario);
 
         if(requestDto.tipoId() != null){
             entidade.setTipo(tipoRepository.findById(requestDto.tipoId())
@@ -152,7 +143,8 @@ public class MovimentacaoEstoqueService {
         }
 
             entidade.setPeriodo(periodoRepository.findById(requestDto.periodoId())
-                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Período não encontrado", requestDto.periodoId())));
+                .filter(periodo -> Boolean.FALSE.equals(periodo.getFechado()))
+                .orElseThrow(() -> new EntidadeConflitanteException("Movimentações só podem usar períodos abertos")));
 
     }
 

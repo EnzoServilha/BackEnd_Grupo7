@@ -3,7 +3,6 @@ package sptech.school.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.endereco.EnderecoRequestDto;
 import sptech.school.dto.endereco.EnderecoResponseDto;
@@ -37,7 +36,6 @@ public class EnderecoController {
     }
 
     @GetMapping("/administracao")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<EnderecoResponseDto>> listarAdministrativo(
             @RequestParam(defaultValue = "todos") String ativo) {
         return ResponseEntity.ok(EnderecoMapper.toResponseDtoList(enderecoService.listarAdministrativo(ativo)));
@@ -102,7 +100,6 @@ public class EnderecoController {
     }
 
     @PatchMapping("/{id}/reativacao")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> reativar(@PathVariable Integer id) {
         enderecoService.reativar(id);
         return ResponseEntity.noContent().build();

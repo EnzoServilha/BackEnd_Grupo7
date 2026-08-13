@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Null;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.fornecedor.FornecedorRequestDto;
 import sptech.school.dto.fornecedor.FornecedorResponseDto;
@@ -31,7 +30,6 @@ public class FornecedorController {
     }
 
     @GetMapping("/administracao")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<FornecedorResponseDto>> listarAdministrativo(
             @RequestParam(defaultValue = "todos") String ativo) {
         return ResponseEntity.ok(service.listarAdministrativo(ativo));
@@ -86,7 +84,6 @@ public class FornecedorController {
     }
 
     @PatchMapping("/{id}/reativacao")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> reativar(@PathVariable Integer id) {
         service.reativar(id);
         return ResponseEntity.noContent().build();

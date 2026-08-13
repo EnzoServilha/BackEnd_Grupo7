@@ -1,6 +1,7 @@
 package sptech.school.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
@@ -18,9 +19,11 @@ public class MovimentacaoEstoque {
     @JoinColumn(name = "fk_usuario", nullable = false)
     private Usuario usuario;
 
+    @PositiveOrZero
     @Column(name = "total_gasto_impostos", precision = 10, scale = 2)
     private BigDecimal totalGastoImpostos;
 
+    @PositiveOrZero
     @Column(name = "preco_frete", precision = 10, scale = 2)
     private BigDecimal precoFrete;
 

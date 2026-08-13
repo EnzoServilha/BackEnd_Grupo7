@@ -3,6 +3,7 @@ package sptech.school.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Null;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
@@ -41,13 +42,13 @@ public class MovimentacaoEstoqueController {
     }
 
     @PostMapping
-    public ResponseEntity<MovimentacaoEstoqueResponseDto> criar(@RequestBody @Valid MovimentacaoEstoqueRequestDto requestDto){
-        return ResponseEntity.status(201).body(service.criar(requestDto));
+    public ResponseEntity<MovimentacaoEstoqueResponseDto> criar(@RequestBody @Valid MovimentacaoEstoqueRequestDto requestDto, Authentication authentication){
+        return ResponseEntity.status(201).body(service.criar(requestDto, authentication.getName()));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MovimentacaoEstoqueResponseDto> editar(@RequestBody @Valid MovimentacaoEstoqueRequestDto requestDto, @PathVariable Integer id){
-        return ResponseEntity.status(200).body(service.editar(requestDto, id));
+    public ResponseEntity<MovimentacaoEstoqueResponseDto> editar(@RequestBody @Valid MovimentacaoEstoqueRequestDto requestDto, @PathVariable Integer id, Authentication authentication){
+        return ResponseEntity.status(200).body(service.editar(requestDto, id, authentication.getName()));
     }
 
     @DeleteMapping("/{id}")

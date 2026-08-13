@@ -3,7 +3,6 @@ package sptech.school.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.item.ItemRequestDto;
 import sptech.school.dto.item.ItemResponseDto;
@@ -34,7 +33,6 @@ public class ItemController {
     }
 
     @GetMapping("/administracao")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ItemResponseDto>> listarAdministrativo(
             @RequestParam(defaultValue = "todos") String ativo) {
         return ResponseEntity.ok(ItemMapper.toResponseDtoList(itemService.listarAdministrativo(ativo)));
@@ -102,7 +100,6 @@ public class ItemController {
     }
 
     @PatchMapping("/{id}/reativacao")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> reativar(@PathVariable Integer id) {
         itemService.reativar(id);
         return ResponseEntity.noContent().build();

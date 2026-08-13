@@ -444,14 +444,14 @@ class FornecedorServiceTest {
 
             Fornecedor salvo = criarFornecedor(1, "Empresa Atualizada", "Carlos");
 
-            when(repository.existsById(1)).thenReturn(true);
+            when(repository.findById(1)).thenReturn(Optional.of(salvo));
             when(repository.save(Mockito.any(Fornecedor.class))).thenReturn(salvo);
 
             FornecedorResponseDto resultado = fornecedorService.atualizar(request, 1);
 
             assertNotNull(resultado);
 
-            Mockito.verify(repository).existsById(1);
+            Mockito.verify(repository).findById(1);
             Mockito.verify(repository).save(Mockito.any(Fornecedor.class));
         }
 
@@ -460,12 +460,12 @@ class FornecedorServiceTest {
         void atualizarNaoEncontrado() {
             FornecedorRequestDto request = criarRequest("Empresa X", "Fulano");
 
-            when(repository.existsById(99)).thenReturn(false);
+            when(repository.findById(99)).thenReturn(Optional.empty());
 
             assertThrows(EntidadeNaoEncontradaException.class, () ->
                     fornecedorService.atualizar(request, 99));
 
-            Mockito.verify(repository).existsById(99);
+            Mockito.verify(repository).findById(99);
             Mockito.verify(repository, never()).save(Mockito.any());
         }
 
@@ -480,7 +480,7 @@ class FornecedorServiceTest {
 
             Fornecedor salvo = criarFornecedor(2, "Empresa B", "Lucas");
 
-            when(repository.existsById(2)).thenReturn(true);
+            when(repository.findById(2)).thenReturn(Optional.of(salvo));
             when(marcaRepository.findAllById(List.of(1))).thenReturn(List.of(marca));
             when(repository.save(Mockito.any(Fornecedor.class))).thenReturn(salvo);
 
@@ -498,7 +498,7 @@ class FornecedorServiceTest {
             FornecedorRequestDto request = criarRequest("Empresa B", "Lucas");
             request.setMarcaId(List.of(99));
 
-            when(repository.existsById(2)).thenReturn(true);
+            when(repository.findById(2)).thenReturn(Optional.of(criarFornecedor(2, "Empresa B", "Lucas")));
             when(marcaRepository.findAllById(List.of(99))).thenReturn(List.of());
 
             assertThrows(EntidadeNaoEncontradaException.class, () ->
@@ -518,7 +518,7 @@ class FornecedorServiceTest {
 
             Fornecedor salvo = criarFornecedor(3, "Empresa C", "Bianca");
 
-            when(repository.existsById(3)).thenReturn(true);
+            when(repository.findById(3)).thenReturn(Optional.of(salvo));
             when(categoriaRepository.findAllById(List.of(4))).thenReturn(List.of(cat));
             when(repository.save(Mockito.any(Fornecedor.class))).thenReturn(salvo);
 
@@ -535,7 +535,7 @@ class FornecedorServiceTest {
             FornecedorRequestDto request = criarRequest("Empresa C", "Bianca");
             request.setCategoriaId(List.of(99));
 
-            when(repository.existsById(3)).thenReturn(true);
+            when(repository.findById(3)).thenReturn(Optional.of(criarFornecedor(3, "Empresa C", "Bianca")));
             when(categoriaRepository.findAllById(List.of(99))).thenReturn(List.of());
 
             assertThrows(EntidadeNaoEncontradaException.class, () ->
@@ -555,7 +555,7 @@ class FornecedorServiceTest {
 
             Fornecedor salvo = criarFornecedor(4, "Empresa D", "Roberto");
 
-            when(repository.existsById(4)).thenReturn(true);
+            when(repository.findById(4)).thenReturn(Optional.of(salvo));
             when(enderecoRepository.findById(5)).thenReturn(Optional.of(endereco));
             when(repository.save(Mockito.any(Fornecedor.class))).thenReturn(salvo);
 
@@ -572,7 +572,7 @@ class FornecedorServiceTest {
             FornecedorRequestDto request = criarRequest("Empresa D", "Roberto");
             request.setEnderecoId(99);
 
-            when(repository.existsById(4)).thenReturn(true);
+            when(repository.findById(4)).thenReturn(Optional.of(criarFornecedor(4, "Empresa D", "Roberto")));
             when(enderecoRepository.findById(99)).thenReturn(Optional.empty());
 
             assertThrows(EntidadeNaoEncontradaException.class, () ->
