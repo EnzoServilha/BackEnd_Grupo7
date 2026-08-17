@@ -58,7 +58,6 @@ public class FornecedorService {
 
         return FornecedorMapper.toResponseDtoList(fornecedor);
     }
-
     public FornecedorResponseDto criar(FornecedorRequestDto fornecedor) {
         Fornecedor novoFornecedor = FornecedorMapper.toEntity(fornecedor);
 
