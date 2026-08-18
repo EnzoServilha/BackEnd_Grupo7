@@ -1,7 +1,11 @@
 -- DADOS OBRIGATORIOS PARA APLICACAO
 INSERT INTO permissao (id, nome) VALUES (1, 'ROLE_ADMIN'), (2, 'ROLE_USER');
-INSERT INTO tipo (id, nome) VALUES (1, 'ENTRADA'), (2, 'SAIDA'), (3, 'AJUSTE');
-INSERT INTO status (id, nome) VALUES (1, 'PENDENTE'), (2, 'CONCLUIDO'), (3, 'CANCELADO');
+INSERT INTO tipo (id, nome) VALUES (1, 'ENTRADA'), (2, 'SAIDA'), (3, 'AJUSTE'), (4, 'COTACAO');
+INSERT INTO status (id, nome) VALUES
+    (1, 'PENDENTE'),
+    (2, 'CONCLUIDO'),
+    (3, 'CONCLUIDO PARCIAL'),
+    (4, 'CANCELADO');
 
 -- DADOS DE TESTE / DEMONSTRACAO
 INSERT INTO usuario (nome, email, senha, data_cadastro, permissao_id)

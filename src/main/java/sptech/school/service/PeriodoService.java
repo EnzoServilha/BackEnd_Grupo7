@@ -97,6 +97,13 @@ public class PeriodoService {
         novoPeriodo.setFechado(false);
         novoPeriodo = periodoRepository.save(novoPeriodo);
 
+        List<MovimentacaoEstoque> cotacoesPendentes = movimentacaoEstoqueRepository
+            .findAllByPeriodoIdAndTipoNomeAndStatusNome(periodoAtual.getId(), "COTACAO", "PENDENTE");
+        for (MovimentacaoEstoque cotacao : cotacoesPendentes) {
+            cotacao.setPeriodo(novoPeriodo);
+        }
+        movimentacaoEstoqueRepository.saveAll(cotacoesPendentes);
+
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new EntidadeConflitanteException("Usuário responsável pelo fechamento não encontrado"));
         Tipo tipoAjuste = tipoRepository.findByNome("AJUSTE")
@@ -132,6 +139,63 @@ public class PeriodoService {
                 saldos
         );
     }
+
+        @Transactional
+        public Periodo rollbackPeriodo() {
+        Periodo periodoAtual = buscarPeriodoAberto();
+        Periodo periodoAnterior = periodoRepository.findFirstByFechadoTrueOrderByIdDesc()
+            .orElseThrow(() -> new EntidadeConflitanteException("Não há período anterior para restaurar"));
+
+        List<MovimentacaoEstoque> movimentacoesAtuais = movimentacaoEstoqueRepository
+            .findAllByPeriodoId(periodoAtual.getId());
+        String observacaoAjuste = "Saldo inicial transferido do período " + periodoAnterior.getId();
+
+        List<MovimentacaoEstoque> ajustesAutomaticos = movimentacoesAtuais.stream()
+            .filter(movimentacao -> ehAjusteAutomatico(movimentacao, observacaoAjuste))
+            .toList();
+        if (ajustesAutomaticos.size() != 1) {
+            throw new EntidadeConflitanteException("O período atual não possui um único ajuste automático de abertura");
+        }
+
+        boolean possuiMovimentacaoPosterior = movimentacoesAtuais.stream()
+            .anyMatch(movimentacao -> !ehAjusteAutomatico(movimentacao, observacaoAjuste)
+                && !ehCotacaoPendente(movimentacao));
+        if (possuiMovimentacaoPosterior) {
+            throw new EntidadeConflitanteException(
+                "O período atual possui movimentações e não pode ser removido");
+        }
+
+        List<MovimentacaoEstoque> cotacoesPendentes = movimentacoesAtuais.stream()
+            .filter(this::ehCotacaoPendente)
+            .toList();
+        for (MovimentacaoEstoque cotacao : cotacoesPendentes) {
+            cotacao.setPeriodo(periodoAnterior);
+        }
+        movimentacaoEstoqueRepository.saveAll(cotacoesPendentes);
+
+        MovimentacaoEstoque ajusteAutomatico = ajustesAutomaticos.get(0);
+        itensNaMovimentacaoRepository.deleteAllByMovimentacaoEstoqueId(ajusteAutomatico.getId());
+        movimentacaoEstoqueRepository.delete(ajusteAutomatico);
+        periodoRepository.delete(periodoAtual);
+
+        periodoAnterior.setFechado(false);
+        periodoAnterior.setDataFechamento(null);
+        periodoAnterior.setQtdPecas(null);
+        return periodoRepository.save(periodoAnterior);
+        }
+
+        private boolean ehAjusteAutomatico(MovimentacaoEstoque movimentacao, String observacaoEsperada) {
+        return movimentacao.getTipo() != null
+            && "AJUSTE".equals(movimentacao.getTipo().getNome())
+            && observacaoEsperada.equals(movimentacao.getObservacoes());
+        }
+
+        private boolean ehCotacaoPendente(MovimentacaoEstoque movimentacao) {
+        return movimentacao.getTipo() != null
+            && "COTACAO".equals(movimentacao.getTipo().getNome())
+            && movimentacao.getStatus() != null
+            && "PENDENTE".equals(movimentacao.getStatus().getNome());
+        }
 
     private Periodo buscarPeriodoAberto() {
         return periodoRepository.findFirstByFechadoFalseOrderByIdDesc()

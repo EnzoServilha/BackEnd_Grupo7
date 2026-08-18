@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
     Periodo findFirstByOrderByIdDesc();
     List<Periodo> findAllByOrderByIdDesc();
+    Optional<Periodo> findFirstByFechadoTrueOrderByIdDesc();
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Periodo> findFirstByFechadoFalseOrderByIdDesc();

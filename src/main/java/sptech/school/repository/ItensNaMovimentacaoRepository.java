@@ -9,4 +9,5 @@ public interface ItensNaMovimentacaoRepository extends JpaRepository<ItensNaMovi
     List<ItensNaMovimentacao> findAllByItemId(Integer itemId);
     List<ItensNaMovimentacao> findAllByMovimentacaoEstoqueId(Integer movimentacaoEstoqueId);
     boolean existsByMovimentacaoEstoqueIdAndItemId(Integer movimentacaoEstoqueId, Integer itemId);
+    void deleteAllByMovimentacaoEstoqueId(Integer movimentacaoEstoqueId);
 }

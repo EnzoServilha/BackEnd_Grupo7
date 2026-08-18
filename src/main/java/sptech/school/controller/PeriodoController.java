@@ -40,6 +40,11 @@ public class PeriodoController {
         return ResponseEntity.ok(periodoService.fecharPeriodo(idUsuario, descricaoNovoPeriodo));
     }
 
+    @DeleteMapping("/rollback")
+    public ResponseEntity<Periodo> rollbackPeriodo() {
+        return ResponseEntity.ok(periodoService.rollbackPeriodo());
+    }
+
     @PostMapping()
     public ResponseEntity<Periodo> criarNovoPeriodo (@RequestBody String descricao){
         return ResponseEntity.status(200).body(periodoService.cadastrarPeriodo(descricao));

@@ -100,6 +100,9 @@ class PeriodoServiceTest {
             item1.setId(1);
             Item item2 = new Item();
             item2.setId(2);
+            MovimentacaoEstoque cotacaoPendente = new MovimentacaoEstoque();
+            cotacaoPendente.setId(20);
+            cotacaoPendente.setPeriodo(periodoAberto);
 
             when(periodoRepository.findFirstByFechadoFalseOrderByIdDesc()).thenReturn(Optional.of(periodoAberto));
             when(periodoRepository.pegarSaldoPorItemDoPeriodo(2)).thenReturn(saldos);
@@ -108,6 +111,8 @@ class PeriodoServiceTest {
                 if (periodo.getId() == null) periodo.setId(3);
                 return periodo;
             });
+            when(movimentacaoEstoqueRepository.findAllByPeriodoIdAndTipoNomeAndStatusNome(
+                    2, "COTACAO", "PENDENTE")).thenReturn(List.of(cotacaoPendente));
             when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
             when(tipoRepository.findByNome("AJUSTE")).thenReturn(Optional.of(ajuste));
             when(statusRepository.findByNome("CONCLUIDO")).thenReturn(Optional.of(concluido));
@@ -128,6 +133,8 @@ class PeriodoServiceTest {
             assertFalse(response.novoPeriodo().getFechado());
             assertEquals(10, response.movimentacaoAjusteId());
             assertEquals(saldos, response.saldosTransferidos());
+            assertEquals(3, cotacaoPendente.getPeriodo().getId());
+            verify(movimentacaoEstoqueRepository).saveAll(List.of(cotacaoPendente));
 
             ArgumentCaptor<MovimentacaoEstoque> movimentacaoCaptor = ArgumentCaptor.forClass(MovimentacaoEstoque.class);
             verify(movimentacaoEstoqueRepository).save(movimentacaoCaptor.capture());
@@ -151,6 +158,87 @@ class PeriodoServiceTest {
             assertThrows(EntidadeConflitanteException.class,
                     () -> periodoService.fecharPeriodo(1L, "Novo período"));
             verifyNoInteractions(movimentacaoEstoqueRepository, itensNaMovimentacaoRepository);
+        }
+    }
+
+    @Nested
+    @DisplayName("Rollback de período")
+    class RollbackPeriodoTest {
+
+        @Test
+        @DisplayName("Deve remover período atual, ajuste automático e reabrir período anterior")
+        void rollbackPeriodoComSucesso() {
+            Periodo periodoAnterior = periodo(2, true);
+            periodoAnterior.setQtdPecas(12);
+            periodoAnterior.setDataFechamento(LocalDateTime.now());
+            Periodo periodoAtual = periodo(3, false);
+
+            MovimentacaoEstoque ajuste = movimentacao(
+                    10, periodoAtual, "AJUSTE", "CONCLUIDO",
+                    "Saldo inicial transferido do período 2");
+            MovimentacaoEstoque cotacao = movimentacao(
+                    20, periodoAtual, "COTACAO", "PENDENTE", null);
+
+            when(periodoRepository.findFirstByFechadoFalseOrderByIdDesc()).thenReturn(Optional.of(periodoAtual));
+            when(periodoRepository.findFirstByFechadoTrueOrderByIdDesc()).thenReturn(Optional.of(periodoAnterior));
+            when(movimentacaoEstoqueRepository.findAllByPeriodoId(3)).thenReturn(List.of(ajuste, cotacao));
+            when(periodoRepository.save(periodoAnterior)).thenReturn(periodoAnterior);
+
+            Periodo restaurado = periodoService.rollbackPeriodo();
+
+            assertSame(periodoAnterior, restaurado);
+            assertFalse(restaurado.getFechado());
+            assertNull(restaurado.getDataFechamento());
+            assertNull(restaurado.getQtdPecas());
+            assertSame(periodoAnterior, cotacao.getPeriodo());
+            verify(movimentacaoEstoqueRepository).saveAll(List.of(cotacao));
+            verify(itensNaMovimentacaoRepository).deleteAllByMovimentacaoEstoqueId(10);
+            verify(movimentacaoEstoqueRepository).delete(ajuste);
+            verify(periodoRepository).delete(periodoAtual);
+        }
+
+        @Test
+        @DisplayName("Não deve remover período atual quando houver venda")
+        void naoDeveRemoverPeriodoComVenda() {
+            Periodo periodoAnterior = periodo(2, true);
+            Periodo periodoAtual = periodo(3, false);
+            MovimentacaoEstoque ajuste = movimentacao(
+                    10, periodoAtual, "AJUSTE", "CONCLUIDO",
+                    "Saldo inicial transferido do período 2");
+            MovimentacaoEstoque venda = movimentacao(
+                    30, periodoAtual, "SAIDA", "CONCLUIDO", null);
+
+            when(periodoRepository.findFirstByFechadoFalseOrderByIdDesc()).thenReturn(Optional.of(periodoAtual));
+            when(periodoRepository.findFirstByFechadoTrueOrderByIdDesc()).thenReturn(Optional.of(periodoAnterior));
+            when(movimentacaoEstoqueRepository.findAllByPeriodoId(3)).thenReturn(List.of(ajuste, venda));
+
+            assertThrows(EntidadeConflitanteException.class, () -> periodoService.rollbackPeriodo());
+
+            verify(movimentacaoEstoqueRepository, never()).delete(any());
+            verify(periodoRepository, never()).delete(any());
+            verifyNoInteractions(itensNaMovimentacaoRepository);
+        }
+
+        private Periodo periodo(Integer id, boolean fechado) {
+            Periodo periodo = new Periodo();
+            periodo.setId(id);
+            periodo.setFechado(fechado);
+            return periodo;
+        }
+
+        private MovimentacaoEstoque movimentacao(Integer id, Periodo periodo, String tipoNome,
+                                                  String statusNome, String observacoes) {
+            Tipo tipo = new Tipo();
+            tipo.setNome(tipoNome);
+            Status status = new Status();
+            status.setNome(statusNome);
+            MovimentacaoEstoque movimentacao = new MovimentacaoEstoque();
+            movimentacao.setId(id);
+            movimentacao.setPeriodo(periodo);
+            movimentacao.setTipo(tipo);
+            movimentacao.setStatus(status);
+            movimentacao.setObservacoes(observacoes);
+            return movimentacao;
         }
     }
 

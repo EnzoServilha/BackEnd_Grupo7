@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Null;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import sptech.school.dto.movimentacaoEstoque.FechamentoCotacaoRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
 import sptech.school.service.MovimentacaoEstoqueService;
@@ -44,6 +45,14 @@ public class MovimentacaoEstoqueController {
     @PostMapping
     public ResponseEntity<MovimentacaoEstoqueResponseDto> criar(@RequestBody @Valid MovimentacaoEstoqueRequestDto requestDto, Authentication authentication){
         return ResponseEntity.status(201).body(service.criar(requestDto, authentication.getName()));
+    }
+
+    @PostMapping("/cotacoes/{id}/fechamento")
+    public ResponseEntity<MovimentacaoEstoqueResponseDto> fecharCotacao(
+            @PathVariable Integer id,
+            @RequestBody @Valid FechamentoCotacaoRequestDto requestDto,
+            Authentication authentication) {
+        return ResponseEntity.status(201).body(service.fecharCotacao(id, requestDto, authentication.getName()));
     }
 
     @PutMapping("/{id}")

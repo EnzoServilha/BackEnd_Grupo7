@@ -8,15 +8,22 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
+import sptech.school.dto.movimentacaoEstoque.FechamentoCotacaoRequestDto;
+import sptech.school.dto.movimentacaoEstoque.ItemFechamentoCotacaoRequestDto;
+import sptech.school.entity.Item;
+import sptech.school.entity.ItensNaMovimentacao;
 import sptech.school.entity.MovimentacaoEstoque;
 import sptech.school.entity.Periodo;
 import sptech.school.entity.Status;
+import sptech.school.entity.Tipo;
 import sptech.school.entity.Usuario;
 import sptech.school.exception.EntidadeConflitanteException;
 import sptech.school.exception.MovimentacaoNaoEncontrada;
 import sptech.school.repository.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,6 +44,15 @@ class MovimentacaoEstoqueServiceTest {
 
     @Mock
     private PeriodoRepository periodoRepository;
+
+    @Mock
+    private TipoRepository tipoRepository;
+
+    @Mock
+    private StatusRepository statusRepository;
+
+    @Mock
+    private ItensNaMovimentacaoRepository itensNaMovimentacaoRepository;
 
     @InjectMocks
     private MovimentacaoEstoqueService service;
@@ -112,6 +128,118 @@ class MovimentacaoEstoqueServiceTest {
             assertThrows(MovimentacaoNaoEncontrada.class, () -> service.buscarPorId(99));
 
             verify(movimentacaoRepository).findById(99);
+        }
+    }
+
+    @Nested
+    @DisplayName("fecharCotacao()")
+    class FecharCotacaoTests {
+
+        @Test
+        @DisplayName("Deve concluir parcialmente quando vender menos que o cotado")
+        void deveConcluirParcialmente() {
+            MovimentacaoEstoque cotacao = criarCotacaoPendente(5);
+            Usuario usuario = new Usuario();
+            Tipo saida = tipo("SAIDA");
+            Status concluido = status("CONCLUIDO");
+            Status concluidoParcial = status("CONCLUIDO PARCIAL");
+            Periodo periodo = periodoAberto(2);
+
+            when(movimentacaoRepository.buscarPorIdComBloqueio(10)).thenReturn(Optional.of(cotacao));
+            when(usuarioRepository.findByEmailAndAtivoTrue("usuario@teste.com")).thenReturn(Optional.of(usuario));
+            when(tipoRepository.findByNome("SAIDA")).thenReturn(Optional.of(saida));
+            when(statusRepository.findByNome("CONCLUIDO")).thenReturn(Optional.of(concluido));
+            when(statusRepository.findByNome("CONCLUIDO PARCIAL")).thenReturn(Optional.of(concluidoParcial));
+            when(periodoRepository.findById(2)).thenReturn(Optional.of(periodo));
+            when(movimentacaoRepository.save(any(MovimentacaoEstoque.class))).thenAnswer(invocation -> {
+                MovimentacaoEstoque movimentacao = invocation.getArgument(0);
+                if (movimentacao.getId() == null) {
+                    movimentacao.setId(20);
+                }
+                return movimentacao;
+            });
+
+            var response = service.fecharCotacao(10, requestFechamento(3), "usuario@teste.com");
+
+            assertEquals("SAIDA", response.tipo().nome());
+            assertEquals("CONCLUIDO", response.status().nome());
+            assertEquals(10, response.movimentacaoOriginalId());
+            assertEquals(3, response.qtdItens());
+            assertSame(concluidoParcial, cotacao.getStatus());
+            verify(itensNaMovimentacaoRepository).saveAll(any());
+            verify(movimentacaoRepository, times(2)).save(any(MovimentacaoEstoque.class));
+        }
+
+        @Test
+        @DisplayName("Deve concluir integralmente quando vender toda a quantidade cotada")
+        void deveConcluirIntegralmente() {
+            MovimentacaoEstoque cotacao = criarCotacaoPendente(5);
+            Status concluido = status("CONCLUIDO");
+
+            when(movimentacaoRepository.buscarPorIdComBloqueio(10)).thenReturn(Optional.of(cotacao));
+            when(usuarioRepository.findByEmailAndAtivoTrue("usuario@teste.com")).thenReturn(Optional.of(new Usuario()));
+            when(tipoRepository.findByNome("SAIDA")).thenReturn(Optional.of(tipo("SAIDA")));
+            when(statusRepository.findByNome("CONCLUIDO")).thenReturn(Optional.of(concluido));
+            when(periodoRepository.findById(2)).thenReturn(Optional.of(periodoAberto(2)));
+            when(movimentacaoRepository.save(any(MovimentacaoEstoque.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            service.fecharCotacao(10, requestFechamento(5), "usuario@teste.com");
+
+            assertSame(concluido, cotacao.getStatus());
+        }
+
+        @Test
+        @DisplayName("Deve rejeitar quantidade superior à cotada")
+        void deveRejeitarQuantidadeSuperior() {
+            MovimentacaoEstoque cotacao = criarCotacaoPendente(5);
+            when(movimentacaoRepository.buscarPorIdComBloqueio(10)).thenReturn(Optional.of(cotacao));
+
+            assertThrows(EntidadeConflitanteException.class,
+                    () -> service.fecharCotacao(10, requestFechamento(6), "usuario@teste.com"));
+
+            verify(movimentacaoRepository, never()).save(any());
+        }
+
+        private MovimentacaoEstoque criarCotacaoPendente(int quantidade) {
+            Item item = new Item();
+            item.setId(1);
+            MovimentacaoEstoque cotacao = new MovimentacaoEstoque();
+            cotacao.setId(10);
+            cotacao.setTipo(tipo("COTACAO"));
+            cotacao.setStatus(status("PENDENTE"));
+
+            ItensNaMovimentacao itemCotado = new ItensNaMovimentacao();
+            itemCotado.setItem(item);
+            itemCotado.setQtd(quantidade);
+            itemCotado.setPrecoUnitario(BigDecimal.TEN);
+            itemCotado.setMovimentacaoEstoque(cotacao);
+            cotacao.setItens(List.of(itemCotado));
+            return cotacao;
+        }
+
+        private FechamentoCotacaoRequestDto requestFechamento(int quantidade) {
+            return new FechamentoCotacaoRequestDto(
+                    List.of(new ItemFechamentoCotacaoRequestDto(1, quantidade, BigDecimal.TEN)),
+                    null, null, null, null, null, "NF-1", 2);
+        }
+
+        private Tipo tipo(String nome) {
+            Tipo tipo = new Tipo();
+            tipo.setNome(nome);
+            return tipo;
+        }
+
+        private Status status(String nome) {
+            Status status = new Status();
+            status.setNome(nome);
+            return status;
+        }
+
+        private Periodo periodoAberto(Integer id) {
+            Periodo periodo = new Periodo();
+            periodo.setId(id);
+            periodo.setFechado(false);
+            return periodo;
         }
     }
 
