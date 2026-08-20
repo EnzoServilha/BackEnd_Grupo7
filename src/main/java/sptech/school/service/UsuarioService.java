@@ -1,7 +1,6 @@
 package sptech.school.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,7 +13,6 @@ import sptech.school.config.GerenciadorTokenJwt;
 import sptech.school.dto.usuario.*;
 
 import sptech.school.entity.Permissao;
-import sptech.school.exception.AcessoNegadoexception;
 import sptech.school.exception.PermissaoNaoEncontradaException;
 import sptech.school.exception.SenhaInvalidaException;
 import sptech.school.exception.UsuarioNaoEncontradoException;
@@ -75,8 +73,10 @@ public class UsuarioService {
   }
 
   public List<UsuarioResponseDto> listarTodos() {
-      List<Usuario> usuariosEncontrados = usuarioRepository.findAll();
-      return UsuarioMapper.toResponseDtoList(usuariosEncontrados);
+
+    List<Usuario> usuariosEncontrados = usuarioRepository.findAll();
+    return UsuarioMapper.toResponseDtoList(usuariosEncontrados);
+
   }
 
   public UsuarioResponseDto buscarPorId(Long id) {
@@ -130,12 +130,5 @@ public class UsuarioService {
     Usuario usuario = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
     return UsuarioMapper.toResponseDto(usuario);
-  }
-
-  public void verificarAcesso(UsuarioResponseDto logado) {
-    if (logado.getPermissao() == null ||
-            !logado.getPermissao().nome().equals("ROLE_ADMIN")) {
-      throw new AcessoNegadoexception("Você não tem permissão para acessar!");
-    }
   }
 }
