@@ -171,6 +171,7 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
+
     @GetMapping("/me")
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<UsuarioResponseDto> buscarUsuarioLogado() {
