@@ -5,9 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.item.ItemRequestDto;
 import sptech.school.dto.item.ItemResponseDto;
+import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.entity.Item;
 import sptech.school.mapper.ItemMapper;
 import sptech.school.service.ItemService;
+import sptech.school.service.UsuarioService;
 
 import java.util.List;
 
@@ -16,9 +18,11 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemService;
+    private final UsuarioService usuarioService;
 
-    public ItemController(ItemService itemService) {
+    public ItemController(ItemService itemService, UsuarioService usuarioService) {
         this.itemService = itemService;
+        this.usuarioService = usuarioService;
     }
 
     @GetMapping
@@ -63,6 +67,9 @@ public class ItemController {
 
     @PostMapping
     public ResponseEntity<ItemResponseDto> cadastrar(@RequestBody @Valid ItemRequestDto request) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         Item item = ItemMapper.toEntity(request);
         Item salvo = itemService.cadastrar(item, request.codigosAssociadosIds(), request.itensSimilaresIds());
         return ResponseEntity.created(null).body(ItemMapper.toResponseDto(salvo));
@@ -72,6 +79,9 @@ public class ItemController {
     public ResponseEntity<ItemResponseDto> atualizar(
             @PathVariable Integer id,
             @RequestBody @Valid ItemRequestDto request) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         Item item = ItemMapper.toEntity(request);
         Item atualizado = itemService.atualizar(id, item);
         return ResponseEntity.ok(ItemMapper.toResponseDto(atualizado));
@@ -79,6 +89,9 @@ public class ItemController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         itemService.deletar(id);
         return ResponseEntity.noContent().build();
     }
@@ -87,6 +100,9 @@ public class ItemController {
     public ResponseEntity<ItemResponseDto> adicionarCodigoAssociado(
             @PathVariable Integer itemId,
             @PathVariable Integer codigoAssociadoId) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         Item item = itemService.adicionarCodigoAssociado(itemId, codigoAssociadoId);
         return ResponseEntity.ok(ItemMapper.toResponseDto(item));
     }
@@ -94,6 +110,9 @@ public class ItemController {
     @DeleteMapping("/{itemId}/codigos-associados/{codigoAssociadoId}")
     public ResponseEntity<Void> removerCodigoAssociado(@PathVariable Integer itemId,
                                                        @PathVariable Integer codigoAssociadoId) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         itemService.removerCodigoAssociado(itemId, codigoAssociadoId);
         return ResponseEntity.noContent().build();
     }

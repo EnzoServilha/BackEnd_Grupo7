@@ -6,16 +6,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.categoria.CategoriaRequestDto;
 import sptech.school.dto.categoria.CategoriaResponseDto;
+import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.service.CategoriaService;
+import sptech.school.service.UsuarioService;
 
 @RestController
 @RequestMapping("/categorias")
 public class CategoriaController {
 
     private CategoriaService service;
+    private final UsuarioService usuarioService;
 
-    public CategoriaController(CategoriaService service) {
+    public CategoriaController(CategoriaService service, UsuarioService usuarioService) {
         this.service = service;
+        this.usuarioService = usuarioService;
     }
 
     @GetMapping("/{nome}")
@@ -30,12 +34,17 @@ public class CategoriaController {
 
     @PostMapping
     public ResponseEntity<CategoriaResponseDto> criar(@RequestBody @Valid CategoriaRequestDto requestDto){
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         return ResponseEntity.status(200).body(service.criar(requestDto));
     }
 
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Null> deletar(@PathVariable Integer id){
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
 
         service.deletar(id);
 

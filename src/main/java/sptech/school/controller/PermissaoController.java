@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.permissao.PermissaoRequestDto;
 import sptech.school.dto.permissao.PermissaoResponseDto;
 import sptech.school.service.PermissaoService;
+import sptech.school.dto.usuario.UsuarioResponseDto;
+import sptech.school.service.UsuarioService;
 
 import java.util.List;
 
@@ -14,14 +16,19 @@ import java.util.List;
 @RequestMapping("/permissoes")
 public class PermissaoController {
     private final PermissaoService permissaoService;
+    private final UsuarioService usuarioService;
 
-    public PermissaoController(PermissaoService permissaoService) {
+    public PermissaoController(PermissaoService permissaoService, UsuarioService usuarioService) {
         this.permissaoService = permissaoService;
+        this.usuarioService = usuarioService;
     }
 
     @PostMapping
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<PermissaoResponseDto> criar(@RequestBody @Valid PermissaoRequestDto dto) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         return ResponseEntity.status(201).body(permissaoService.criar(dto));
     }
 
@@ -42,12 +49,18 @@ public class PermissaoController {
     @PutMapping("/{id}")
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<PermissaoResponseDto> atualizar(@PathVariable Integer id, @RequestBody @Valid PermissaoRequestDto dto) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         return ResponseEntity.ok(permissaoService.atualizar(id, dto));
     }
 
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         permissaoService.deletar(id);
         return ResponseEntity.noContent().build();
     }

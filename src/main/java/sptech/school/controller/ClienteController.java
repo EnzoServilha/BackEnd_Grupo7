@@ -5,9 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.cliente.ClienteRequestDto;
 import sptech.school.dto.cliente.ClienteResponseDto;
+import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.entity.*;
 import sptech.school.mapper.ClienteMapper;
 import sptech.school.service.ClienteService;
+import sptech.school.service.UsuarioService;
 
 import java.util.List;
 @RestController
@@ -15,9 +17,11 @@ import java.util.List;
 public class ClienteController {
 
     private ClienteService clienteService;
+    private final UsuarioService usuarioService;
 
-    public ClienteController(ClienteService clienteService) {
+    public ClienteController(ClienteService clienteService, UsuarioService usuarioService) {
         this.clienteService = clienteService;
+        this.usuarioService = usuarioService;
     }
 
 
@@ -37,6 +41,8 @@ public class ClienteController {
 
     @PostMapping
     public ResponseEntity<ClienteResponseDto> cadastrar(@RequestBody @Valid ClienteRequestDto request) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
 
         ClienteResponseDto salvo = clienteService.cadastrar(request);
 
@@ -49,6 +55,8 @@ public class ClienteController {
             @PathVariable Integer id,
             @RequestBody @Valid ClienteRequestDto request
     ) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
 
         ClienteResponseDto atualizado = clienteService.atualizar( request, id);
 
@@ -58,6 +66,9 @@ public class ClienteController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         clienteService.deletar(id);
         return ResponseEntity.noContent().build();
     }

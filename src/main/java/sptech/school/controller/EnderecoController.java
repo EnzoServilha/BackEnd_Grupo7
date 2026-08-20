@@ -5,9 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.endereco.EnderecoRequestDto;
 import sptech.school.dto.endereco.EnderecoResponseDto;
+import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.entity.Endereco;
 import sptech.school.mapper.EnderecoMapper;
 import sptech.school.service.EnderecoService;
+import sptech.school.service.UsuarioService;
 
 import java.util.List;
 
@@ -16,9 +18,11 @@ import java.util.List;
 public class EnderecoController {
 
     private EnderecoService enderecoService;
+    private final UsuarioService usuarioService;
 
-    public EnderecoController(EnderecoService enderecoService) {
+    public EnderecoController(EnderecoService enderecoService, UsuarioService usuarioService) {
         this.enderecoService = enderecoService;
+        this.usuarioService = usuarioService;
     }
 
     // ----------------------------------------------------------------------------------------------------
@@ -52,6 +56,9 @@ public class EnderecoController {
     // ----------------------------------------------------------------------------------------------------
     @PostMapping
     public ResponseEntity<EnderecoResponseDto> cadastrar(@RequestBody @Valid EnderecoRequestDto request) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         Endereco endereco = EnderecoMapper.toEntity(request);
 
         Endereco salvo = enderecoService.cadastrar(endereco);
@@ -67,6 +74,9 @@ public class EnderecoController {
             @PathVariable Integer id,
             @RequestBody @Valid EnderecoRequestDto request
     ) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         Endereco endereco = EnderecoMapper.toEntity(request);
 
         Endereco atualizado = enderecoService.atualizar(id, endereco);
@@ -79,6 +89,9 @@ public class EnderecoController {
     // ----------------------------------------------------------------------------------------------------
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         enderecoService.deletar(id);
         return ResponseEntity.noContent().build();
     }

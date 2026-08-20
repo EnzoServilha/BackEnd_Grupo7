@@ -6,7 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
+import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.service.MovimentacaoEstoqueService;
+import sptech.school.service.UsuarioService;
 
 import java.util.List;
 
@@ -15,9 +17,11 @@ import java.util.List;
 public class MovimentacaoEstoqueController {
 
     private final MovimentacaoEstoqueService service;
+    private final UsuarioService usuarioService;
 
-    public MovimentacaoEstoqueController(MovimentacaoEstoqueService service) {
+    public MovimentacaoEstoqueController(MovimentacaoEstoqueService service, UsuarioService usuarioService) {
         this.service = service;
+        this.usuarioService = usuarioService;
     }
 
     @GetMapping("/{id}")
@@ -42,16 +46,24 @@ public class MovimentacaoEstoqueController {
 
     @PostMapping
     public ResponseEntity<MovimentacaoEstoqueResponseDto> criar(@RequestBody @Valid MovimentacaoEstoqueRequestDto requestDto){
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         return ResponseEntity.status(201).body(service.criar(requestDto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<MovimentacaoEstoqueResponseDto> editar(@RequestBody @Valid MovimentacaoEstoqueRequestDto requestDto, @PathVariable Integer id){
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         return ResponseEntity.status(200).body(service.editar(requestDto, id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Null> deletar(@PathVariable Integer id){
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
 
         service.deletar(id);
 

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.fornecedor.FornecedorRequestDto;
 import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.service.FornecedorService;
+import sptech.school.dto.usuario.UsuarioResponseDto;
+import sptech.school.service.UsuarioService;
 
 import java.util.List;
 
@@ -15,9 +17,11 @@ import java.util.List;
 public class FornecedorController {
 
     private final FornecedorService service;
+    private final UsuarioService usuarioService;
 
-    public FornecedorController(FornecedorService service) {
+    public FornecedorController(FornecedorService service, UsuarioService usuarioService) {
         this.service = service;
+        this.usuarioService = usuarioService;
     }
 
     @GetMapping
@@ -52,16 +56,24 @@ public class FornecedorController {
 
     @PostMapping
     public ResponseEntity<FornecedorResponseDto> criar(@RequestBody @Valid FornecedorRequestDto requestDto){
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         return ResponseEntity.status(201).body(service.criar(requestDto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<FornecedorResponseDto> atualizar(@RequestBody @Valid FornecedorRequestDto requestDto, @PathVariable Integer id){
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         return ResponseEntity.status(200).body(service.atualizar(requestDto, id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Null> deletar(@PathVariable Integer id){
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
 
         service.deletar(id);
 

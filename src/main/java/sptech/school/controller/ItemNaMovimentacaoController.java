@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoRequestDto;
 import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoResponseDto;
 import sptech.school.service.ItemNaMovimentacaoService;
+import sptech.school.dto.usuario.UsuarioResponseDto;
+import sptech.school.service.UsuarioService;
 
 import java.util.List;
 
@@ -15,9 +17,11 @@ import java.util.List;
 public class ItemNaMovimentacaoController {
 
     private final ItemNaMovimentacaoService service;
+    private final UsuarioService usuarioService;
 
-    public ItemNaMovimentacaoController(ItemNaMovimentacaoService service) {
+    public ItemNaMovimentacaoController(ItemNaMovimentacaoService service, UsuarioService usuarioService) {
         this.service = service;
+        this.usuarioService = usuarioService;
     }
 
 
@@ -38,16 +42,25 @@ public class ItemNaMovimentacaoController {
 
     @PostMapping
     public ResponseEntity<ItensNaMovimentacaoResponseDto> criar(@RequestBody @Valid ItensNaMovimentacaoRequestDto requestDto){
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         return ResponseEntity.status(201).body(service.criar(requestDto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ItensNaMovimentacaoResponseDto> editar(@RequestBody @Valid ItensNaMovimentacaoRequestDto requestDto, @PathVariable Integer id){
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         return ResponseEntity.status(200).body(service.editar(requestDto, id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Null> deletar(@PathVariable Integer id){
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         service.deletar(id);
 
         return ResponseEntity.status(204).build();
