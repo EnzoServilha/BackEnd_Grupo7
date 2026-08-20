@@ -38,6 +38,10 @@ public class UsuarioController {
     @PostMapping
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<Void> criar(@RequestBody @Valid UsuarioCriacaoDto usuarioCriacaoDto) {
+
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         final Usuario novoUsuario = UsuarioMapper.of(usuarioCriacaoDto);
         this.usuarioService.criar(novoUsuario);
         return ResponseEntity.status(201).build();
@@ -130,6 +134,9 @@ public class UsuarioController {
     @PutMapping("/{id}")
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<Void> atualizar(@PathVariable Long id, @RequestBody @Valid UsuarioCriacaoDto dto) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         usuarioService.atualizar(id, dto);
         return ResponseEntity.noContent().build();
     }
@@ -137,6 +144,9 @@ public class UsuarioController {
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         usuarioService.deletar(id);
         return ResponseEntity.noContent().build();
     }
@@ -144,6 +154,9 @@ public class UsuarioController {
     @PatchMapping("/{id}/permissao/{permissaoId}")
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<Void> atualizarPermissao(@PathVariable Long id, @PathVariable Integer permissaoId) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         usuarioService.atualizarPermissao(id, permissaoId);
         return ResponseEntity.noContent().build();
     }
@@ -151,6 +164,9 @@ public class UsuarioController {
     @PatchMapping("/{id}/senha")
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<Void> alterarSenha(@PathVariable Long id, @RequestBody @Valid UsuarioSenhaDto dto) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         usuarioService.alterarSenha(id, dto);
         return ResponseEntity.noContent().build();
     }

@@ -27,7 +27,7 @@ public class EmailPeriodoListener implements EventListener{
             System.out.println("TESTANDO");
             SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
             simpleMailMessage.setFrom(emailRemetente);
-            simpleMailMessage.setTo("erick.ferreira@sptech.school");
+            simpleMailMessage.setTo("enzo.servilha@sptech.school");
             simpleMailMessage.setText(mensagem);
             javaMailSender.send(simpleMailMessage);
             System.out.println("FOI");
