@@ -147,7 +147,7 @@ public class MovimentacaoEstoqueService {
     public MovimentacaoEstoqueResponseDto editar(MovimentacaoEstoqueRequestDto request, Integer id, String emailUsuario){
          MovimentacaoEstoque movimentacao = movimentacaoRepository.findById(id)
              .orElseThrow(() -> new MovimentacaoNaoEncontrada("Movimentação não encontrada para edição"));
-         validarPendente(movimentacao);
+         validarEdicao(movimentacao);
 
          MovimentacaoEstoqueMapper.atualizar(movimentacao, request);
          preencher(movimentacao, request, emailUsuario);
@@ -221,6 +221,13 @@ public class MovimentacaoEstoqueService {
     private void validarPendente(MovimentacaoEstoque movimentacao) {
         if (movimentacao.getStatus() == null || !"PENDENTE".equals(movimentacao.getStatus().getNome())) {
             throw new EntidadeConflitanteException("Somente movimentações pendentes podem ser alteradas ou canceladas");
+        }
+    }
+
+    private void validarEdicao(MovimentacaoEstoque movimentacao) {
+        validarPendente(movimentacao);
+        if (movimentacao.getTipo() != null && "COTACAO".equals(movimentacao.getTipo().getNome())) {
+            throw new EntidadeConflitanteException("Cotações são imutáveis e não podem ser editadas");
         }
     }
 

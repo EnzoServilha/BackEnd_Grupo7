@@ -114,6 +114,21 @@ class MovimentacaoEstoqueServiceTest {
             assertSame(periodoAberto, movimentacao.getPeriodo());
             verify(movimentacaoRepository).save(movimentacao);
         }
+
+        @Test
+        @DisplayName("Deve rejeitar edição de cotação pendente")
+        void deveRejeitarEdicaoDeCotacao() {
+            MovimentacaoEstoque cotacao = new MovimentacaoEstoque();
+            cotacao.setTipo(tipo("COTACAO"));
+            cotacao.setStatus(status("PENDENTE"));
+            when(movimentacaoRepository.findById(10)).thenReturn(Optional.of(cotacao));
+
+            assertThrows(EntidadeConflitanteException.class,
+                    () -> service.editar(criarRequest(2), 10, "usuario@teste.com"));
+
+            verify(movimentacaoRepository, never()).save(any());
+            verifyNoInteractions(usuarioRepository, periodoRepository);
+        }
     }
 
     @Nested
@@ -256,5 +271,33 @@ class MovimentacaoEstoqueServiceTest {
 
             verify(movimentacaoRepository).findById(99);
         }
+
+        @Test
+        @DisplayName("Deve permitir cancelar cotação pendente sem alterar seu conteúdo")
+        void devePermitirCancelarCotacaoPendente() {
+            MovimentacaoEstoque cotacao = new MovimentacaoEstoque();
+            cotacao.setTipo(tipo("COTACAO"));
+            cotacao.setStatus(status("PENDENTE"));
+            Status cancelado = status("CANCELADO");
+            when(movimentacaoRepository.findById(10)).thenReturn(Optional.of(cotacao));
+            when(statusRepository.findByNome("CANCELADO")).thenReturn(Optional.of(cancelado));
+
+            service.cancelar(10);
+
+            assertSame(cancelado, cotacao.getStatus());
+            verify(movimentacaoRepository).save(cotacao);
+        }
+    }
+
+    private Tipo tipo(String nome) {
+        Tipo tipo = new Tipo();
+        tipo.setNome(nome);
+        return tipo;
+    }
+
+    private Status status(String nome) {
+        Status status = new Status();
+        status.setNome(nome);
+        return status;
     }
 }

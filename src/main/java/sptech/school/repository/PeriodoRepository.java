@@ -36,6 +36,7 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
         JOIN me.tipo t
                 WHERE p.id = :idPeriodo
                     AND me.status.nome = 'CONCLUIDO'
+                    AND me.status.nome <> 'CANCELADO'
     """)
     Integer pegarTotalDePecasDoPeriodo(@Param("idPeriodo") Integer idPeriodo);
 
@@ -53,6 +54,7 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
     JOIN me.tipo t
         WHERE me.periodo.id = :idPeriodo
             AND me.status.nome = 'CONCLUIDO'
+            AND me.status.nome <> 'CANCELADO'
     GROUP BY itm.item.id
 """)
     List<PeriodoQtdPecasDTO> pegarSaldoPorItemDoPeriodo(@Param("idPeriodo") Integer idPeriodo);
