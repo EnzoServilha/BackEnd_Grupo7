@@ -165,7 +165,8 @@ class MovimentacaoEstoqueServiceTest {
             when(tipoRepository.findByNome("SAIDA")).thenReturn(Optional.of(saida));
             when(statusRepository.findByNome("CONCLUIDO")).thenReturn(Optional.of(concluido));
             when(statusRepository.findByNome("CONCLUIDO PARCIAL")).thenReturn(Optional.of(concluidoParcial));
-            when(periodoRepository.findById(2)).thenReturn(Optional.of(periodo));
+            when(periodoRepository.buscarPeriodoAbertoComBloqueio(2)).thenReturn(Optional.of(periodo));
+            when(periodoRepository.pegarSaldoDisponivelDoItem(2, 1)).thenReturn(10L);
             when(movimentacaoRepository.save(any(MovimentacaoEstoque.class))).thenAnswer(invocation -> {
                 MovimentacaoEstoque movimentacao = invocation.getArgument(0);
                 if (movimentacao.getId() == null) {
@@ -195,7 +196,8 @@ class MovimentacaoEstoqueServiceTest {
             when(usuarioRepository.findByEmailAndAtivoTrue("usuario@teste.com")).thenReturn(Optional.of(new Usuario()));
             when(tipoRepository.findByNome("SAIDA")).thenReturn(Optional.of(tipo("SAIDA")));
             when(statusRepository.findByNome("CONCLUIDO")).thenReturn(Optional.of(concluido));
-            when(periodoRepository.findById(2)).thenReturn(Optional.of(periodoAberto(2)));
+            when(periodoRepository.buscarPeriodoAbertoComBloqueio(2)).thenReturn(Optional.of(periodoAberto(2)));
+            when(periodoRepository.pegarSaldoDisponivelDoItem(2, 1)).thenReturn(5L);
             when(movimentacaoRepository.save(any(MovimentacaoEstoque.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             service.fecharCotacao(10, requestFechamento(5), "usuario@teste.com");
@@ -207,12 +209,49 @@ class MovimentacaoEstoqueServiceTest {
         @DisplayName("Deve rejeitar quantidade superior à cotada")
         void deveRejeitarQuantidadeSuperior() {
             MovimentacaoEstoque cotacao = criarCotacaoPendente(5);
+            when(periodoRepository.buscarPeriodoAbertoComBloqueio(2))
+                    .thenReturn(Optional.of(periodoAberto(2)));
             when(movimentacaoRepository.buscarPorIdComBloqueio(10)).thenReturn(Optional.of(cotacao));
 
             assertThrows(EntidadeConflitanteException.class,
                     () -> service.fecharCotacao(10, requestFechamento(6), "usuario@teste.com"));
 
             verify(movimentacaoRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Deve rejeitar fechamento quando o estoque for insuficiente")
+        void deveRejeitarEstoqueInsuficiente() {
+            MovimentacaoEstoque cotacao = criarCotacaoPendente(5);
+            when(movimentacaoRepository.buscarPorIdComBloqueio(10)).thenReturn(Optional.of(cotacao));
+            when(periodoRepository.buscarPeriodoAbertoComBloqueio(2))
+                    .thenReturn(Optional.of(periodoAberto(2)));
+            when(periodoRepository.pegarSaldoDisponivelDoItem(2, 1)).thenReturn(2L);
+
+            EntidadeConflitanteException exception = assertThrows(EntidadeConflitanteException.class,
+                    () -> service.fecharCotacao(10, requestFechamento(3), "usuario@teste.com"));
+
+            assertEquals("Estoque insuficiente para o item 1. Quantidade solicitada: 3. "
+                    + "Quantidade disponível: 2", exception.getMessage());
+            verify(movimentacaoRepository, never()).save(any());
+            verify(itensNaMovimentacaoRepository, never()).saveAll(any());
+            verifyNoInteractions(usuarioRepository);
+        }
+
+        @Test
+        @DisplayName("Deve rejeitar fechamento quando não houver estoque")
+        void deveRejeitarEstoqueZero() {
+            MovimentacaoEstoque cotacao = criarCotacaoPendente(5);
+            when(movimentacaoRepository.buscarPorIdComBloqueio(10)).thenReturn(Optional.of(cotacao));
+            when(periodoRepository.buscarPeriodoAbertoComBloqueio(2))
+                    .thenReturn(Optional.of(periodoAberto(2)));
+            when(periodoRepository.pegarSaldoDisponivelDoItem(2, 1)).thenReturn(0L);
+
+            assertThrows(EntidadeConflitanteException.class,
+                    () -> service.fecharCotacao(10, requestFechamento(1), "usuario@teste.com"));
+
+            verify(movimentacaoRepository, never()).save(any());
+            verify(itensNaMovimentacaoRepository, never()).saveAll(any());
         }
 
         private MovimentacaoEstoque criarCotacaoPendente(int quantidade) {
