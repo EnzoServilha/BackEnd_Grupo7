@@ -1,12 +1,12 @@
-spring.web.error.include-message=always
-spring.web.error.include-binding-errors=always
+server.error.include-message=${SERVER_ERROR_INCLUDE_MESSAGE:never}
+server.error.include-binding-errors=${SERVER_ERROR_INCLUDE_BINDING_ERRORS:never}
 
 # =============================================================================
 # BANCO DE DADOS H2 (apenas para desenvolvimento/testes)
 # Em produção, substitua pelo driver do banco real (PostgreSQL, MySQL etc.)
 # =============================================================================
 spring.datasource.url=jdbc:h2:mem:teste-security
-spring.h2.console.enabled=true
+spring.h2.console.enabled=${H2_CONSOLE_ENABLED:false}
 spring.datasource.username=${DB_USERNAME:admin}
 spring.datasource.password=${DB_PASSWORD:admin}
 spring.jpa.hibernate.ddl-auto=create-drop
@@ -15,7 +15,7 @@ spring.sql.init.mode=always
 # Garante que o data.sql seja executado após o schema JPA ser criado
 spring.jpa.defer-datasource-initialization=true
 
-logging.level.org.springframework.security=TRACE
+logging.level.org.springframework.security=${SPRING_SECURITY_LOG_LEVEL:WARN}
 
 # =============================================================================
 # CONFIGURAÇÕES JWT

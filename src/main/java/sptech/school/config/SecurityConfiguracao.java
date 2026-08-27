@@ -76,7 +76,6 @@ public class SecurityConfiguracao {
             "/api/public/authenticate",
             "/webjars/**",
             "/v3/api-docs/**",
-            "/actuator/*",
             "/usuarios/login",
             "/usuarios/login/**",
             "/usuarios/logout/**",
@@ -227,8 +226,7 @@ public class SecurityConfiguracao {
                 HttpMethod.PATCH.name(),
                 HttpMethod.DELETE.name(),
                 HttpMethod.OPTIONS.name(),
-                HttpMethod.HEAD.name(),
-                HttpMethod.TRACE.name()
+                HttpMethod.HEAD.name()
         ));
 
         // Permite todos os headers de requisição (Content-Type, Authorization etc.)
