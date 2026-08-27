@@ -1,6 +1,7 @@
 package sptech.school.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,11 +9,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 //import sptech.school.dto.*;
 import sptech.school.dto.usuario.*;
 import sptech.school.entity.Usuario;
 import sptech.school.mapper.UsuarioMapper;
+import sptech.school.service.TentativaLoginService;
 import sptech.school.service.UsuarioService;
 
 import java.time.Duration;
@@ -33,9 +36,11 @@ public class UsuarioController {
 
     @Autowired
     private final UsuarioService usuarioService;
+    private final TentativaLoginService tentativaLoginService;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, TentativaLoginService tentativaLoginService) {
         this.usuarioService = usuarioService;
+        this.tentativaLoginService = tentativaLoginService;
     }
 
     @PostMapping
@@ -67,13 +72,24 @@ public class UsuarioController {
      */
     @PostMapping("/login")
     public ResponseEntity<UsuarioSessaoDto> login(
-            @RequestBody UsuarioLoginDto usuarioLoginDto,
+            @RequestBody @Valid UsuarioLoginDto usuarioLoginDto,
+            HttpServletRequest request,
             HttpServletResponse response) {
+
+        String ipOrigem = request.getRemoteAddr();
+        tentativaLoginService.verificarBloqueio(usuarioLoginDto.getEmail(), ipOrigem);
 
         final Usuario usuario = UsuarioMapper.of(usuarioLoginDto);
 
         // autenticar() gera o token internamente — precisamos dele apenas para o cookie
-        UsuarioTokenDto autenticado = this.usuarioService.autenticar(usuario);
+        UsuarioTokenDto autenticado;
+        try {
+            autenticado = this.usuarioService.autenticar(usuario);
+            tentativaLoginService.registrarSucesso(usuarioLoginDto.getEmail(), ipOrigem);
+        } catch (AuthenticationException e) {
+            tentativaLoginService.registrarFalha(usuarioLoginDto.getEmail(), ipOrigem);
+            throw e;
+        }
 
         // Token vai para o cookie HttpOnly — inacessível ao JavaScript (proteção XSS)
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NOME, autenticado.getToken())

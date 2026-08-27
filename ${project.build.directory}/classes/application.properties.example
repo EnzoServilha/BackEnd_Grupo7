@@ -35,3 +35,9 @@ jwt.validity=${JWT_VALIDITY:3600}
 #   - Nunca commite chaves reais no repositório Git
 
 jwt.secret=${JWT_SECRET:}
+
+# =============================================================================
+# PROTEÇÃO CONTRA BRUTE FORCE NO LOGIN
+# =============================================================================
+security.login.max-failed-attempts=${LOGIN_MAX_FAILED_ATTEMPTS:5}
+security.login.lock-duration-minutes=${LOGIN_LOCK_DURATION_MINUTES:15}
