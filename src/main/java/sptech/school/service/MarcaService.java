@@ -7,6 +7,7 @@ import sptech.school.entity.Marca;
 import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.mapper.MarcaMapper;
 import sptech.school.repository.MarcaRepository;
+import sptech.school.util.BuscaSanitizer;
 
 @Service
 public class MarcaService {
@@ -17,7 +18,7 @@ public class MarcaService {
     }
 
     public MarcaResponseDto buscarPorNome(String nome) {
-        Marca marca = repository.findByNomeEmpresaContaining(nome);
+        Marca marca = repository.findByNomeEmpresaContaining(BuscaSanitizer.escaparLike(nome));
         if (marca == null) return null;
         return MarcaMapper.toResponseDto(marca);
     }

@@ -1,5 +1,6 @@
 package sptech.school.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -43,6 +44,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleValidacaoParametro(ConstraintViolationException ex) {
+        List<String> erros = ex.getConstraintViolations().stream()
+                .map(e -> e.getPropertyPath() + ": " + e.getMessage())
+                .toList();
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("erro", "Erro de validação");
+        body.put("detalhes", erros);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
     private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String mensagem) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
@@ -52,4 +67,3 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(body);
     }
 }
-

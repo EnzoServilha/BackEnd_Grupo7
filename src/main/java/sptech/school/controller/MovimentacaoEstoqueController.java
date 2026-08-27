@@ -1,8 +1,12 @@
 package sptech.school.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
@@ -14,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/movimentacoes")
+@Validated
 public class MovimentacaoEstoqueController {
 
     private final MovimentacaoEstoqueService service;
@@ -35,12 +40,22 @@ public class MovimentacaoEstoqueController {
     }
 
     @GetMapping("/tipo/{tipo}")
-    public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> buscarPorTipo(@PathVariable String tipo){
+    public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> buscarPorTipo(
+            @PathVariable
+            @NotBlank
+            @Size(max = 45)
+            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            String tipo){
         return ResponseEntity.status(200).body(service.buscarPorTipo(tipo));
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> buscarPorStatus(@PathVariable String status){
+    public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> buscarPorStatus(
+            @PathVariable
+            @NotBlank
+            @Size(max = 45)
+            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            String status){
         return ResponseEntity.status(200).body(service.buscarPorStatus(status));
     }
 

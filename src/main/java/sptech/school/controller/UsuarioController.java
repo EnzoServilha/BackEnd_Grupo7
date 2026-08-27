@@ -28,6 +28,9 @@ public class UsuarioController {
     @Value("${jwt.validity}")
     private long jwtValidity;
 
+    @Value("${COOKIE_SECURE:true}")
+    private boolean secureCookie;
+
     @Autowired
     private final UsuarioService usuarioService;
 
@@ -75,7 +78,7 @@ public class UsuarioController {
         // Token vai para o cookie HttpOnly — inacessível ao JavaScript (proteção XSS)
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NOME, autenticado.getToken())
                 .httpOnly(true)                          // inacessível ao JavaScript
-                .secure(false)                           // true em produção (exige HTTPS)
+                .secure(secureCookie)
                 .sameSite("Strict")                      // bloqueia envio cross-site (mitiga CSRF)
                 .path("/")                               // valido para toda a aplicacao
                 .maxAge(Duration.ofSeconds(jwtValidity)) // expira junto com o token JWT
@@ -102,7 +105,7 @@ public class UsuarioController {
     public ResponseEntity<Void> logout(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NOME, "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(secureCookie)
                 .sameSite("Strict")
                 .path("/")
                 .maxAge(0)  // maxAge=0 instrui o browser a deletar o cookie imediatamente

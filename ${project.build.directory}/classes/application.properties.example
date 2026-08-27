@@ -26,17 +26,12 @@ logging.level.org.springframework.security=TRACE
 # Em produção: tokens de curta duração (15-60 min) + refresh token são mais seguros
 jwt.validity=${JWT_VALIDITY:3600}
 
-<<<<<<< ajustes-pos-testes
-jwt.secret=${JWT_SECRET:ZmFjdWxkYWRlc3B0ZWNoMjAyNnNlY3JldGtleWp3dGJhc2U2NA==}
-=======
 # Chave secreta para assinar os tokens (algoritmo HMAC-SHA256)
 # REQUISITOS:
 #   - Deve estar codificada em Base64
 #   - Mínimo de 32 bytes após decodificação (256 bits para HS256)
 # ATENÇÃO:
-#   - NUNCA use esta chave em produção
 #   - Em produção, defina a variável de ambiente JWT_SECRET com uma chave forte
 #   - Nunca commite chaves reais no repositório Git
 
 jwt.secret=${JWT_SECRET:}
->>>>>>> main

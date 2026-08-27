@@ -3,6 +3,7 @@ package sptech.school.config;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -17,8 +18,9 @@ import java.util.stream.Collectors;
 
 public class GerenciadorTokenJwt {
 
-     //A chave deve ser armazenada em Base64 no arquivo de propriedades</li>
+    private static final int TAMANHO_MINIMO_CHAVE_HS256_BYTES = 32;
 
+     //A chave deve ser armazenada em Base64 no arquivo de propriedades</li>
     @Value("${jwt.secret}")
     private String secret;
 
@@ -54,7 +56,7 @@ public class GerenciadorTokenJwt {
                 .claim("authorities", authorities)           // claim customizado: perfis do usuário
                 .issuedAt(new Date(System.currentTimeMillis()))                             // claim "iat"
                 .expiration(new Date(System.currentTimeMillis() + jwtTokenValidity * 1_000)) // claim "exp"
-                .signWith(parseSecret())                     // assina com HMAC-SHA256
+                .signWith(parseSecret(), Jwts.SIG.HS256)     // assina com HMAC-SHA256
                 .compact();                                  // serializa para String
     }
 
@@ -156,6 +158,21 @@ public class GerenciadorTokenJwt {
      * @return {@link SecretKey} pronta para uso na assinatura/verificação
      */
     private SecretKey parseSecret() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(this.secret));
+        if (this.secret == null || this.secret.isBlank()) {
+            throw new IllegalStateException("JWT_SECRET deve ser informado em Base64.");
+        }
+
+        byte[] chave;
+        try {
+            chave = Decoders.BASE64.decode(this.secret);
+        } catch (DecodingException e) {
+            throw new IllegalStateException("JWT_SECRET deve estar codificado em Base64.", e);
+        }
+
+        if (chave.length < TAMANHO_MINIMO_CHAVE_HS256_BYTES) {
+            throw new IllegalStateException("JWT_SECRET deve possuir ao menos 256 bits apos decodificar Base64.");
+        }
+
+        return Keys.hmacShaKeyFor(chave);
     }
 }

@@ -1,7 +1,11 @@
 package sptech.school.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.item.ItemRequestDto;
 import sptech.school.dto.item.ItemResponseDto;
@@ -15,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/itens")
+@Validated
 public class ItemController {
 
     private final ItemService itemService;
@@ -39,27 +44,47 @@ public class ItemController {
     }
 
     @GetMapping("/codigo/{codigoInterno}")
-    public ResponseEntity<ItemResponseDto> buscarPorCodigoInterno(@PathVariable String codigoInterno) {
+    public ResponseEntity<ItemResponseDto> buscarPorCodigoInterno(
+            @PathVariable
+            @NotBlank
+            @Size(max = 50)
+            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            String codigoInterno) {
         Item item = itemService.buscarPorCodigoInterno(codigoInterno);
         return ResponseEntity.ok(ItemMapper.toResponseDto(item));
     }
 
     @GetMapping("/marca/{marca}")
-    public ResponseEntity<List<ItemResponseDto>> listarPorMarca(@PathVariable String marca) {
+    public ResponseEntity<List<ItemResponseDto>> listarPorMarca(
+            @PathVariable
+            @NotBlank
+            @Size(max = 50)
+            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            String marca) {
         List<Item> itens = itemService.listarPorMarca(marca);
         if (itens.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(ItemMapper.toResponseDtoList(itens));
     }
 
     @GetMapping("/pesquisar")
-    public ResponseEntity<List<ItemResponseDto>> pesquisar(@RequestParam String termo) {
+    public ResponseEntity<List<ItemResponseDto>> pesquisar(
+            @RequestParam
+            @NotBlank
+            @Size(max = 100)
+            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            String termo) {
         List<Item> itens = itemService.pesquisar(termo);
         if (itens.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(ItemMapper.toResponseDtoList(itens));
     }
 
     @GetMapping("/por-codigo-associado")
-    public ResponseEntity<List<ItemResponseDto>> buscarPorCodigoAssociado(@RequestParam String codigo) {
+    public ResponseEntity<List<ItemResponseDto>> buscarPorCodigoAssociado(
+            @RequestParam
+            @NotBlank
+            @Size(max = 100)
+            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            String codigo) {
         List<Item> itens = itemService.buscarPorCodigoAssociado(codigo);
         if (itens.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(ItemMapper.toResponseDtoList(itens));

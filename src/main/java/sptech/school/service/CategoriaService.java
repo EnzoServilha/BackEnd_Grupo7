@@ -7,6 +7,7 @@ import sptech.school.entity.Categoria;
 import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.mapper.CategoriaMapper;
 import sptech.school.repository.CategoriaRepository;
+import sptech.school.util.BuscaSanitizer;
 
 @Service
 public class CategoriaService {
@@ -18,7 +19,7 @@ public class CategoriaService {
     }
 
     public CategoriaResponseDto buscarPorNome(String nome) {
-        Categoria categoria = repository.findByNomeContaining(nome);
+        Categoria categoria = repository.findByNomeContaining(BuscaSanitizer.escaparLike(nome));
         if (categoria == null) return null;
         return CategoriaMapper.toResponseDto(categoria);
     }

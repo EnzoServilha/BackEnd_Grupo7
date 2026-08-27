@@ -13,6 +13,7 @@ import sptech.school.repository.CategoriaRepository;
 import sptech.school.repository.EnderecoRepository;
 import sptech.school.repository.FornecedorRepository;
 import sptech.school.repository.MarcaRepository;
+import sptech.school.util.BuscaSanitizer;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,11 +41,11 @@ public class FornecedorService {
     }
 
     public List<FornecedorResponseDto> buscarPorNomeContato(String nomeContato) {
-        return FornecedorMapper.toResponseDtoList(repository.findByNomeContatoContaining(nomeContato)) ;
+        return FornecedorMapper.toResponseDtoList(repository.findByNomeContatoContaining(BuscaSanitizer.escaparLike(nomeContato))) ;
     }
 
     public List<FornecedorResponseDto> buscarPorNomeEmpresa(String nomeEmpresa) {
-        return FornecedorMapper.toResponseDtoList(repository.findByNomeEmpresaContaining(nomeEmpresa)) ;
+        return FornecedorMapper.toResponseDtoList(repository.findByNomeEmpresaContaining(BuscaSanitizer.escaparLike(nomeEmpresa))) ;
     }
 
     public List<FornecedorResponseDto> listarPorCategoria(Integer idCategoria) {
@@ -113,4 +114,3 @@ public class FornecedorService {
         }
     }
 }
-

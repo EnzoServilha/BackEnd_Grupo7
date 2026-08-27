@@ -1,8 +1,12 @@
 package sptech.school.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.categoria.CategoriaRequestDto;
 import sptech.school.dto.categoria.CategoriaResponseDto;
@@ -12,6 +16,7 @@ import sptech.school.service.UsuarioService;
 
 @RestController
 @RequestMapping("/categorias")
+@Validated
 public class CategoriaController {
 
     private CategoriaService service;
@@ -23,7 +28,12 @@ public class CategoriaController {
     }
 
     @GetMapping("/{nome}")
-    public ResponseEntity<CategoriaResponseDto> buscarPorNome(@PathVariable String nome){
+    public ResponseEntity<CategoriaResponseDto> buscarPorNome(
+            @PathVariable
+            @NotBlank
+            @Size(max = 100)
+            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            String nome){
         return ResponseEntity.status(200).body(service.buscarPorNome(nome));
     }
 

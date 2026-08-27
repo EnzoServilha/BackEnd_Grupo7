@@ -2,7 +2,11 @@ package sptech.school.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.fornecedor.FornecedorRequestDto;
 import sptech.school.dto.fornecedor.FornecedorResponseDto;
@@ -14,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/fornecedores")
+@Validated
 public class FornecedorController {
 
     private final FornecedorService service;
@@ -35,12 +40,22 @@ public class FornecedorController {
     }
 
     @GetMapping("/buscarPorNome/{nome}")
-    public  ResponseEntity<List<FornecedorResponseDto>> buscarPorNomeContato(@PathVariable String nome){
+    public  ResponseEntity<List<FornecedorResponseDto>> buscarPorNomeContato(
+            @PathVariable
+            @NotBlank
+            @Size(max = 150)
+            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            String nome){
         return ResponseEntity.status(200).body(service.buscarPorNomeContato(nome));
     }
 
     @GetMapping("/buscarPorEmpresa/{empresa}")
-    public ResponseEntity<List<FornecedorResponseDto>> buscarPorNomeEmpresa(@PathVariable String empresa){
+    public ResponseEntity<List<FornecedorResponseDto>> buscarPorNomeEmpresa(
+            @PathVariable
+            @NotBlank
+            @Size(max = 150)
+            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            String empresa){
         return ResponseEntity.status(200).body(service.buscarPorNomeEmpresa(empresa));
     }
 

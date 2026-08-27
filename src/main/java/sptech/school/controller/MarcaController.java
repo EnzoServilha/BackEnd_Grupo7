@@ -1,8 +1,12 @@
 package sptech.school.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.marca.MarcaRequestDto;
 import sptech.school.dto.marca.MarcaResponseDto;
@@ -12,6 +16,7 @@ import sptech.school.service.UsuarioService;
 
 @RestController
 @RequestMapping("/marcas")
+@Validated
 public class MarcaController {
 
     private MarcaService service;
@@ -23,7 +28,12 @@ public class MarcaController {
     }
 
     @GetMapping("/{nome}")
-    public ResponseEntity<MarcaResponseDto> buscarPorNome(@PathVariable String nome){
+    public ResponseEntity<MarcaResponseDto> buscarPorNome(
+            @PathVariable
+            @NotBlank
+            @Size(max = 100)
+            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            String nome){
         return ResponseEntity.status(200).body(service.buscarPorNome(nome));
     }
 
