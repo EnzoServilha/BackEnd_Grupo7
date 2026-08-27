@@ -2,21 +2,31 @@ package sptech.school.dto.usuario;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class UsuarioCriacaoDto {
 
+  @NotBlank
   @Size(min = 3, max = 10)
   @Schema(description = "Nome do usuário", example = "John Doe")
   private String nome;
 
+  @NotBlank
   @Email
+  @Size(max = 150)
   @Schema(description = "Email do usuário", example = "john@doe.com")
   private String email;
 
-  @Size(min = 6, max = 20)
-  @Schema(description = "Senha do usuário", example = "123456")
+  @NotBlank
+  @Size(min = 8, max = 72)
+  @Pattern(
+          regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^\\p{L}\\p{N}\\s])\\S+$",
+          message = "A senha deve conter letra maiúscula, letra minúscula, número, caractere especial e não pode ter espaços"
+  )
+  @Schema(description = "Senha do usuário", example = "Senha@123")
   private String senha;
 
   @NotNull

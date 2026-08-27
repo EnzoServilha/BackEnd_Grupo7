@@ -14,8 +14,8 @@ public class UsuarioLoginDto {
   private String email;
 
   @NotBlank
-  @Size(min = 6, max = 100)
-  @Schema(description = "Senha do usuário", example = "123456")
+  @Size(max = 72)
+  @Schema(description = "Senha do usuário", example = "Senha@123")
   private String senha;
 
   public String getEmail() {

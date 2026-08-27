@@ -1,17 +1,25 @@
 package sptech.school.dto.usuario;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class UsuarioSenhaDto {
 
 
-    @Size(min = 6, max = 20)
-    @Schema(description = "Senha atual do usuário", example = "123456")
+    @NotBlank
+    @Size(max = 72)
+    @Schema(description = "Senha atual do usuário", example = "SenhaAtual@123")
     private String senhaAtual;
 
-    @Size(min = 6, max = 20)
-    @Schema(description = "Nova senha do usuário", example = "novaSenha123")
+    @NotBlank
+    @Size(min = 8, max = 72)
+    @Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^\\p{L}\\p{N}\\s])\\S+$",
+            message = "A senha deve conter letra maiúscula, letra minúscula, número, caractere especial e não pode ter espaços"
+    )
+    @Schema(description = "Nova senha do usuário", example = "NovaSenha@123")
     private String novaSenha;
 
     public String getSenhaAtual() {
