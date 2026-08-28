@@ -7,6 +7,7 @@ import sptech.school.entity.Item;
 import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.repository.CodigoAssociadoRepository;
 import sptech.school.repository.ItemRepository;
+import sptech.school.util.BuscaSanitizer;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,16 +45,17 @@ public class ItemService {
     }
 
     public List<Item> listarPorMarca(String marca) {
-        return itemRepository.findByMarcaContainingIgnoreCase(marca).stream()
+        return itemRepository.findByMarcaContainingIgnoreCase(
+                BuscaSanitizer.escaparLike(marca)).stream()
             .filter(item -> Boolean.TRUE.equals(item.getAtivo())).toList();
     }
 
     public List<Item> pesquisar(String termo) {
-        return itemRepository.pesquisarPorTermo(termo);
+        return itemRepository.pesquisarPorTermo(BuscaSanitizer.escaparLike(termo));
     }
 
     public List<Item> buscarPorCodigoAssociado(String codigo) {
-        return itemRepository.buscarPorCodigoAssociado(codigo);
+        return itemRepository.buscarPorCodigoAssociado(BuscaSanitizer.escaparLike(codigo));
     }
 
     public Item cadastrar(Item item, List<Integer> codigosAssociadosIds, List<Integer> itensSimilaresIds) {

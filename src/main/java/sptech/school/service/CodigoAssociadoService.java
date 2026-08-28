@@ -12,6 +12,7 @@ import sptech.school.mapper.CodigoAssociadoMapper;
 import sptech.school.repository.ClienteRepository;
 import sptech.school.repository.CodigoAssociadoRepository;
 import sptech.school.repository.FornecedorRepository;
+import sptech.school.util.BuscaSanitizer;
 
 import java.util.List;
 
@@ -44,7 +45,8 @@ public class CodigoAssociadoService {
     }
 
     public List<CodigoAssociado> pesquisarPorCodigo(String codigo) {
-        return codigoAssociadoRepository.findByCodigoContainingIgnoreCase(codigo).stream()
+        return codigoAssociadoRepository.findByCodigoContainingIgnoreCase(
+                BuscaSanitizer.escaparLike(codigo)).stream()
             .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo())).toList();
     }
 

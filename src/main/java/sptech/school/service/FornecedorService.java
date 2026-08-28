@@ -14,6 +14,7 @@ import sptech.school.repository.CategoriaRepository;
 import sptech.school.repository.EnderecoRepository;
 import sptech.school.repository.FornecedorRepository;
 import sptech.school.repository.MarcaRepository;
+import sptech.school.util.BuscaSanitizer;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,12 +49,14 @@ public class FornecedorService {
     }
 
     public List<FornecedorResponseDto> buscarPorNomeContato(String nomeContato) {
-        return FornecedorMapper.toResponseDtoList(repository.findByNomeContatoContaining(nomeContato).stream()
+        return FornecedorMapper.toResponseDtoList(repository.findByNomeContatoContaining(
+                BuscaSanitizer.escaparLike(nomeContato)).stream()
             .filter(fornecedor -> Boolean.TRUE.equals(fornecedor.getAtivo())).toList()) ;
     }
 
     public List<FornecedorResponseDto> buscarPorNomeEmpresa(String nomeEmpresa) {
-        return FornecedorMapper.toResponseDtoList(repository.findByNomeEmpresaContaining(nomeEmpresa).stream()
+        return FornecedorMapper.toResponseDtoList(repository.findByNomeEmpresaContaining(
+                BuscaSanitizer.escaparLike(nomeEmpresa)).stream()
             .filter(fornecedor -> Boolean.TRUE.equals(fornecedor.getAtivo())).toList()) ;
     }
 
@@ -68,7 +71,6 @@ public class FornecedorService {
 
         return FornecedorMapper.toResponseDtoList(fornecedor);
     }
-
     public FornecedorResponseDto criar(FornecedorRequestDto fornecedor) {
         Fornecedor novoFornecedor = FornecedorMapper.toEntity(fornecedor);
 
@@ -141,4 +143,3 @@ public class FornecedorService {
         }
     }
 }
-

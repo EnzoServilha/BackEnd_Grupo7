@@ -1,5 +1,7 @@
 package sptech.school.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,6 +16,7 @@ import sptech.school.config.GerenciadorTokenJwt;
 import sptech.school.dto.usuario.*;
 
 import sptech.school.entity.Permissao;
+import sptech.school.exception.AcessoNegadoexception;
 import sptech.school.exception.PermissaoNaoEncontradaException;
 import sptech.school.exception.EntidadeConflitanteException;
 import sptech.school.exception.SenhaInvalidaException;
@@ -29,6 +32,8 @@ import java.util.List;
 
 @Service
 public class UsuarioService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(UsuarioService.class);
 
   @Autowired
   private PasswordEncoder passwordEncoder;
@@ -171,5 +176,15 @@ public class UsuarioService {
     Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(email)
             .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
     return UsuarioMapper.toResponseDto(usuario);
+  }
+
+  public void verificarAcesso(UsuarioResponseDto logado) {
+    if (logado.permissao() == null ||
+            !logado.permissao().nome().equals("ROLE_ADMIN")) {
+      String permissao = logado.permissao() == null ? "SEM_PERMISSAO" : logado.permissao().nome();
+      LOGGER.warn("[SEGURANCA] Acesso administrativo negado: usuario={}, permissao={}",
+              logado.email(), permissao);
+      throw new AcessoNegadoexception("Você não tem permissão para acessar!");
+    }
   }
 }
