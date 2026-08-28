@@ -27,9 +27,9 @@ public class MovimentacaoEstoqueController {
         return ResponseEntity.status(200).body(service.buscarPorId(id));
     }
 
-    @GetMapping
-    public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> listar(){
-        return ResponseEntity.status(200).body(service.listar());
+    @GetMapping("/periodo/{idPeriodo}")
+    public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> listarPorPeriodoAtual(@PathVariable Integer idPeriodo){
+        return ResponseEntity.status(200).body(service.listarPorPeriodoAtual(idPeriodo));
     }
 
     @GetMapping("/tipo/{tipo}")

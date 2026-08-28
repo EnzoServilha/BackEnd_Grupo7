@@ -21,9 +21,9 @@ public class ItemNaMovimentacaoController {
     }
 
 
-    @GetMapping
-    public ResponseEntity<List<ItensNaMovimentacaoResponseDto>> listar(){
-        return ResponseEntity.ok(service.listar());
+    @GetMapping("/item/periodo/{id}")
+    public ResponseEntity<List<ItensNaMovimentacaoResponseDto>> listarPorPeriodoAtual(@PathVariable Integer id){
+        return ResponseEntity.ok(service.listarPorPeriodoAtual(id));
     }
 
     @GetMapping("/item/{id}")

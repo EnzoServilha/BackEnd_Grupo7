@@ -53,8 +53,8 @@ public class MovimentacaoEstoqueService {
     }
 
     @Transactional
-    public List<MovimentacaoEstoqueResponseDto> listar(){
-        return MovimentacaoEstoqueMapper.toResponseDtoList(movimentacaoRepository.findAll());
+    public List<MovimentacaoEstoqueResponseDto> listarPorPeriodoAtual(Integer idPeriodo){
+        return MovimentacaoEstoqueMapper.toResponseDtoList(movimentacaoRepository.listarPorPeriodoAtual(idPeriodo));
     }
 
     @Transactional

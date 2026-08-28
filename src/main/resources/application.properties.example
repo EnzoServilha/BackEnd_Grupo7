@@ -5,15 +5,21 @@ spring.web.error.include-binding-errors=always
 # BANCO DE DADOS H2 (apenas para desenvolvimento/testes)
 # Em produção, substitua pelo driver do banco real (PostgreSQL, MySQL etc.)
 # =============================================================================
-spring.datasource.url=jdbc:h2:mem:teste-security
+spring.datasource.url=jdbc:h2:mem:teste-security;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+spring.datasource.driver-class-name=org.h2.Driver
 spring.h2.console.enabled=true
 spring.datasource.username=${DB_USERNAME:admin}
 spring.datasource.password=${DB_PASSWORD:admin}
-spring.jpa.hibernate.ddl-auto=create-drop
-spring.sql.init.mode=always
 
-# Garante que o data.sql seja executado após o schema JPA ser criado
+# Hibernate cria o esquema a partir das entidades @Entity
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+
+# Adia a execução do data.sql até o Hibernate terminar de criar a estrutura das tabelas
 spring.jpa.defer-datasource-initialization=true
+
+# Altere para 'embedded' ou comente esta linha (remover o 'always')
+spring.sql.init.mode=embedded
 
 logging.level.org.springframework.security=TRACE
 

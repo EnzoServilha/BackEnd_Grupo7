@@ -29,8 +29,11 @@ public class ItemNaMovimentacaoService {
         this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
     }
 
-    public List<ItensNaMovimentacaoResponseDto> listar(){
-        return ItensNaMovimentacaoMapper.toResponseDtoList(itemMovimentacaoRepository.findAll());
+    public List<ItensNaMovimentacaoResponseDto> listarPorPeriodoAtual(Integer id){
+
+        List<String> tipos = List.of("ENTRADA", "SAIDA");
+
+        return ItensNaMovimentacaoMapper.toResponseDtoList(itemMovimentacaoRepository.findByMovimentacaoEstoque_Periodo_IdAndMovimentacaoEstoque_Tipo_NomeIn(id, tipos));
     }
 
     public List<ItensNaMovimentacaoResponseDto> listarPorItem(Integer id){

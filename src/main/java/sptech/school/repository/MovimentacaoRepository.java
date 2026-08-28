@@ -18,6 +18,9 @@ public interface MovimentacaoRepository extends JpaRepository<MovimentacaoEstoqu
     @Query("SELECT m FROM MovimentacaoEstoque m WHERE m.status.nome = :status")
     List<MovimentacaoEstoque> buscarPorStatus(String status);
 
+    @Query("SELECT m FROM MovimentacaoEstoque m WHERE m.periodo.id = :idUltimoPeriodo")
+    List<MovimentacaoEstoque> listarPorPeriodoAtual(Integer idUltimoPeriodo);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT m FROM MovimentacaoEstoque m WHERE m.id = :id")
     Optional<MovimentacaoEstoque> buscarPorIdComBloqueio(@Param("id") Integer id);
