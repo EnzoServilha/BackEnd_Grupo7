@@ -1,5 +1,7 @@
 package sptech.school.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class TentativaLoginService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TentativaLoginService.class);
 
     private final Map<String, TentativaLogin> tentativas = new ConcurrentHashMap<>();
     private final int maxTentativas;
@@ -45,12 +49,18 @@ public class TentativaLoginService {
             return;
         }
 
+        LOGGER.warn("[SEGURANCA] Login bloqueado por excesso de tentativas: email={}, ip={}, bloqueadoAte={}",
+                normalizarEmail(email), ip, tentativa.bloqueadoAte);
         throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
                 "Muitas tentativas de login. Tente novamente mais tarde.");
     }
 
     public void registrarSucesso(String email, String ip) {
-        tentativas.remove(gerarChave(email, ip));
+        TentativaLogin removida = tentativas.remove(gerarChave(email, ip));
+        if (removida != null) {
+            LOGGER.info("[SEGURANCA] Login bem-sucedido apos falhas anteriores: email={}, ip={}",
+                    normalizarEmail(email), ip);
+        }
     }
 
     public void registrarFalha(String email, String ip) {
@@ -61,6 +71,11 @@ public class TentativaLoginService {
 
             if (tentativa.quantidade >= maxTentativas) {
                 tentativa.bloqueadoAte = Instant.now().plus(tempoBloqueio);
+                LOGGER.warn("[SEGURANCA] Limite de falhas de login atingido: email={}, ip={}, tentativas={}, bloqueadoAte={}",
+                        normalizarEmail(email), ip, tentativa.quantidade, tentativa.bloqueadoAte);
+            } else {
+                LOGGER.warn("[SEGURANCA] Falha de login registrada: email={}, ip={}, tentativas={}",
+                        normalizarEmail(email), ip, tentativa.quantidade);
             }
 
             return tentativa;
@@ -68,9 +83,13 @@ public class TentativaLoginService {
     }
 
     private String gerarChave(String email, String ip) {
-        String emailNormalizado = email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
+        String emailNormalizado = normalizarEmail(email);
         String ipNormalizado = ip == null ? "" : ip;
         return emailNormalizado + "|" + ipNormalizado;
+    }
+
+    private String normalizarEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
     }
 
     private static class TentativaLogin {

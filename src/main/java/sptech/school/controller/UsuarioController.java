@@ -4,12 +4,16 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 //import sptech.school.dto.*;
 import sptech.school.dto.usuario.*;
@@ -24,6 +28,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UsuarioController.class);
 
     // Nome do cookie — definido em um só lugar para evitar typos
     public static final String COOKIE_NOME = "authToken";
@@ -86,6 +92,7 @@ public class UsuarioController {
         try {
             autenticado = this.usuarioService.autenticar(usuario);
             tentativaLoginService.registrarSucesso(usuarioLoginDto.getEmail(), ipOrigem);
+            LOGGER.info("[SEGURANCA] Login bem-sucedido: email={}, ip={}", usuarioLoginDto.getEmail(), ipOrigem);
         } catch (AuthenticationException e) {
             tentativaLoginService.registrarFalha(usuarioLoginDto.getEmail(), ipOrigem);
             throw e;
@@ -118,7 +125,10 @@ public class UsuarioController {
      * tokens de curta duração (15 min a 1 hora) são importantes.</p>
      */
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String usuario = authentication == null ? "anonymous" : authentication.getName();
+
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NOME, "")
                 .httpOnly(true)
                 .secure(secureCookie)
@@ -128,6 +138,7 @@ public class UsuarioController {
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        LOGGER.info("[SEGURANCA] Logout solicitado: usuario={}, ip={}", usuario, request.getRemoteAddr());
 
         return ResponseEntity.noContent().build();
     }

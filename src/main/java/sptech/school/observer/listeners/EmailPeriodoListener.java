@@ -1,6 +1,7 @@
 package sptech.school.observer.listeners;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -10,6 +11,8 @@ import java.time.LocalDateTime;
 
 @Component
 public class EmailPeriodoListener implements EventListener{
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmailPeriodoListener.class);
 
     private final JavaMailSender javaMailSender;
 
@@ -24,16 +27,15 @@ public class EmailPeriodoListener implements EventListener{
     public void update(String eventType, LocalDateTime dataUltimoFechamento) {
         try {
             String mensagem = eventType + formatarData(dataUltimoFechamento);
-            System.out.println("TESTANDO");
             SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
             simpleMailMessage.setFrom(emailRemetente);
             simpleMailMessage.setTo("enzo.servilha@sptech.school");
             simpleMailMessage.setText(mensagem);
             javaMailSender.send(simpleMailMessage);
-            System.out.println("FOI");
+            LOGGER.info("[MONITORAMENTO] Alerta de fechamento de periodo enviado com sucesso.");
         }
         catch (Exception e) {
-            System.out.println(e.getMessage());
+            LOGGER.error("[MONITORAMENTO] Falha ao enviar alerta de fechamento de periodo.", e);
         }
     }
 }

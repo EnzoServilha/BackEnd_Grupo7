@@ -1,7 +1,8 @@
 package sptech.school.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,6 +30,8 @@ import java.util.List;
 
 @Service
 public class UsuarioService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(UsuarioService.class);
 
   @Autowired
   private PasswordEncoder passwordEncoder;
@@ -135,6 +138,9 @@ public class UsuarioService {
   public void verificarAcesso(UsuarioResponseDto logado) {
     if (logado.getPermissao() == null ||
             !logado.getPermissao().nome().equals("ROLE_ADMIN")) {
+      String permissao = logado.getPermissao() == null ? "SEM_PERMISSAO" : logado.getPermissao().nome();
+      LOGGER.warn("[SEGURANCA] Acesso administrativo negado: usuario={}, permissao={}",
+              logado.getEmail(), permissao);
       throw new AcessoNegadoexception("Você não tem permissão para acessar!");
     }
   }
