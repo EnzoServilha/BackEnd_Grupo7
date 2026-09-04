@@ -18,7 +18,6 @@ import sptech.school.mapper.ClienteMapper;
 import sptech.school.repository.ClienteRepository;
 import sptech.school.repository.EnderecoRepository;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,7 +43,7 @@ public class ClienteServiceTest {
         void deveAtualizar() {
 
             ClienteRequestDto clientePassado = new ClienteRequestDto("Empresa", "contato", "18487221801", "98452-7389",
-                    "teste@email.com", "", LocalDateTime.now(), 1);
+                    "teste@email.com", "", 1);
 
             Integer id = 1;
 
@@ -57,8 +56,8 @@ public class ClienteServiceTest {
 
             endereco.setId(1);
 
-            Mockito.when(clienteRepository.existsById(1))
-                    .thenReturn(true);
+            Mockito.when(clienteRepository.findById(1))
+                    .thenReturn(Optional.of(entidade));
 
             Mockito.when(enderecoRepository.findById(clientePassado.enderecoId()))
                     .thenReturn(Optional.of(endereco));
@@ -68,7 +67,9 @@ public class ClienteServiceTest {
                     .thenReturn(entidade);
 
 
-            Assertions.assertEquals(ClienteMapper.toResponseDto(entidade), clienteService.atualizar(clientePassado, id));
+            ClienteResponseDto resultado = clienteService.atualizar(clientePassado, id);
+
+            Assertions.assertEquals(ClienteMapper.toResponseDto(entidade), resultado);
 
         }
 
@@ -85,12 +86,11 @@ public class ClienteServiceTest {
                     "11984527389",
                     "teste@email.com",
                     "Observação de teste",
-                    LocalDateTime.now(),
                     id
             );
 
-            Mockito.when(clienteRepository.existsById(2))
-                    .thenReturn(false);
+            Mockito.when(clienteRepository.findById(2))
+                    .thenReturn(Optional.empty());
 
             Assertions.assertThrows(EntidadeNaoEncontradaException.class, () -> clienteService.atualizar(clientePassado, 2));
 
@@ -115,7 +115,6 @@ public class ClienteServiceTest {
                     "11984527389",
                     "teste@email.com",
                     "Observação de teste",
-                    LocalDateTime.now(),
                     id
             );
 
@@ -153,7 +152,7 @@ public class ClienteServiceTest {
         void preencherComEnderecoErrado() {
 
             ClienteRequestDto clientePassado = new ClienteRequestDto("Empresa", "contato", "18487221801", "98452-7389",
-                    "teste@email.com", "", LocalDateTime.now(), 1);
+                    "teste@email.com", "", 1);
 
             Integer id = 1;
 
@@ -174,7 +173,7 @@ public class ClienteServiceTest {
         void preencherComEnderecoNull() {
 
             ClienteRequestDto clientePassado = new ClienteRequestDto("Empresa", "contato", "18487221801", "98452-7389",
-                    "teste@email.com", "", LocalDateTime.now(), null);
+                    "teste@email.com", "", null);
 
             Integer id = 1;
 

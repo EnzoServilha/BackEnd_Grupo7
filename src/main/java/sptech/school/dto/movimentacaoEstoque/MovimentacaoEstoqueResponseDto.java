@@ -7,14 +7,15 @@ import sptech.school.dto.status.StatusResponseDto;
 import sptech.school.dto.tipo.TipoResponseDto;
 import sptech.school.dto.usuario.UsuarioResponseDto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record MovimentacaoEstoqueResponseDto(
         Integer id,
         UsuarioResponseDto usuario,
-        Double totalGastoImpostos,
-        Double precoFrete,
+        BigDecimal totalGastoImpostos,
+        BigDecimal precoFrete,
         LocalDateTime dataMovimentacao,
         LocalDate dataEntregaPrevista,
         LocalDate dataEntrega,
@@ -26,8 +27,8 @@ public record MovimentacaoEstoqueResponseDto(
         FornecedorResponseDto fornecedor,
         Integer movimentacaoOriginalId,
         String numeroNotaFiscal,
-        Double valorTotal,
-        Double precoProdutos,
+        BigDecimal valorTotal,
+        BigDecimal precoProdutos,
         Integer qtdItens,
         Long qtdDiasPrevistos,
         Long qtdDiasReal

@@ -8,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "fornecedor")
-public class Fornecedor {
+public class Fornecedor extends EntidadeAtivavel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -21,14 +21,19 @@ public class ItensSimilaresService {
 
     public List<Item> listarSimilares(Integer itemId) {
         Item item = itemRepository.findById(itemId)
+            .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", itemId));
-        return item.getItensSimilares() != null ? item.getItensSimilares() : Collections.emptyList();
+        return item.getItensSimilares() != null
+            ? item.getItensSimilares().stream().filter(similar -> Boolean.TRUE.equals(similar.getAtivo())).toList()
+            : Collections.emptyList();
     }
 
     public Item adicionarSimilar(Integer itemId, Integer similarId) {
         Item item = itemRepository.findById(itemId)
+            .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Item", itemId));
         Item similar = itemRepository.findById(similarId)
+            .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Item Similar", similarId));
 
 

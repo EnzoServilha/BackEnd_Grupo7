@@ -2,7 +2,6 @@ package sptech.school.dto.fornecedor;
 
 import jakarta.validation.constraints.Size;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class FornecedorRequestDto{
@@ -25,8 +24,6 @@ public class FornecedorRequestDto{
         private String email;
 
         private String observacoes;
-
-        private LocalDateTime dataCadastro;
 
         private List<Integer> categoriaId;
 
@@ -98,14 +95,6 @@ public class FornecedorRequestDto{
                 this.observacoes = observacoes;
         }
 
-        public LocalDateTime getDataCadastro() {
-                return dataCadastro;
-        }
-
-        public void setDataCadastro(LocalDateTime dataCadastro) {
-                this.dataCadastro = dataCadastro;
-        }
-
         public List<Integer> getCategoriaId() {
                 return categoriaId;
         }
@@ -132,7 +121,6 @@ public class FornecedorRequestDto{
                         ", telefone='" + telefone + '\'' +
                         ", email='" + email + '\'' +
                         ", observacoes='" + observacoes + '\'' +
-                        ", dataCadastro=" + dataCadastro +
                         ", categoriaId=" + categoriaId +
                         ", enderecoId=" + enderecoId +
                         '}';

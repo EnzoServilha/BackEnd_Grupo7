@@ -17,6 +17,8 @@ public class PeriodoMapper {
         dto.setDataCriacao(periodo.getDataCriacao());
         dto.setAnotacao(periodo.getAnotacao());
         dto.setQtdPecas(periodo.getQtdPecas());
+        dto.setFechado(periodo.getFechado());
+        dto.setDataFechamento(periodo.getDataFechamento());
 
         return dto;
     }

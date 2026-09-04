@@ -120,29 +120,31 @@ class CategoriaServiceTest {
     }
 
         @Nested
-        @DisplayName("deletar()")
+        @DisplayName("desativar()")
         class DeletarTest {
 
             @Test
-            @DisplayName("Deve deletar categoria com sucesso")
+            @DisplayName("Deve desativar categoria sem exclusão física")
             void deletarComSucesso() {
-                when(repository.existsById(1)).thenReturn(true);
+                Categoria categoria = new Categoria();
+                when(repository.findById(1)).thenReturn(java.util.Optional.of(categoria));
 
                 categoriaService.deletar(1);
 
-                Mockito.verify(repository).existsById(1);
-                Mockito.verify(repository).deleteById(1);
+                assertFalse(categoria.getAtivo());
+                Mockito.verify(repository).save(categoria);
+                Mockito.verify(repository, never()).deleteById(Mockito.any());
             }
 
             @Test
             @DisplayName("Deve lançar EntidadeNaoEncontradaException quando categoria não existir")
             void deletarNaoEncontrado() {
-                when(repository.existsById(99)).thenReturn(false);
+                when(repository.findById(99)).thenReturn(java.util.Optional.empty());
 
                 assertThrows(EntidadeNaoEncontradaException.class, () ->
                         categoriaService.deletar(99));
 
-                Mockito.verify(repository).existsById(99);
+                Mockito.verify(repository).findById(99);
                 Mockito.verify(repository, never()).deleteById(Mockito.any());
             }
         }

@@ -6,13 +6,13 @@ import java.util.List;
 
 @Entity
 @Table(name = "codigo_associado")
-public class CodigoAssociado {
+public class CodigoAssociado extends EntidadeAtivavel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "codigo", nullable = false)
+    @Column(name = "codigo", nullable = false, length = 255)
     private String codigo;
 
     @ManyToOne

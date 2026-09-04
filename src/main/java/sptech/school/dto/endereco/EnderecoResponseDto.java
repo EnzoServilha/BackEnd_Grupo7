@@ -8,6 +8,8 @@ public record EnderecoResponseDto(
         String complemento,
         String bairro,
         String cidade,
-        String uf
+        String uf,
+        Boolean ativo,
+        Long desativadoPorId
 ) {
 }

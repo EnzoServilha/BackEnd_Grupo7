@@ -14,7 +14,9 @@ public record ItemResponseDto(
         String localizacao,
         LocalDateTime dataCadastro,
         List<CodigoAssociadoResponseDto> codigosAssociados,
-        List<ItemResumoDto> itensSimilares
+        List<ItemResumoDto> itensSimilares,
+        Boolean ativo,
+        Long desativadoPorId
 ) {
     public record ItemResumoDto(
             Integer id,

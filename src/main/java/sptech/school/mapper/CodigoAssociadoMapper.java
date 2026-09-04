@@ -32,7 +32,9 @@ public class CodigoAssociadoMapper {
                 codigoAssociado.getId(),
                 codigoAssociado.getCodigo(),
                 fornecedorResumo,
-                clienteResumo
+                clienteResumo,
+                codigoAssociado.getAtivo(),
+                codigoAssociado.getDesativadoPor() != null ? codigoAssociado.getDesativadoPor().getId() : null
         );
     }
 

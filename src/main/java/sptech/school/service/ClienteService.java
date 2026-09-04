@@ -10,6 +10,7 @@ import sptech.school.mapper.ClienteMapper;
 import sptech.school.repository.*;
 
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ClienteService {
@@ -23,13 +24,22 @@ public class ClienteService {
     }
 
     public Cliente buscarPorId(Integer id) {
+        return clienteRepository.findByIdAndAtivoTrue(id)
+                .orElseThrow(() -> new ClienteNaoEncontradoException(String.valueOf(id)));
+    }
+
+    public Cliente buscarPorIdIncluindoInativo(Integer id) {
         return clienteRepository.findById(id)
                 .orElseThrow(() -> new ClienteNaoEncontradoException(String.valueOf(id)));
     }
 
 
     public List<Cliente> listarTodos() {
-        return clienteRepository.findAll();
+        return clienteRepository.findAllByAtivoTrue();
+    }
+
+    public List<Cliente> listarAdministrativo(String ativo) {
+        return FiltroAtivacao.filtrar(clienteRepository.findAll(), ativo);
     }
 
     public ClienteResponseDto cadastrar(ClienteRequestDto cliente) {
@@ -45,27 +55,38 @@ public class ClienteService {
     }
 
     public ClienteResponseDto atualizar(ClienteRequestDto cliente, Integer id) {
-        if (!clienteRepository.existsById(id)) throw new EntidadeNaoEncontradaException("Cliente não encontrado", id);
+        Cliente entidade = clienteRepository.findById(id)
+            .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
+            .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente não encontrado", id));
 
-        Cliente entidade = ClienteMapper.toEntity(cliente);
-
-        entidade.setId(id);
-
+        ClienteMapper.atualizar(entidade, cliente);
         preencher(entidade, cliente);
 
         return ClienteMapper.toResponseDto(clienteRepository.save(entidade));
     }
 
+    @Transactional
+    public void desativar(Integer id, Usuario usuarioExecutor) {
+        Cliente cliente = buscarPorIdIncluindoInativo(id);
+        cliente.desativar(usuarioExecutor);
+        clienteRepository.save(cliente);
+    }
+
     public void deletar(Integer id) {
-        if (!clienteRepository.existsById(id)) {
-            throw new ClienteNaoEncontradoException(String.valueOf(id));
-        }
-        clienteRepository.deleteById(id);
+        desativar(id, null);
+    }
+
+    @Transactional
+    public void reativar(Integer id) {
+        Cliente cliente = buscarPorIdIncluindoInativo(id);
+        cliente.reativar();
+        clienteRepository.save(cliente);
     }
 
     public void preencher(Cliente entidade, ClienteRequestDto cliente){
         if (cliente.enderecoId() != null) {
             Endereco endereco = enderecoRepository.findById(cliente.enderecoId())
+                .filter(enderecoEncontrado -> Boolean.TRUE.equals(enderecoEncontrado.getAtivo()))
                     .orElseThrow(() -> new EntidadeNaoEncontradaException("Endereço não encontrado", cliente.enderecoId()));
 
 

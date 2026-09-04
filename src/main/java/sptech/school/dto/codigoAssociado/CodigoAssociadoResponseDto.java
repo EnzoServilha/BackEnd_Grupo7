@@ -4,7 +4,9 @@ public record CodigoAssociadoResponseDto(
         Integer id,
         String codigo,
         FornecedorResumo fornecedor,
-        ClienteResumo cliente
+        ClienteResumo cliente,
+        Boolean ativo,
+        Long desativadoPorId
 ) {
         public record FornecedorResumo(
                 Integer id,
