@@ -7,12 +7,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoRequestDto;
+import sptech.school.entity.ItensNaMovimentacao;
+import sptech.school.entity.MovimentacaoEstoque;
+import sptech.school.entity.Status;
+import sptech.school.entity.Tipo;
+import sptech.school.exception.EntidadeConflitanteException;
 import sptech.school.exception.ItemNaMovimentacaoNaoEncontrado;
 import sptech.school.repository.ItensNaMovimentacaoRepository;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,5 +48,42 @@ class ItemNaMovimentacaoServiceTest {
 
             verify(itemMovimentacaoRepository).findById(99);
         }
+
+        @Test
+        @DisplayName("Deve rejeitar exclusão de item de cotação")
+        void deveRejeitarExclusaoDeItemDeCotacao() {
+            ItensNaMovimentacao itemCotado = itemDeCotacaoPendente();
+            when(itemMovimentacaoRepository.findById(1)).thenReturn(Optional.of(itemCotado));
+
+            assertThrows(EntidadeConflitanteException.class, () -> service.deletar(1));
+
+            verify(itemMovimentacaoRepository, never()).deleteById(any());
+        }
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar edição de item de cotação")
+    void deveRejeitarEdicaoDeItemDeCotacao() {
+        ItensNaMovimentacao itemCotado = itemDeCotacaoPendente();
+        when(itemMovimentacaoRepository.findById(1)).thenReturn(Optional.of(itemCotado));
+        ItensNaMovimentacaoRequestDto request =
+                new ItensNaMovimentacaoRequestDto(10, 20, 2, BigDecimal.TEN);
+
+        assertThrows(EntidadeConflitanteException.class, () -> service.editar(request, 1));
+
+        verify(itemMovimentacaoRepository, never()).save(any());
+    }
+
+    private ItensNaMovimentacao itemDeCotacaoPendente() {
+        Tipo cotacao = new Tipo();
+        cotacao.setNome("COTACAO");
+        Status pendente = new Status();
+        pendente.setNome("PENDENTE");
+        MovimentacaoEstoque movimentacao = new MovimentacaoEstoque();
+        movimentacao.setTipo(cotacao);
+        movimentacao.setStatus(pendente);
+        ItensNaMovimentacao item = new ItensNaMovimentacao();
+        item.setMovimentacaoEstoque(movimentacao);
+        return item;
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.endereco.EnderecoRequestDto;
 import sptech.school.dto.endereco.EnderecoResponseDto;
+import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.entity.Endereco;
 import sptech.school.mapper.EnderecoMapper;
 import sptech.school.service.EnderecoService;
@@ -62,6 +63,9 @@ public class EnderecoController {
     // ----------------------------------------------------------------------------------------------------
     @PostMapping
     public ResponseEntity<EnderecoResponseDto> cadastrar(@RequestBody @Valid EnderecoRequestDto request) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         Endereco endereco = EnderecoMapper.toEntity(request);
 
         Endereco salvo = enderecoService.cadastrar(endereco);
@@ -77,6 +81,9 @@ public class EnderecoController {
             @PathVariable Integer id,
             @RequestBody @Valid EnderecoRequestDto request
     ) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         Endereco endereco = EnderecoMapper.toEntity(request);
 
         Endereco atualizado = enderecoService.atualizar(id, endereco);
@@ -89,18 +96,27 @@ public class EnderecoController {
     // ----------------------------------------------------------------------------------------------------
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id, Authentication authentication) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         enderecoService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/desativacao")
     public ResponseEntity<Void> desativar(@PathVariable Integer id, Authentication authentication) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         enderecoService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/reativacao")
     public ResponseEntity<Void> reativar(@PathVariable Integer id) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         enderecoService.reativar(id);
         return ResponseEntity.noContent().build();
     }

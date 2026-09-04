@@ -8,6 +8,7 @@ import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
 import sptech.school.entity.ItensNaMovimentacao;
 import sptech.school.entity.MovimentacaoEstoque;
+import sptech.school.entity.Periodo;
 import sptech.school.entity.Status;
 import sptech.school.entity.Tipo;
 import sptech.school.entity.Usuario;
@@ -85,16 +86,20 @@ public class MovimentacaoEstoqueService {
         return  MovimentacaoEstoqueMapper.toResponse(movimentacaoRepository.save(movimentacao));
     }
 
-        @Transactional
-        public MovimentacaoEstoqueResponseDto fecharCotacao(Integer cotacaoId,
-                                 FechamentoCotacaoRequestDto request,
-                                 String emailUsuario) {
+    @Transactional
+    public MovimentacaoEstoqueResponseDto fecharCotacao(Integer cotacaoId,
+                                                        FechamentoCotacaoRequestDto request,
+                                                        String emailUsuario) {
+        Periodo periodoVenda = periodoRepository.buscarPeriodoAbertoComBloqueio(request.periodoId())
+            .orElseThrow(() -> new EntidadeConflitanteException("Vendas só podem usar períodos abertos"));
+
         MovimentacaoEstoque cotacao = movimentacaoRepository.buscarPorIdComBloqueio(cotacaoId)
             .orElseThrow(() -> new MovimentacaoNaoEncontrada("Cotação não encontrada"));
         validarCotacaoAberta(cotacao);
 
         Map<Integer, ItensNaMovimentacao> itensCotados = indexarItensCotados(cotacao);
         validarItensVendidos(request.itens(), itensCotados);
+        validarEstoqueDisponivel(request.itens(), request.periodoId());
 
         Usuario usuario = usuarioRepository.findByEmailAndAtivoTrue(emailUsuario)
             .orElseThrow(() -> new EntidadeNaoEncontradaException("Usuário ativo não encontrado", emailUsuario));
@@ -116,9 +121,7 @@ public class MovimentacaoEstoqueService {
         venda.setDataEntrega(request.dataEntrega());
         venda.setObservacoes(request.observacoes());
         venda.setNumeroNotaFiscal(request.numeroNotaFiscal());
-        venda.setPeriodo(periodoRepository.findById(request.periodoId())
-            .filter(periodo -> Boolean.FALSE.equals(periodo.getFechado()))
-            .orElseThrow(() -> new EntidadeConflitanteException("Vendas só podem usar períodos abertos")));
+        venda.setPeriodo(periodoVenda);
         venda = movimentacaoRepository.save(venda);
 
         MovimentacaoEstoque vendaPersistida = venda;
@@ -142,12 +145,12 @@ public class MovimentacaoEstoqueService {
         movimentacaoRepository.save(cotacao);
 
         return MovimentacaoEstoqueMapper.toResponse(venda);
-        }
+    }
 
     public MovimentacaoEstoqueResponseDto editar(MovimentacaoEstoqueRequestDto request, Integer id, String emailUsuario){
          MovimentacaoEstoque movimentacao = movimentacaoRepository.findById(id)
              .orElseThrow(() -> new MovimentacaoNaoEncontrada("Movimentação não encontrada para edição"));
-         validarPendente(movimentacao);
+         validarEdicao(movimentacao);
 
          MovimentacaoEstoqueMapper.atualizar(movimentacao, request);
          preencher(movimentacao, request, emailUsuario);
@@ -224,6 +227,13 @@ public class MovimentacaoEstoqueService {
         }
     }
 
+    private void validarEdicao(MovimentacaoEstoque movimentacao) {
+        validarPendente(movimentacao);
+        if (movimentacao.getTipo() != null && "COTACAO".equals(movimentacao.getTipo().getNome())) {
+            throw new EntidadeConflitanteException("Cotações são imutáveis e não podem ser editadas");
+        }
+    }
+
     private void validarCriacao(MovimentacaoEstoque movimentacao) {
         if (movimentacao.getTipo() == null) {
             throw new EntidadeConflitanteException("O tipo da movimentação é obrigatório");
@@ -276,6 +286,21 @@ public class MovimentacaoEstoqueService {
             }
             if (itemVendido.qtd() > itemCotado.getQtd()) {
                 throw new EntidadeConflitanteException("A quantidade vendida não pode superar a quantidade cotada");
+            }
+        }
+    }
+
+    private void validarEstoqueDisponivel(List<ItemFechamentoCotacaoRequestDto> itensVendidos,
+                                          Integer periodoId) {
+        for (ItemFechamentoCotacaoRequestDto itemVendido : itensVendidos) {
+            Long saldoConsultado = periodoRepository.pegarSaldoDisponivelDoItem(
+                periodoId, itemVendido.itemId());
+            long saldoDisponivel = saldoConsultado == null ? 0L : saldoConsultado;
+
+            if (saldoDisponivel < itemVendido.qtd()) {
+                throw new EntidadeConflitanteException(
+                    "Estoque insuficiente para o item %d. Quantidade solicitada: %d. Quantidade disponível: %d"
+                        .formatted(itemVendido.itemId(), itemVendido.qtd(), saldoDisponivel));
             }
         }
     }

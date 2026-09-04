@@ -6,6 +6,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import sptech.school.service.AutenticacaoService;
 
@@ -48,9 +49,12 @@ public class AutenticacaoProvider implements AuthenticationProvider {
         final String username = authentication.getName();
         final String password = authentication.getCredentials().toString();
 
-        // Carrega o usuário do banco de dados pelo e-mail
-        // Lança UsernameNotFoundException se o usuário não existir
-        UserDetails userDetails = this.usuarioAutorizacaoService.loadUserByUsername(username);
+        UserDetails userDetails;
+        try {
+            userDetails = this.usuarioAutorizacaoService.loadUserByUsername(username);
+        } catch (UsernameNotFoundException e) {
+            throw new BadCredentialsException("Usuário ou senha inválidos");
+        }
 
         // Compara a senha digitada com o hash BCrypt armazenado no banco
         if (this.passwordEncoder.matches(password, userDetails.getPassword())) {
@@ -58,7 +62,7 @@ public class AutenticacaoProvider implements AuthenticationProvider {
             return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         } else {
             // Lança exceção genérica para não revelar se o erro foi no e-mail ou na senha
-            throw new BadCredentialsException("Usuário ou Senha inválidos");
+            throw new BadCredentialsException("Usuário ou senha inválidos");
         }
     }
 

@@ -5,6 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.periodo.FechamentoPeriodoResponseDto;
 import sptech.school.dto.periodo.PeriodoQtdPecasDTO;
+import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.entity.Periodo;
 import sptech.school.service.PeriodoService;
 import sptech.school.service.UsuarioService;
@@ -36,17 +37,26 @@ public class PeriodoController {
     public ResponseEntity<FechamentoPeriodoResponseDto> fecharPeriodo(
             Authentication authentication,
             @RequestParam(defaultValue = "Período criado automaticamente após fechamento") String descricaoNovoPeriodo) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         Long idUsuario = usuarioService.buscarAtivoPorEmail(authentication.getName()).getId();
         return ResponseEntity.ok(periodoService.fecharPeriodo(idUsuario, descricaoNovoPeriodo));
     }
 
     @DeleteMapping("/rollback")
     public ResponseEntity<Periodo> rollbackPeriodo() {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         return ResponseEntity.ok(periodoService.rollbackPeriodo());
     }
 
     @PostMapping()
     public ResponseEntity<Periodo> criarNovoPeriodo (@RequestBody String descricao){
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         return ResponseEntity.status(200).body(periodoService.cadastrarPeriodo(descricao));
     }
 

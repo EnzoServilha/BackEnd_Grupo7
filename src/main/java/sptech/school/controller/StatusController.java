@@ -6,20 +6,26 @@ import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.status.StatusRequestDto;
 import sptech.school.dto.status.StatusResponseDto;
 import sptech.school.service.StatusService;
+import sptech.school.dto.usuario.UsuarioResponseDto;
+import sptech.school.service.UsuarioService;
 
 @RestController
 @RequestMapping("/status")
 public class StatusController {
 
     private final StatusService service;
+    private final UsuarioService usuarioService;
 
-    public StatusController(StatusService service) {
+    public StatusController(StatusService service, UsuarioService usuarioService) {
         this.service = service;
+        this.usuarioService = usuarioService;
     }
 
     @PostMapping
     public ResponseEntity<StatusResponseDto> criar(@RequestBody @Valid StatusRequestDto requestDto) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         return ResponseEntity.status(201).body(service.criar(requestDto));
     }
 }
-

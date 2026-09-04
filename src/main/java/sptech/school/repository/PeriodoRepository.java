@@ -20,6 +20,28 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Periodo> findFirstByFechadoFalseOrderByIdDesc();
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Periodo p WHERE p.id = :periodoId AND p.fechado = false")
+    Optional<Periodo> buscarPeriodoAbertoComBloqueio(@Param("periodoId") Integer periodoId);
+
+    @Query("""
+        SELECT COALESCE(SUM(
+            CASE
+                WHEN me.tipo.nome = 'ENTRADA' THEN itm.qtd
+                WHEN me.tipo.nome = 'AJUSTE' THEN itm.qtd
+                WHEN me.tipo.nome = 'SAIDA' THEN itm.qtd * -1
+                ELSE 0
+            END
+        ), 0)
+        FROM ItensNaMovimentacao itm
+        JOIN itm.movimentacaoEstoque me
+        WHERE me.periodo.id = :periodoId
+          AND itm.item.id = :itemId
+          AND me.status.nome = 'CONCLUIDO'
+    """)
+    Long pegarSaldoDisponivelDoItem(@Param("periodoId") Integer periodoId,
+                                    @Param("itemId") Integer itemId);
+
 
     @Query("""
         SELECT COALESCE(SUM(
@@ -36,6 +58,7 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
         JOIN me.tipo t
                 WHERE p.id = :idPeriodo
                     AND me.status.nome = 'CONCLUIDO'
+                    AND me.status.nome <> 'CANCELADO'
     """)
     Integer pegarTotalDePecasDoPeriodo(@Param("idPeriodo") Integer idPeriodo);
 
@@ -53,6 +76,7 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
     JOIN me.tipo t
         WHERE me.periodo.id = :idPeriodo
             AND me.status.nome = 'CONCLUIDO'
+            AND me.status.nome <> 'CANCELADO'
     GROUP BY itm.item.id
 """)
     List<PeriodoQtdPecasDTO> pegarSaldoPorItemDoPeriodo(@Param("idPeriodo") Integer idPeriodo);

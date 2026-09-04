@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.cliente.ClienteRequestDto;
 import sptech.school.dto.cliente.ClienteResponseDto;
+import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.entity.*;
 import sptech.school.mapper.ClienteMapper;
 import sptech.school.service.ClienteService;
@@ -47,6 +48,8 @@ public class ClienteController {
 
     @PostMapping
     public ResponseEntity<ClienteResponseDto> cadastrar(@RequestBody @Valid ClienteRequestDto request) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
 
         ClienteResponseDto salvo = clienteService.cadastrar(request);
 
@@ -59,6 +62,8 @@ public class ClienteController {
             @PathVariable Integer id,
             @RequestBody @Valid ClienteRequestDto request
     ) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
 
         ClienteResponseDto atualizado = clienteService.atualizar( request, id);
 
@@ -68,18 +73,27 @@ public class ClienteController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id, Authentication authentication) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         clienteService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/desativacao")
     public ResponseEntity<Void> desativar(@PathVariable Integer id, Authentication authentication) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         clienteService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/reativacao")
     public ResponseEntity<Void> reativar(@PathVariable Integer id) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         clienteService.reativar(id);
         return ResponseEntity.noContent().build();
     }

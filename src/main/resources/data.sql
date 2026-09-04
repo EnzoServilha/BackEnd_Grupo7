@@ -4,10 +4,12 @@ INSERT INTO tipo (nome) VALUES ('ENTRADA'), ('SAIDA'), ('AJUSTE'), ('COTACAO');
 INSERT INTO status (nome) VALUES ('PENDENTE'), ('CONCLUIDO'), ('CONCLUIDO PARCIAL'), ('CANCELADO');
 
 -- DADOS DE TESTE / DEMONSTRACAO
--- DADOS DE TESTE / DEMONSTRACAO
 INSERT INTO usuario (nome, email, senha, data_cadastro, permissao_id, ativo)
-VALUES ('Admin', 'admin@teste.com', '$2a$10$0/TKTGxdREbWaWjWYhwf6e9P1fPOAMMNqEnZgOG95jnSkHSfkkIrC', CURRENT_TIMESTAMP, 1, true);
--- PERIODOS
+VALUES
+    ('Admin', 'admin@teste.com', '$2a$12$ugv97T5SrNAZuvPU/siZ9.H2.GrvmEvnRKGwYAhNKgDBxNoC2Gie6', CURRENT_TIMESTAMP, 1, true),
+    ('Enzo', 'enzo@teste.com', '$2a$12$nZ2S4UeZfdZkbWIRAJ5aFOBMtFBZp/dSnvJxftI6hrLx9aXO4Lcte', CURRENT_TIMESTAMP, 2, true);
+
+-- PERIODOS (garantir IDs antes das movimentacoes)
 INSERT INTO periodo (data_criacao, anotacao, qtd_pecas, fechado, data_fechamento)
 VALUES (CURRENT_TIMESTAMP, 'Fechamento do primeiro trimestre de estoque', 150, TRUE, CURRENT_TIMESTAMP);
 
@@ -19,8 +21,8 @@ VALUES (CURRENT_TIMESTAMP, 'Reposição de estoque emergencial', 0, FALSE);
 
 -- ENDEREÇOS
 INSERT INTO endereco (cep, logradouro, numero, bairro, cidade, uf, ativo) VALUES
-                                                                              ('01001-000', 'Praça da Sé', '100', 'Centro', 'São Paulo', 'SP', true),
-                                                                              ('80010-000', 'Rua XV de Novembro', '500', 'Centro', 'Curitiba', 'PR', true);
+    ('01001-000', 'Praça da Sé', '100', 'Centro', 'São Paulo', 'SP', true),
+    ('80010-000', 'Rua XV de Novembro', '500', 'Centro', 'Curitiba', 'PR', true);
 
 -- CLIENTES E FORNECEDORES
 INSERT INTO cliente (nome_empresa, nome_contato, cpf_cnpj, telefone, email, data_cadastro, endereco_id, ativo)
@@ -55,9 +57,9 @@ VALUES
 
 -- CATEGORIAS
 INSERT INTO categoria (nome, ativo) VALUES
-                                        ('Peças Automotivas', true),
-                                        ('Ferramentas', true),
-                                        ('Eletrônicos', true);
+    ('Peças Automotivas', true),
+    ('Ferramentas', true),
+    ('Eletrônicos', true);
 
--- MARCAS DE TESTE (CORRIGIDO)
+-- MARCAS DE TESTE
 INSERT INTO marca (nome_empresa, ativo) VALUES ('Cofap', true), ('Monroe', true);

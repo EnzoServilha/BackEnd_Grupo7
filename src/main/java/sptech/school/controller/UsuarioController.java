@@ -1,18 +1,24 @@
 package sptech.school.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.usuario.*;
 import sptech.school.entity.Usuario;
 import sptech.school.mapper.UsuarioMapper;
+import sptech.school.service.TentativaLoginService;
 import sptech.school.service.UsuarioService;
 
 import java.time.Duration;
@@ -22,21 +28,33 @@ import java.util.List;
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UsuarioController.class);
+
+    // Nome do cookie — definido em um só lugar para evitar typos
     public static final String COOKIE_NOME = "authToken";
 
     @Value("${jwt.validity}")
     private long jwtValidity;
 
+    @Value("${COOKIE_SECURE:true}")
+    private boolean secureCookie;
+
     @Autowired
     private final UsuarioService usuarioService;
+    private final TentativaLoginService tentativaLoginService;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, TentativaLoginService tentativaLoginService) {
         this.usuarioService = usuarioService;
+        this.tentativaLoginService = tentativaLoginService;
     }
 
     @PostMapping
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<Void> criar(@RequestBody @Valid UsuarioCriacaoDto usuarioCriacaoDto) {
+
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         final Usuario novoUsuario = UsuarioMapper.of(usuarioCriacaoDto);
         this.usuarioService.criar(novoUsuario);
         return ResponseEntity.status(201).build();
@@ -59,18 +77,30 @@ public class UsuarioController {
      */
     @PostMapping("/login")
     public ResponseEntity<UsuarioSessaoDto> login(
-            @RequestBody UsuarioLoginDto usuarioLoginDto,
+            @RequestBody @Valid UsuarioLoginDto usuarioLoginDto,
+            HttpServletRequest request,
             HttpServletResponse response) {
+
+        String ipOrigem = request.getRemoteAddr();
+        tentativaLoginService.verificarBloqueio(usuarioLoginDto.getEmail(), ipOrigem);
 
         final Usuario usuario = UsuarioMapper.of(usuarioLoginDto);
 
         // autenticar() gera o token internamente — precisamos dele apenas para o cookie
-        UsuarioTokenDto autenticado = this.usuarioService.autenticar(usuario);
+        UsuarioTokenDto autenticado;
+        try {
+            autenticado = this.usuarioService.autenticar(usuario);
+            tentativaLoginService.registrarSucesso(usuarioLoginDto.getEmail(), ipOrigem);
+            LOGGER.info("[SEGURANCA] Login bem-sucedido: email={}, ip={}", usuarioLoginDto.getEmail(), ipOrigem);
+        } catch (AuthenticationException e) {
+            tentativaLoginService.registrarFalha(usuarioLoginDto.getEmail(), ipOrigem);
+            throw e;
+        }
 
         // Token vai para o cookie HttpOnly — inacessível ao JavaScript (proteção XSS)
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NOME, autenticado.getToken())
                 .httpOnly(true)                          // inacessível ao JavaScript
-                .secure(false)                           // true em produção (exige HTTPS)
+                .secure(secureCookie)
                 .sameSite("Strict")                      // bloqueia envio cross-site (mitiga CSRF)
                 .path("/")                               // valido para toda a aplicacao
                 .maxAge(Duration.ofSeconds(jwtValidity)) // expira junto com o token JWT
@@ -94,16 +124,20 @@ public class UsuarioController {
      * tokens de curta duração (15 min a 1 hora) são importantes.</p>
      */
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String usuario = authentication == null ? "anonymous" : authentication.getName();
+
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NOME, "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(secureCookie)
                 .sameSite("Strict")
                 .path("/")
                 .maxAge(0)  // maxAge=0 instrui o browser a deletar o cookie imediatamente
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        LOGGER.info("[SEGURANCA] Logout solicitado: usuario={}, ip={}", usuario, request.getRemoteAddr());
 
         return ResponseEntity.noContent().build();
     }
@@ -136,6 +170,9 @@ public class UsuarioController {
     @PutMapping("/{id}")
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<Void> atualizar(@PathVariable Long id, @RequestBody @Valid UsuarioCriacaoDto dto) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         usuarioService.atualizar(id, dto);
         return ResponseEntity.noContent().build();
     }
@@ -143,6 +180,9 @@ public class UsuarioController {
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<Void> deletar(@PathVariable Long id, Authentication authentication) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         usuarioService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
         return ResponseEntity.noContent().build();
     }
@@ -150,6 +190,9 @@ public class UsuarioController {
     @PatchMapping("/{id}/desativacao")
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<Void> desativar(@PathVariable Long id, Authentication authentication) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         usuarioService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
         return ResponseEntity.noContent().build();
     }
@@ -157,6 +200,9 @@ public class UsuarioController {
     @PatchMapping("/{id}/reativacao")
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<Void> reativar(@PathVariable Long id) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         usuarioService.reativar(id);
         return ResponseEntity.noContent().build();
     }
@@ -164,6 +210,9 @@ public class UsuarioController {
     @PatchMapping("/{id}/permissao/{permissaoId}")
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<Void> atualizarPermissao(@PathVariable Long id, @PathVariable Integer permissaoId) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         usuarioService.atualizarPermissao(id, permissaoId);
         return ResponseEntity.noContent().build();
     }
@@ -171,6 +220,9 @@ public class UsuarioController {
     @PatchMapping("/{id}/senha")
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<Void> alterarSenha(@PathVariable Long id, @RequestBody @Valid UsuarioSenhaDto dto) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         usuarioService.alterarSenha(id, dto);
         return ResponseEntity.noContent().build();
     }

@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -56,7 +55,7 @@ public class SecurityConfiguracao {
     /**
      * URLs que não exigem autenticação (acesso público).
      *
-     * <p>Inclui documentação da API (Swagger/OpenAPI), console do H2, endpoints
+     * <p>Inclui documentação da API (Swagger/OpenAPI), endpoints
      * de login e rotas de erro — tudo que deve funcionar sem token JWT.</p>
      *
      * <p><b>Spring Security 7 (Spring Boot 4):</b> {@code AntPathRequestMatcher} foi removido.
@@ -73,12 +72,9 @@ public class SecurityConfiguracao {
             "/api/public/authenticate",
             "/webjars/**",
             "/v3/api-docs/**",
-            "/actuator/*",
             "/usuarios/login",
             "/usuarios/login/**",
             "/usuarios/logout/**",
-            "/h2-console/**",
-            "/h2-console/*/**",
             "/error/**"
     };
 
@@ -95,11 +91,6 @@ public class SecurityConfiguracao {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Desabilita restrição de X-Frame-Options para permitir o console H2 no browser.
-                // Em produção, remova isso — o H2 console não deve ser exposto.
-                .headers(headers -> headers
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
-
                 // Habilita CORS com a configuração definida em corsConfigurationSource()
                 .cors(Customizer.withDefaults())
 
@@ -195,7 +186,7 @@ public class SecurityConfiguracao {
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(12);
     }
 
     /**
@@ -231,8 +222,7 @@ public class SecurityConfiguracao {
                 HttpMethod.PATCH.name(),
                 HttpMethod.DELETE.name(),
                 HttpMethod.OPTIONS.name(),
-                HttpMethod.HEAD.name(),
-                HttpMethod.TRACE.name()
+                HttpMethod.HEAD.name()
         ));
 
         // Permite todos os headers de requisição (Content-Type, Authorization etc.)

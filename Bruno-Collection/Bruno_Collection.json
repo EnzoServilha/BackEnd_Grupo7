@@ -1,0 +1,3858 @@
+{
+  "info": {
+    "_postman_id": "d69ff429-50d8-4da4-b7ab-a4d6195e6007",
+    "name": "Lamar Auto Pecas - API completa",
+    "description": "Importe este arquivo no Bruno. Execute Autenticacao > Login primeiro. Todas as rotas de negócio exigem JWT. Cada request contém entrada de exemplo e testes de status/formato. Rotas DELETE, PATCH, fechamento e rollback alteram dados.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "email",
+      "value": "admin@teste.com",
+      "type": "string"
+    },
+    {
+      "key": "senha",
+      "value": "123456",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "usuarioId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "permissaoId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "categoriaId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "clienteId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "fornecedorId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "enderecoId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "marcaId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "codigoAssociadoId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "itemId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "similarId",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "itemMovimentacaoId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "movimentacaoId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "cotacaoId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "periodoId",
+      "value": "3",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Autenticacao",
+      "item": [
+        {
+          "name": "Login e capturar JWT",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "login"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"senha\": \"{{senha}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });",
+                  "const c=pm.response.headers.get(\"Set-Cookie\")||\"\"; const m=c.match(/authToken=([^;]+)/); pm.test(\"JWT recebido\",()=>pm.expect(m).not.eql(null)); if(m)pm.collectionVariables.set(\"authToken\",m[1]); if(pm.response.code===200)pm.collectionVariables.set(\"usuarioId\",String(pm.response.json().userId));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "logout"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Criar usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, empty.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Usuario Bruno\",\n  \"email\": \"usuario.bruno@teste.com\",\n  \"senha\": \"123456\",\n  \"permissaoId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([201]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200,204, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200,204]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar administrativos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/administracao?ativo=todos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "administracao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Usuario logado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "me"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioId}}"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 204, empty.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Usuario Bruno\",\n  \"email\": \"usuario.bruno@teste.com\",\n  \"senha\": \"123456\",\n  \"permissaoId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar permissao",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuarioId}}/permissao/{{permissaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioId}}",
+                "permissao",
+                "{{permissaoId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alterar senha",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuarioId}}/senha",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioId}}",
+                "senha"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 204, empty.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"senhaAtual\": \"{{senha}}\",\n  \"novaSenha\": \"novaSenha123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar PATCH",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuarioId}}/desativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioId}}",
+                "desativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reativar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuarioId}}/reativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioId}}",
+                "reativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar DELETE",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuarioId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Listar administrativas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/administracao?ativo=todos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias",
+                "administracao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por nome",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/Pe%C3%A7as%20Automotivas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias",
+                "Pe%C3%A7as%20Automotivas"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/porId/{{categoriaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias",
+                "porId",
+                "{{categoriaId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Categoria Bruno\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar PATCH",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/{{categoriaId}}/desativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias",
+                "{{categoriaId}}",
+                "desativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reativar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/{{categoriaId}}/reativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias",
+                "{{categoriaId}}",
+                "reativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar DELETE",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/{{categoriaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categorias",
+                "{{categoriaId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Clientes",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200,204, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200,204]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar administrativos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/administracao?ativo=todos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "administracao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{clienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{clienteId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastrar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomeEmpresa\": \"Oficina Bruno\",\n  \"nomeContato\": \"Contato Teste\",\n  \"cpfCnpj\": \"12345678000199\",\n  \"telefone\": \"11999999999\",\n  \"email\": \"cliente.bruno@teste.com\",\n  \"observacoes\": \"Teste Bruno\",\n  \"enderecoId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([201]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{clienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{clienteId}}"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomeEmpresa\": \"Oficina Bruno\",\n  \"nomeContato\": \"Contato Teste\",\n  \"cpfCnpj\": \"12345678000199\",\n  \"telefone\": \"11999999999\",\n  \"email\": \"cliente.bruno@teste.com\",\n  \"observacoes\": \"Teste Bruno\",\n  \"enderecoId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar PATCH",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{clienteId}}/desativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{clienteId}}",
+                "desativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reativar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{clienteId}}/reativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{clienteId}}",
+                "reativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar DELETE",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{clienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{clienteId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Fornecedores",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fornecedores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fornecedores"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar administrativos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fornecedores/administracao?ativo=todos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fornecedores",
+                "administracao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fornecedores/{{fornecedorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fornecedores",
+                "{{fornecedorId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por contato",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fornecedores/buscarPorNome/Marcos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fornecedores",
+                "buscarPorNome",
+                "Marcos"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por empresa",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fornecedores/buscarPorEmpresa/Pecas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fornecedores",
+                "buscarPorEmpresa",
+                "Pecas"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por categoria",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fornecedores/buscarPorCategoria/{{categoriaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fornecedores",
+                "buscarPorCategoria",
+                "{{categoriaId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por marca",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fornecedores/buscarPorMarca/{{marcaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fornecedores",
+                "buscarPorMarca",
+                "{{marcaId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastrar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/fornecedores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fornecedores"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"razaoSocial\": \"Fornecedor Bruno LTDA\",\n  \"cnpj\": \"11222333000144\",\n  \"nomeContato\": \"Contato Bruno\",\n  \"nomeEmpresa\": \"Fornecedor Bruno\",\n  \"telefone\": \"1133334444\",\n  \"email\": \"fornecedor.bruno@teste.com\",\n  \"observacoes\": \"Teste Bruno\",\n  \"categoriaId\": [\n    1\n  ],\n  \"marcaId\": [],\n  \"enderecoId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([201]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/fornecedores/{{fornecedorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fornecedores",
+                "{{fornecedorId}}"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"razaoSocial\": \"Fornecedor Bruno LTDA\",\n  \"cnpj\": \"11222333000144\",\n  \"nomeContato\": \"Contato Bruno\",\n  \"nomeEmpresa\": \"Fornecedor Bruno\",\n  \"telefone\": \"1133334444\",\n  \"email\": \"fornecedor.bruno@teste.com\",\n  \"observacoes\": \"Teste Bruno\",\n  \"categoriaId\": [\n    1\n  ],\n  \"marcaId\": [],\n  \"enderecoId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar PATCH",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fornecedores/{{fornecedorId}}/desativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fornecedores",
+                "{{fornecedorId}}",
+                "desativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reativar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fornecedores/{{fornecedorId}}/reativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fornecedores",
+                "{{fornecedorId}}",
+                "reativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar DELETE",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fornecedores/{{fornecedorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fornecedores",
+                "{{fornecedorId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Enderecos",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/enderecos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "enderecos"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200,204, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200,204]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar administrativos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/enderecos/administracao?ativo=todos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "enderecos",
+                "administracao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/enderecos/{{enderecoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "enderecos",
+                "{{enderecoId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastrar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/enderecos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "enderecos"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cep\": \"01001-000\",\n  \"logradouro\": \"Rua Teste Bruno\",\n  \"numero\": \"100\",\n  \"complemento\": \"Sala 1\",\n  \"bairro\": \"Centro\",\n  \"cidade\": \"São Paulo\",\n  \"uf\": \"SP\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([201]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/enderecos/{{enderecoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "enderecos",
+                "{{enderecoId}}"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cep\": \"01001-000\",\n  \"logradouro\": \"Rua Teste Bruno\",\n  \"numero\": \"100\",\n  \"complemento\": \"Sala 1\",\n  \"bairro\": \"Centro\",\n  \"cidade\": \"São Paulo\",\n  \"uf\": \"SP\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar PATCH",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/enderecos/{{enderecoId}}/desativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "enderecos",
+                "{{enderecoId}}",
+                "desativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reativar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/enderecos/{{enderecoId}}/reativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "enderecos",
+                "{{enderecoId}}",
+                "reativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar DELETE",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/enderecos/{{enderecoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "enderecos",
+                "{{enderecoId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Marcas",
+      "item": [
+        {
+          "name": "Listar administrativas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/marcas/administracao?ativo=todos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "marcas",
+                "administracao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por nome",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/marcas/Cofap",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "marcas",
+                "Cofap"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/marcas/porId/{{marcaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "marcas",
+                "porId",
+                "{{marcaId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/marcas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "marcas"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Marca Bruno\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar PATCH",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/marcas/{{marcaId}}/desativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "marcas",
+                "{{marcaId}}",
+                "desativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reativar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/marcas/{{marcaId}}/reativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "marcas",
+                "{{marcaId}}",
+                "reativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar DELETE",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/marcas/{{marcaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "marcas",
+                "{{marcaId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Codigos associados",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/codigos-associados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "codigos-associados"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200,204, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200,204]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar administrativos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/codigos-associados/administracao?ativo=todos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "codigos-associados",
+                "administracao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/codigos-associados/{{codigoAssociadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "codigos-associados",
+                "{{codigoAssociadoId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pesquisar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/codigos-associados/pesquisar?codigo=BRUNO",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "codigos-associados",
+                "pesquisar"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200,204, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200,204]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastrar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/codigos-associados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "codigos-associados"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"COD-BRUNO-001\",\n  \"fornecedorId\": 1,\n  \"clienteId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([201]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/codigos-associados/{{codigoAssociadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "codigos-associados",
+                "{{codigoAssociadoId}}"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigo\": \"COD-BRUNO-001\",\n  \"fornecedorId\": 1,\n  \"clienteId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar PATCH",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/codigos-associados/{{codigoAssociadoId}}/desativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "codigos-associados",
+                "{{codigoAssociadoId}}",
+                "desativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reativar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/codigos-associados/{{codigoAssociadoId}}/reativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "codigos-associados",
+                "{{codigoAssociadoId}}",
+                "reativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar DELETE",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/codigos-associados/{{codigoAssociadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "codigos-associados",
+                "{{codigoAssociadoId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Itens",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200,204, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200,204]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar administrativos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/administracao?ativo=todos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "administracao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/{{itemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "{{itemId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por codigo interno",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/codigo/AMOR-001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "codigo",
+                "AMOR-001"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar por marca",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/marca/Cofap",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "marca",
+                "Cofap"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200,204, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200,204]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pesquisar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/pesquisar?termo=Amortecedor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "pesquisar"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200,204, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200,204]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por codigo associado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/por-codigo-associado?codigo=COD-BRUNO",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "por-codigo-associado"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200,204, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200,204]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastrar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/itens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigoInterno\": \"ITEM-BRUNO-001\",\n  \"marca\": \"Cofap\",\n  \"ano\": 2026,\n  \"descricao\": \"Item teste Bruno\",\n  \"localizacao\": \"Prateleira T1\",\n  \"dataCadastro\": \"2026-08-18T10:00:00\",\n  \"codigosAssociadosIds\": [],\n  \"itensSimilaresIds\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([201]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/itens/{{itemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "{{itemId}}"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"codigoInterno\": \"ITEM-BRUNO-001\",\n  \"marca\": \"Cofap\",\n  \"ano\": 2026,\n  \"descricao\": \"Item teste Bruno\",\n  \"localizacao\": \"Prateleira T1\",\n  \"dataCadastro\": \"2026-08-18T10:00:00\",\n  \"codigosAssociadosIds\": [],\n  \"itensSimilaresIds\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Associar codigo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/{{itemId}}/codigos-associados/{{codigoAssociadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "{{itemId}}",
+                "codigos-associados",
+                "{{codigoAssociadoId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desassociar codigo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/{{itemId}}/codigos-associados/{{codigoAssociadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "{{itemId}}",
+                "codigos-associados",
+                "{{codigoAssociadoId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar PATCH",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/{{itemId}}/desativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "{{itemId}}",
+                "desativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reativar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/{{itemId}}/reativacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "{{itemId}}",
+                "reativacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desativar DELETE",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/{{itemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "{{itemId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Itens similares",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/{{itemId}}/similares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "{{itemId}}",
+                "similares"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200,204, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200,204]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Adicionar",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/{{itemId}}/similares/{{similarId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "{{itemId}}",
+                "similares",
+                "{{similarId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itens/{{itemId}}/similares/{{similarId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itens",
+                "{{itemId}}",
+                "similares",
+                "{{similarId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Itens na movimentacao",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itensNaMovimentacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itensNaMovimentacao"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar por item",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itensNaMovimentacao/item/{{itemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itensNaMovimentacao",
+                "item",
+                "{{itemId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar por movimentacao",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itensNaMovimentacao/movimentacao/{{movimentacaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itensNaMovimentacao",
+                "movimentacao",
+                "{{movimentacaoId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/itensNaMovimentacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itensNaMovimentacao"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movimentacaoEstoqueId\": 1,\n  \"itemId\": 2,\n  \"qtd\": 2,\n  \"precoUnitario\": 99.9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([201]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/itensNaMovimentacao/{{itemMovimentacaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itensNaMovimentacao",
+                "{{itemMovimentacaoId}}"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movimentacaoEstoqueId\": 1,\n  \"itemId\": 2,\n  \"qtd\": 2,\n  \"precoUnitario\": 99.9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deletar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/itensNaMovimentacao/{{itemMovimentacaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "itensNaMovimentacao",
+                "{{itemMovimentacaoId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Movimentacoes",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movimentacoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimentacoes"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movimentacoes/{{movimentacaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimentacoes",
+                "{{movimentacaoId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por tipo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movimentacoes/tipo/ENTRADA",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimentacoes",
+                "tipo",
+                "ENTRADA"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movimentacoes/status/CONCLUIDO",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimentacoes",
+                "status",
+                "CONCLUIDO"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimentacoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimentacoes"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"totalGastoImpostos\": 10.5,\n  \"precoFrete\": 20,\n  \"dataEntregaPrevista\": \"2026-08-25\",\n  \"dataEntrega\": null,\n  \"observacoes\": \"Teste Bruno\",\n  \"tipoId\": 1,\n  \"statusId\": 1,\n  \"clienteId\": null,\n  \"fornecedorId\": 1,\n  \"movimentacaoOriginalId\": null,\n  \"numeroNotaFiscal\": \"NF-BRUNO-001\",\n  \"periodoId\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([201]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimentacoes/{{movimentacaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimentacoes",
+                "{{movimentacaoId}}"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"totalGastoImpostos\": 10.5,\n  \"precoFrete\": 20,\n  \"dataEntregaPrevista\": \"2026-08-25\",\n  \"dataEntrega\": null,\n  \"observacoes\": \"Teste Bruno\",\n  \"tipoId\": 1,\n  \"statusId\": 1,\n  \"clienteId\": null,\n  \"fornecedorId\": 1,\n  \"movimentacaoOriginalId\": null,\n  \"numeroNotaFiscal\": \"NF-BRUNO-001\",\n  \"periodoId\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Fechar cotacao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimentacoes/cotacoes/{{cotacaoId}}/fechamento",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimentacoes",
+                "cotacoes",
+                "{{cotacaoId}}",
+                "fechamento"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itens\": [\n    {\n      \"itemId\": 1,\n      \"qtd\": 5,\n      \"precoUnitario\": 150\n    }\n  ],\n  \"totalGastoImpostos\": 10,\n  \"precoFrete\": 20,\n  \"dataEntregaPrevista\": \"2026-08-30\",\n  \"dataEntrega\": null,\n  \"observacoes\": \"Fechamento teste\",\n  \"numeroNotaFiscal\": \"NF-COT-BRUNO\",\n  \"periodoId\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([201]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancelar PATCH",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movimentacoes/{{movimentacaoId}}/cancelamento",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimentacoes",
+                "{{movimentacaoId}}",
+                "cancelamento"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancelar DELETE",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movimentacoes/{{movimentacaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimentacoes",
+                "{{movimentacaoId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 204, empty."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Periodos",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/periodos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "periodos"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar ultimo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/periodos/ultimo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "periodos",
+                "ultimo"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Estoque atual",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/periodos/estoque-atual",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "periodos",
+                "estoque-atual"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Fechar",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/periodos/fechar?descricaoNovoPeriodo=Periodo%20Bruno",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "periodos",
+                "fechar"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rollback",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/periodos/rollback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "periodos",
+                "rollback"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/periodos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "periodos"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "\"Periodo criado pela colecao Bruno\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Permissoes",
+      "item": [
+        {
+          "name": "Criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/permissoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "permissoes"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"ROLE_BRUNO_TEST\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([201]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/permissoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "permissoes"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200,204, array."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200,204]).to.include(pm.response.code));",
+                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/permissoes/{{permissaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "permissoes",
+                "{{permissaoId}}"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, object."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/permissoes/{{permissaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "permissoes",
+                "{{permissaoId}}"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"ROLE_BRUNO_TEST\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Status",
+      "item": [
+        {
+          "name": "Criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "status"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"STATUS_BRUNO_TEST\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([201]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tipos",
+      "item": [
+        {
+          "name": "Criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tipos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tipos"
+              ]
+            },
+            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"TIPO_BRUNO_TEST\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([201]).to.include(pm.response.code));",
+                  "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Etiquetas",
+      "item": [
+        {
+          "name": "Gerar PDF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/etiquetas/{{itemId}}/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "etiquetas",
+                "{{itemId}}",
+                "pdf"
+              ]
+            },
+            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, pdf."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
+                  "pm.test(\"PDF válido\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/pdf\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

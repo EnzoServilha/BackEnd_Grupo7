@@ -70,7 +70,7 @@ public class ItemNaMovimentacaoService {
     public ItensNaMovimentacaoResponseDto editar(ItensNaMovimentacaoRequestDto requestDto, Integer id){
         ItensNaMovimentacao itens = itemMovimentacaoRepository.findById(id)
                 .orElseThrow(() -> new ItemNaMovimentacaoNaoEncontrado("Item na movimentação não encontrado"));
-        validarPendente(itens.getMovimentacaoEstoque());
+        validarAlteracaoDeItem(itens.getMovimentacaoEstoque());
         itens.setQtd(requestDto.qtd());
         itens.setPrecoUnitario(requestDto.precoUnitario());
 
@@ -81,7 +81,7 @@ public class ItemNaMovimentacaoService {
     public void deletar(Integer id){
         ItensNaMovimentacao item = itemMovimentacaoRepository.findById(id)
                 .orElseThrow(() -> new ItemNaMovimentacaoNaoEncontrado("Item na movimentação não encontrado"));
-        validarPendente(item.getMovimentacaoEstoque());
+        validarAlteracaoDeItem(item.getMovimentacaoEstoque());
         itemMovimentacaoRepository.deleteById(id);
     }
 
@@ -94,6 +94,13 @@ public class ItemNaMovimentacaoService {
     private void validarPendente(MovimentacaoEstoque movimentacao) {
         if (movimentacao.getStatus() == null || !"PENDENTE".equals(movimentacao.getStatus().getNome())) {
             throw new EntidadeConflitanteException("Itens só podem ser alterados em movimentações pendentes");
+        }
+    }
+
+    private void validarAlteracaoDeItem(MovimentacaoEstoque movimentacao) {
+        validarPendente(movimentacao);
+        if (movimentacao.getTipo() != null && "COTACAO".equals(movimentacao.getTipo().getNome())) {
+            throw new EntidadeConflitanteException("Os itens de uma cotação são imutáveis");
         }
     }
 }

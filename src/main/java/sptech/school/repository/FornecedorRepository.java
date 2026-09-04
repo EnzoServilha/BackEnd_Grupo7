@@ -2,6 +2,7 @@ package sptech.school.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import sptech.school.entity.Fornecedor;
 
 import java.util.List;
@@ -10,8 +11,17 @@ import java.util.Optional;
 public interface FornecedorRepository extends JpaRepository<Fornecedor, Integer> {
     List<Fornecedor> findAllByAtivoTrue();
     Optional<Fornecedor> findByIdAndAtivoTrue(Integer id);
-    List<Fornecedor> findByNomeContatoContaining(String nomeContato);
-    List<Fornecedor> findByNomeEmpresaContaining(String nomeEmpresa);
+
+    @Query("SELECT f FROM Fornecedor f " +
+            "WHERE f.ativo = true " +
+            "AND LOWER(f.nomeContato) LIKE LOWER(CONCAT('%', :nomeContato, '%')) ESCAPE '\\'")
+    List<Fornecedor> findByNomeContatoContaining(@Param("nomeContato") String nomeContato);
+
+    @Query("SELECT f FROM Fornecedor f " +
+            "WHERE f.ativo = true " +
+            "AND LOWER(f.nomeEmpresa) LIKE LOWER(CONCAT('%', :nomeEmpresa, '%')) ESCAPE '\\'")
+    List<Fornecedor> findByNomeEmpresaContaining(@Param("nomeEmpresa") String nomeEmpresa);
+
     List<Fornecedor> findByNomeContatoContainingAndAtivoTrue(String nomeContato);
     List<Fornecedor> findByNomeEmpresaContainingAndAtivoTrue(String nomeEmpresa);
     boolean existsByEnderecoIdAndAtivoTrue(Integer enderecoId);
