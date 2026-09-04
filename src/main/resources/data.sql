@@ -2,8 +2,8 @@ INSERT INTO permissao (nome) VALUES ('ROLE_ADMIN');
 INSERT INTO permissao (nome) VALUES ('ROLE_USER');
 
 INSERT INTO usuario (nome, email, senha, data_cadastro, permissao_id)
-VALUES ('Admin', 'admin@teste.com', '$2a$12$ugv97T5SrNAZuvPU/siZ9.H2.GrvmEvnRKGwYAhNKgDBxNoC2Gie6', NOW(), 1),
-('Enzo', 'enzo@teste.com', '$2a$12$nZ2S4UeZfdZkbWIRAJ5aFOBMtFBZp/dSnvJxftI6hrLx9aXO4Lcte', NOW(), 2);;
+VALUES ('Admin', 'admin@teste.com', '$2b$12$1gqU.fwSCs2iXea6mEmg1eQf0VgAt72gyRo5XGMi9ZHNSZ7WXH3uy', NOW(), 1),
+('Enzo', 'enzo@teste.com', '$2b$12$1gqU.fwSCs2iXea6mEmg1eQf0VgAt72gyRo5XGMi9ZHNSZ7WXH3uy', NOW(), 2);;
 
 -- 1. TIPOS, STATUS E CATEGORIAS (Básico)
 INSERT INTO tipo (id, nome) VALUES (1, 'ENTRADA'), (2, 'SAIDA'), (3, 'AJUSTE');
