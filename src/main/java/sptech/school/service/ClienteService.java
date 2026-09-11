@@ -1,8 +1,10 @@
 package sptech.school.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import sptech.school.dto.cliente.ClienteRequestDto;
-import sptech.school.dto.cliente.ClienteResponseDto;
+import sptech.school.dto.cliente.ClienteResponseDtoPaginacao;
 import sptech.school.entity.*;
 import sptech.school.exception.ClienteNaoEncontradoException;
 import sptech.school.exception.EntidadeNaoEncontradaException;
@@ -34,15 +36,16 @@ public class ClienteService {
     }
 
 
-    public List<Cliente> listarTodos() {
-        return clienteRepository.findAllByAtivoTrue();
+    public ClienteResponseDtoPaginacao listarTodos(Pageable pageable) {
+        Page<Cliente> pagina = clienteRepository.findAllByAtivoTrue(pageable);
+        return ClienteMapper.toPaginadoDto(pagina);
     }
 
     public List<Cliente> listarAdministrativo(String ativo) {
         return FiltroAtivacao.filtrar(clienteRepository.findAll(), ativo);
     }
 
-    public ClienteResponseDto cadastrar(ClienteRequestDto cliente) {
+    public ClienteResponseDtoPaginacao cadastrar(ClienteRequestDto cliente) {
 
         Cliente entidade = ClienteMapper.toEntity(cliente);
 
@@ -54,7 +57,7 @@ public class ClienteService {
         return ClienteMapper.toResponseDto(clienteRepository.save(entidade));
     }
 
-    public ClienteResponseDto atualizar(ClienteRequestDto cliente, Integer id) {
+    public ClienteResponseDtoPaginacao atualizar(ClienteRequestDto cliente, Integer id) {
         Cliente entidade = clienteRepository.findById(id)
             .filter(encontrado -> Boolean.TRUE.equals(encontrado.getAtivo()))
             .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente não encontrado", id));
