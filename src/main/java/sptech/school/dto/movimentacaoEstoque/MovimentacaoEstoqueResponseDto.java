@@ -1,6 +1,6 @@
 package sptech.school.dto.movimentacaoEstoque;
 
-import sptech.school.dto.cliente.ClienteResponseDto;
+import sptech.school.dto.cliente.ClienteResponseDtoPaginacao;
 import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.dto.periodo.PeriodoResponseDto;
 import sptech.school.dto.status.StatusResponseDto;
@@ -22,7 +22,7 @@ public record MovimentacaoEstoqueResponseDto(
         String observacoes,
         TipoResponseDto tipo,
         StatusResponseDto status,
-        ClienteResponseDto cliente,
+        ClienteResponseDtoPaginacao cliente,
         PeriodoResponseDto periodo,
         FornecedorResponseDto fornecedor,
         Integer movimentacaoOriginalId,

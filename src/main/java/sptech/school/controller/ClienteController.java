@@ -1,11 +1,14 @@
 package sptech.school.controller;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.cliente.ClienteRequestDto;
-import sptech.school.dto.cliente.ClienteResponseDto;
+import sptech.school.dto.cliente.ClienteResponseDtoPaginacao;
 import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.entity.*;
 import sptech.school.mapper.ClienteMapper;
@@ -27,45 +30,61 @@ public class ClienteController {
 
 
     @GetMapping
-    public ResponseEntity<List<ClienteResponseDto>> listarTodos() {
-        List<Cliente> clientes = clienteService.listarTodos();
-        if (clientes.isEmpty()) return ResponseEntity.noContent().build();
-        return ResponseEntity.ok(ClienteMapper.toResponseDtoList(clientes));
+    public ResponseEntity<ClienteResponseDtoPaginacao> listar(
+            //Configura o pagebla
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamanho,
+            @RequestParam(defaultValue = "nomeEmpresa") String ordenacao,
+            @RequestParam(defaultValue = "ASC") String direcao) {
+
+        // Converte a string "ASC" ou "DESC" em enum
+        Sort.Direction dir = Sort.Direction.fromString(direcao);
+
+        // Define ordenação primária pelo campo escolhido + id como critério de desempate
+        Sort sort = Sort.by(dir, ordenacao).and(Sort.by(Sort.Direction.ASC, "id"));
+
+        // Cria o objeto de paginação
+        Pageable pageable = PageRequest.of(pagina, tamanho, sort);
+
+        // Chama o service que busca no banco e usa o ClienteMapper
+        ClienteResponseDtoPaginacao response = clienteService.listarTodos(pageable);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/administracao")
-    public ResponseEntity<List<ClienteResponseDto>> listarAdministrativo(
+    public ResponseEntity<List<ClienteResponseDtoPaginacao>> listarAdministrativo(
             @RequestParam(defaultValue = "todos") String ativo) {
         return ResponseEntity.ok(ClienteMapper.toResponseDtoList(clienteService.listarAdministrativo(ativo)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClienteResponseDto> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ClienteResponseDtoPaginacao> buscarPorId(@PathVariable Integer id) {
         Cliente clienteEncontrado = clienteService.buscarPorId(id);
         return ResponseEntity.ok(ClienteMapper.toResponseDto(clienteEncontrado));
     }
 
 
     @PostMapping
-    public ResponseEntity<ClienteResponseDto> cadastrar(@RequestBody @Valid ClienteRequestDto request) {
+    public ResponseEntity<ClienteResponseDtoPaginacao> cadastrar(@RequestBody @Valid ClienteRequestDto request) {
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
         usuarioService.verificarAcesso(logado);
 
-        ClienteResponseDto salvo = clienteService.cadastrar(request);
+        ClienteResponseDtoPaginacao salvo = clienteService.cadastrar(request);
 
         return ResponseEntity.status(201).body(salvo);
     }
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClienteResponseDto> atualizar(
+    public ResponseEntity<ClienteResponseDtoPaginacao> atualizar(
             @PathVariable Integer id,
             @RequestBody @Valid ClienteRequestDto request
     ) {
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
         usuarioService.verificarAcesso(logado);
 
-        ClienteResponseDto atualizado = clienteService.atualizar( request, id);
+        ClienteResponseDtoPaginacao atualizado = clienteService.atualizar( request, id);
 
         return ResponseEntity.ok(atualizado);
     }
