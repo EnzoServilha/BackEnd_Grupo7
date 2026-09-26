@@ -59,25 +59,33 @@ public class UsuarioService {
     this.usuarioRepository.save(novoUsuario);
   }
 
-  public UsuarioTokenDto autenticar(Usuario usuario) {
+    public UsuarioTokenDto autenticar(UsuarioLoginDto usuarioLoginDto) {
 
-    final UsernamePasswordAuthenticationToken credentials = new UsernamePasswordAuthenticationToken(
-          usuario.getEmail(), usuario.getSenha());
+        // Cria o token de autenticação contendo o e-mail e a senha em texto puro vindos da requisição
+        final UsernamePasswordAuthenticationToken credentials = new UsernamePasswordAuthenticationToken(
+                usuarioLoginDto.getEmail(),
+                usuarioLoginDto.getSenha()
+        );
 
-    final Authentication authentication = this.authenticationManager.authenticate(credentials);
+        // O AuthenticationManager aciona o AutenticacaoProvider, que busca no banco
+        // e compara o hash BCrypt usando o passwordEncoder.matches()
+        final Authentication authentication = this.authenticationManager.authenticate(credentials);
 
-    Usuario usuarioAutenticado =
-          usuarioRepository.findByEmailAndAtivoTrue(usuario.getEmail())
-                    .orElseThrow(
-                            () -> new ResponseStatusException(404, "Email do usuário não cadastrado", null)
-                    );
+        // Busca o usuário ativo no banco para gerar o token e o retorno
+        Usuario usuarioAutenticado = usuarioRepository.findByEmailAndAtivoTrue(usuarioLoginDto.getEmail())
+                .orElseThrow(
+                        () -> new ResponseStatusException(404, "Email do usuário não cadastrado", null)
+                );
 
-    SecurityContextHolder.getContext().setAuthentication(authentication);
+        // Seta a autenticação no contexto de segurança do Spring
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-    final String token = gerenciadorTokenJwt.generateToken(authentication);
+        // Gera o token JWT utilizando o gerenciador
+        final String token = gerenciadorTokenJwt.generateToken(authentication);
 
-    return UsuarioMapper.of(usuarioAutenticado, token);
-  }
+        // Retorna o DTO com os dados do usuário e o token gerado
+        return UsuarioMapper.of(usuarioAutenticado, token);
+    }
 
   public List<UsuarioResponseDto> listarTodos() {
 

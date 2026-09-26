@@ -2,21 +2,19 @@ server.error.include-message=${SERVER_ERROR_INCLUDE_MESSAGE:never}
 server.error.include-binding-errors=${SERVER_ERROR_INCLUDE_BINDING_ERRORS:never}
 
 # =============================================================================
-# BANCO DE DADOS H2 (apenas para desenvolvimento/testes)
-# Em produção, substitua pelo driver do banco real (PostgreSQL, MySQL etc.)
+# BANCO DE DADOS MYSQL (Produção / Desenvolvimento)
 # =============================================================================
-spring.datasource.url=jdbc:h2:mem:teste-security;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-spring.datasource.driver-class-name=org.h2.Driver
-spring.h2.console.enabled=${H2_CONSOLE_ENABLED:false}
-spring.datasource.username=${DB_USERNAME:admin}
-spring.datasource.password=${DB_PASSWORD:admin}
+spring.datasource.url=jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:sua_base_de_dados}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+spring.datasource.username=${DB_USERNAME:root}
+spring.datasource.password=${DB_PASSWORD:sua_senha}
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
-# Hibernate cria o esquema a partir das entidades @Entity
-spring.jpa.hibernate.ddl-auto=create-drop
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
-spring.sql.init.mode=always
+# Hibernate atualiza o esquema automaticamente sem apagar os dados
+spring.jpa.hibernate.ddl-auto=${DB_DDL_AUTO:update}
+spring.jpa.show-sql=${SPRING_JPA_SHOW_SQL:false}
 
-# Garante que o data.sql seja executado após o schema JPA ser criado
+# Desativa scripts automáticos de inicialização para evitar duplicidade de chaves
+spring.sql.init.mode=never
 spring.jpa.defer-datasource-initialization=true
 
 logging.level.org.springframework.security=${SPRING_SECURITY_LOG_LEVEL:WARN}
@@ -24,21 +22,21 @@ logging.level.org.springframework.security=${SPRING_SECURITY_LOG_LEVEL:WARN}
 # =============================================================================
 # CONFIGURAÇÕES JWT
 # =============================================================================
-
-# Tempo de validade do token em SEGUNDOS
-# 3600 = 1 hora | 86400 = 24 horas | 604800 = 7 dias
-# Em produção: tokens de curta duração (15-60 min) + refresh token são mais seguros
 jwt.validity=${JWT_VALIDITY:3600}
-
-# Chave secreta para assinar os tokens (algoritmo HMAC-SHA256)
-# REQUISITOS:
-#   - Deve estar codificada em Base64
-#   - Mínimo de 32 bytes após decodificação (256 bits para HS256)
-# ATENÇÃO:
-#   - Em produção, defina a variável de ambiente JWT_SECRET com uma chave forte
-#   - Nunca commite chaves reais no repositório Git
-
 jwt.secret=${JWT_SECRET:}
+COOKIE_SECURE=${COOKIE_SECURE:false}
+
+# =============================================================================
+# CONFIGURAÇÃO DE E-MAIL (JavaMailSender)
+# =============================================================================
+spring.mail.host=${MAIL_HOST:smtp.gmail.com}
+spring.mail.port=${MAIL_PORT:587}
+spring.mail.username=${MAIL_USERNAME:seu_email@gmail.com}
+spring.mail.password=${MAIL_PASSWORD:sua_senha_de_app_aqui}
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+spring.mail.properties.mail.smtp.ssl.properties.mail.smtp.ssl.protocols=TLSv1.2 TLSv1.3
 
 # =============================================================================
 # PROTEÇÃO CONTRA BRUTE FORCE NO LOGIN

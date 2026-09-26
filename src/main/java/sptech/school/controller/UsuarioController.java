@@ -84,12 +84,11 @@ public class UsuarioController {
         String ipOrigem = request.getRemoteAddr();
         tentativaLoginService.verificarBloqueio(usuarioLoginDto.getEmail(), ipOrigem);
 
-        final Usuario usuario = UsuarioMapper.of(usuarioLoginDto);
-
-        // autenticar() gera o token internamente — precisamos dele apenas para o cookie
         UsuarioTokenDto autenticado;
         try {
-            autenticado = this.usuarioService.autenticar(usuario);
+            // Passa o DTO diretamente para o serviço autenticar
+            autenticado = this.usuarioService.autenticar(usuarioLoginDto);
+
             tentativaLoginService.registrarSucesso(usuarioLoginDto.getEmail(), ipOrigem);
             LOGGER.info("[SEGURANCA] Login bem-sucedido: email={}, ip={}", usuarioLoginDto.getEmail(), ipOrigem);
         } catch (AuthenticationException e) {
@@ -97,18 +96,16 @@ public class UsuarioController {
             throw e;
         }
 
-        // Token vai para o cookie HttpOnly — inacessível ao JavaScript (proteção XSS)
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NOME, autenticado.getToken())
-                .httpOnly(true)                          // inacessível ao JavaScript
+                .httpOnly(true)
                 .secure(secureCookie)
-                .sameSite("Strict")                      // bloqueia envio cross-site (mitiga CSRF)
-                .path("/")                               // valido para toda a aplicacao
-                .maxAge(Duration.ofSeconds(jwtValidity)) // expira junto com o token JWT
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(Duration.ofSeconds(jwtValidity))
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        // Body retorna apenas dados de sessão — sem o token
         UsuarioSessaoDto sessao = UsuarioMapper.ofSessao(autenticado);
         return ResponseEntity.ok(sessao);
     }
