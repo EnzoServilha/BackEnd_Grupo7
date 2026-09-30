@@ -6,8 +6,8 @@ INSERT INTO status (nome) VALUES ('PENDENTE'), ('CONCLUIDO'), ('CONCLUIDO PARCIA
 -- DADOS DE TESTE / DEMONSTRACAO
 INSERT INTO usuario (nome, email, senha, data_cadastro, permissao_id, ativo)
 VALUES
-    ('Admin', 'admin@teste.com', '$2a$12$ugv97T5SrNAZuvPU/siZ9.H2.GrvmEvnRKGwYAhNKgDBxNoC2Gie6', CURRENT_TIMESTAMP, 1, true),
-    ('Enzo', 'enzo@teste.com', '$2a$12$nZ2S4UeZfdZkbWIRAJ5aFOBMtFBZp/dSnvJxftI6hrLx9aXO4Lcte', CURRENT_TIMESTAMP, 2, true);
+    ('Admin', 'admin@teste.com', '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.AQubh4a', CURRENT_TIMESTAMP, 1, true),
+    ('Enzo', 'enzo@teste.com', '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.AQubh4a', CURRENT_TIMESTAMP, 2, true);
 
 -- PERIODOS (garantir IDs antes das movimentacoes)
 INSERT INTO periodo (data_criacao, anotacao, qtd_pecas, fechado, data_fechamento)
@@ -46,14 +46,19 @@ INSERT INTO item_similar (fk_item, fk_item_similar) VALUES (1, 2), (2, 1);
 INSERT INTO movimentacao_estoque (fk_usuario, tipo_id, status_id, periodo_id, numero_nota_fiscal)
 VALUES
     (1, 1, 2, 1, 'NF-2026-P1'),
+    (1, 2, 2, 3, 'NF-2026-P1A'),
+    (1, 4, 2, 3, ''),
     (1, 1, 2, 2, 'NF-2026-P2'),
     (1, 1, 2, 3, 'NF-2026-P3');
 
 INSERT INTO itens_na_movimentacao (movimentacao_estoque_id, item_id, qtd, preco_unitario)
 VALUES
     (1, 1, 150, 150.00),
-    (2, 1, 42, 150.00),
-    (3, 1, 10, 150.00);
+    (1, 2, 2, 200.00),
+    (2, 3, 10, 200.00),
+    (3, 1, 10, 188.00),
+    (4, 1, 42, 150.00),
+    (5, 1, 10, 150.00);
 
 -- CATEGORIAS
 INSERT INTO categoria (nome, ativo) VALUES
