@@ -25,8 +25,6 @@ public class UsuarioDetalhesDto implements UserDetails {
         this.senha = usuario.getSenha();
         this.ativo = Boolean.TRUE.equals(usuario.getAtivo());
 
-        System.out.println(">>> DEBUG LOGIN -> EMAIL: " + email + " | SENHA HASH: " + senha + " | ATIVO (DTO): " + ativo);
-
         this.authorities = usuario.getPermissao() == null
             ? List.of()
             : List.of(new SimpleGrantedAuthority(usuario.getPermissao().getNome()));
