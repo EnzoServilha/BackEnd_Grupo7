@@ -20,13 +20,16 @@ public class FornecedorResponseDto {
     private List<CategoriaResponseDto> categoria;
     private List<MarcaResponseDto> marcas;
     private EnderecoResponseDto endereco;
+    private Boolean ativo;
+    private Long desativadoPorId;
 
     public FornecedorResponseDto() {}
 
     public FornecedorResponseDto(Integer id, String razaoSocial, String cnpj, String nomeContato,
                                 String nomeEmpresa, String telefone, String email, String observacoes,
                                 LocalDateTime dataCadastro, List<CategoriaResponseDto> categoria,
-                                List<MarcaResponseDto> marcas, EnderecoResponseDto endereco) {
+                                List<MarcaResponseDto> marcas, EnderecoResponseDto endereco,
+                                Boolean ativo, Long desativadoPorId) {
         this.id = id;
         this.razaoSocial = razaoSocial;
         this.cnpj = cnpj;
@@ -39,6 +42,8 @@ public class FornecedorResponseDto {
         this.categoria = categoria;
         this.marcas = marcas;
         this.endereco = endereco;
+        this.ativo = ativo;
+        this.desativadoPorId = desativadoPorId;
     }
 
     public Integer getId() { return id; }
@@ -76,4 +81,10 @@ public class FornecedorResponseDto {
 
     public EnderecoResponseDto getEndereco() { return endereco; }
     public void setEndereco(EnderecoResponseDto endereco) { this.endereco = endereco; }
+
+    public Boolean getAtivo() { return ativo; }
+    public void setAtivo(Boolean ativo) { this.ativo = ativo; }
+
+    public Long getDesativadoPorId() { return desativadoPorId; }
+    public void setDesativadoPorId(Long desativadoPorId) { this.desativadoPorId = desativadoPorId; }
 }

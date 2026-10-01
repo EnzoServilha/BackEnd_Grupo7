@@ -13,6 +13,8 @@ public record ClienteResponseDto(
         String email,
         String observacoes,
         LocalDateTime dataCadastro,
-        EnderecoResponseDto endereco
+        EnderecoResponseDto endereco,
+        Boolean ativo,
+        Long desativadoPorId
 ) {
 }

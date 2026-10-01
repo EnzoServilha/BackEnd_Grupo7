@@ -274,23 +274,26 @@ class CodigoAssociadoServiceTest {
     }
 
     @Nested
-    @DisplayName("Cenários do método deletar()")
+        @DisplayName("Cenários do método desativar()")
     class DeletarTests {
 
         // Cenário feliz
         @Test
-        @DisplayName("Deve deletar código associado")
+        @DisplayName("Deve desativar código associado sem exclusão física")
         void deveDeletarCodigoAssociado() {
             // Given
             Integer id = 1;
 
             // When
-            Mockito.when(codigoAssociadoRepository.existsById(id))
-                    .thenReturn(true);
+            CodigoAssociado codigo = new CodigoAssociado();
+            Mockito.when(codigoAssociadoRepository.findById(id))
+                    .thenReturn(Optional.of(codigo));
 
             // Then
             Assertions.assertDoesNotThrow(() -> codigoAssociadoService.deletar(id));
-            Mockito.verify(codigoAssociadoRepository).deleteById(id);
+            Assertions.assertFalse(codigo.getAtivo());
+            Mockito.verify(codigoAssociadoRepository).save(codigo);
+            Mockito.verify(codigoAssociadoRepository, Mockito.never()).deleteById(Mockito.any());
         }
 
         // Cenário triste
@@ -301,8 +304,8 @@ class CodigoAssociadoServiceTest {
             Integer id = 1;
 
             // When
-            Mockito.when(codigoAssociadoRepository.existsById(id))
-                    .thenReturn(false);
+            Mockito.when(codigoAssociadoRepository.findById(id))
+                    .thenReturn(Optional.empty());
 
             // Then
             Assertions.assertThrows(

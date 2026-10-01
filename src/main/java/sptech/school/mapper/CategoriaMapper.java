@@ -17,7 +17,9 @@ public class CategoriaMapper {
     public static CategoriaResponseDto toResponseDto(Categoria categoria) {
         return new CategoriaResponseDto(
                 categoria.getId(),
-                categoria.getNome()
+            categoria.getNome(),
+            categoria.getAtivo(),
+            categoria.getDesativadoPor() != null ? categoria.getDesativadoPor().getId() : null
         );
     }
 

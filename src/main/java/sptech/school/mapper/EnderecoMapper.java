@@ -29,7 +29,9 @@ public class EnderecoMapper {
                 endereco.getComplemento(),
                 endereco.getBairro(),
                 endereco.getCidade(),
-                endereco.getUf()
+                endereco.getUf(),
+                endereco.getAtivo(),
+                endereco.getDesativadoPor() != null ? endereco.getDesativadoPor().getId() : null
         );
     }
 

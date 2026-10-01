@@ -11,17 +11,26 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     Optional<Item> findByCodigoInterno(String codigoInterno);
-
-    List<Item> findByMarcaContainingIgnoreCase(String marca);
+    Optional<Item> findByIdAndAtivoTrue(Integer id);
+    List<Item> findAllByAtivoTrue();
 
     @Query("SELECT i FROM Item i " +
-            "WHERE LOWER(i.codigoInterno) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-            "OR    LOWER(i.marca)         LIKE LOWER(CONCAT('%', :termo, '%')) " +
-            "OR    LOWER(i.descricao)     LIKE LOWER(CONCAT('%', :termo, '%'))")
+            "WHERE i.ativo = true " +
+            "AND LOWER(i.marca) LIKE LOWER(CONCAT('%', :marca, '%')) ESCAPE '\\'")
+    List<Item> findByMarcaContainingIgnoreCase(@Param("marca") String marca);
+
+    List<Item> findByMarcaContainingIgnoreCaseAndAtivoTrue(String marca);
+
+    @Query("SELECT i FROM Item i " +
+            "WHERE i.ativo = true AND (" +
+            "LOWER(i.codigoInterno) LIKE LOWER(CONCAT('%', :termo, '%')) ESCAPE '\\' " +
+            "OR    LOWER(i.marca)         LIKE LOWER(CONCAT('%', :termo, '%')) ESCAPE '\\' " +
+            "OR    LOWER(i.descricao)     LIKE LOWER(CONCAT('%', :termo, '%')) ESCAPE '\\')")
     List<Item> pesquisarPorTermo(@Param("termo") String termo);
 
     @Query("SELECT DISTINCT i FROM Item i " +
             "JOIN i.codigosAssociados ca " +
-            "WHERE LOWER(ca.codigo) LIKE LOWER(CONCAT('%', :codigo, '%'))")
+            "WHERE i.ativo = true AND ca.ativo = true " +
+            "AND LOWER(ca.codigo) LIKE LOWER(CONCAT('%', :codigo, '%')) ESCAPE '\\'")
     List<Item> buscarPorCodigoAssociado(@Param("codigo") String codigo);
 }

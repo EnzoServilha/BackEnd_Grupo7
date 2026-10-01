@@ -3,8 +3,6 @@ package sptech.school.dto.cliente;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-import java.time.LocalDateTime;
-
 public record ClienteRequestDto(
 
         @NotBlank
@@ -25,7 +23,6 @@ public record ClienteRequestDto(
 
         String observacoes,
 
-        LocalDateTime dataCadastro,
         Integer enderecoId
 
 

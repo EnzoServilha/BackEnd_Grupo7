@@ -41,7 +41,9 @@ public class ItemMapper {
                 item.getLocalizacao(),
                 item.getDataCadastro(),
                 codigosDto,
-                similaresDto
+                similaresDto,
+                item.getAtivo(),
+                item.getDesativadoPor() != null ? item.getDesativadoPor().getId() : null
         );
     }
 

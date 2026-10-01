@@ -17,7 +17,12 @@ public class MarcaMapper {
     }
 
     public static MarcaResponseDto toResponseDto(Marca marca) {
-        return new MarcaResponseDto(marca.getId(), marca.getNomeEmpresa());
+        return new MarcaResponseDto(
+            marca.getId(),
+            marca.getNomeEmpresa(),
+            marca.getAtivo(),
+            marca.getDesativadoPor() != null ? marca.getDesativadoPor().getId() : null
+        );
     }
 
     public static List<MarcaResponseDto> toResponseDtoList(List<Marca> fabricantes) {

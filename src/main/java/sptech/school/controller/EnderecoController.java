@@ -2,12 +2,15 @@ package sptech.school.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.endereco.EnderecoRequestDto;
 import sptech.school.dto.endereco.EnderecoResponseDto;
+import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.entity.Endereco;
 import sptech.school.mapper.EnderecoMapper;
 import sptech.school.service.EnderecoService;
+import sptech.school.service.UsuarioService;
 
 import java.util.List;
 
@@ -16,9 +19,11 @@ import java.util.List;
 public class EnderecoController {
 
     private EnderecoService enderecoService;
+    private final UsuarioService usuarioService;
 
-    public EnderecoController(EnderecoService enderecoService) {
+    public EnderecoController(EnderecoService enderecoService, UsuarioService usuarioService) {
         this.enderecoService = enderecoService;
+        this.usuarioService = usuarioService;
     }
 
     // ----------------------------------------------------------------------------------------------------
@@ -29,6 +34,12 @@ public class EnderecoController {
         List<Endereco> enderecos = enderecoService.listarTodos();
         if (enderecos.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(EnderecoMapper.toResponseDtoList(enderecos));
+    }
+
+    @GetMapping("/administracao")
+    public ResponseEntity<List<EnderecoResponseDto>> listarAdministrativo(
+            @RequestParam(defaultValue = "todos") String ativo) {
+        return ResponseEntity.ok(EnderecoMapper.toResponseDtoList(enderecoService.listarAdministrativo(ativo)));
     }
 
     // ----------------------------------------------------------------------------------------------------
@@ -52,6 +63,9 @@ public class EnderecoController {
     // ----------------------------------------------------------------------------------------------------
     @PostMapping
     public ResponseEntity<EnderecoResponseDto> cadastrar(@RequestBody @Valid EnderecoRequestDto request) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         Endereco endereco = EnderecoMapper.toEntity(request);
 
         Endereco salvo = enderecoService.cadastrar(endereco);
@@ -67,6 +81,9 @@ public class EnderecoController {
             @PathVariable Integer id,
             @RequestBody @Valid EnderecoRequestDto request
     ) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         Endereco endereco = EnderecoMapper.toEntity(request);
 
         Endereco atualizado = enderecoService.atualizar(id, endereco);
@@ -78,8 +95,29 @@ public class EnderecoController {
     // Deletar endereço por ID
     // ----------------------------------------------------------------------------------------------------
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
-        enderecoService.deletar(id);
+    public ResponseEntity<Void> deletar(@PathVariable Integer id, Authentication authentication) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
+        enderecoService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/desativacao")
+    public ResponseEntity<Void> desativar(@PathVariable Integer id, Authentication authentication) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
+        enderecoService.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/reativacao")
+    public ResponseEntity<Void> reativar(@PathVariable Integer id) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
+        enderecoService.reativar(id);
         return ResponseEntity.noContent().build();
     }
 

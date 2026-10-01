@@ -28,7 +28,9 @@ public class UsuarioMapper {
                 usuario.getNome(),
                 usuario.getEmail(),
                 usuario.getDataCadastro(),
-                usuario.getPermissao() != null ? PermissaoMapper.toResponseDto(usuario.getPermissao()) : null
+                usuario.getPermissao() != null ? PermissaoMapper.toResponseDto(usuario.getPermissao()) : null,
+                usuario.getAtivo(),
+                usuario.getDesativadoPor() != null ? usuario.getDesativadoPor().getId() : null
         );
     }
 

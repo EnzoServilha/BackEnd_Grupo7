@@ -393,25 +393,28 @@ class ItemServiceTest {
     }
 
     @Nested
-    @DisplayName("Cenários do método deletar()")
+        @DisplayName("Cenários do método desativar()")
     class DeletarTests {
 
         // Cenário feliz
         @Test
-        @DisplayName("Deve deletar item")
+        @DisplayName("Deve desativar item sem exclusão física")
         void deveDeletarItem() {
             // Given
             Integer id = 1;
 
             // When
-            Mockito.when(itemRepository.existsById(id))
-                    .thenReturn(true);
+            Item item = new Item();
+            Mockito.when(itemRepository.findById(id))
+                    .thenReturn(Optional.of(item));
 
             // Then
             Assertions.assertDoesNotThrow(
                     () -> itemService.deletar(id)
             );
-            Mockito.verify(itemRepository).deleteById(id);
+            Assertions.assertFalse(item.getAtivo());
+            Mockito.verify(itemRepository).save(item);
+            Mockito.verify(itemRepository, Mockito.never()).deleteById(Mockito.any());
         }
 
         // Cenário triste
@@ -422,8 +425,8 @@ class ItemServiceTest {
             Integer id = 1;
 
             // When
-            Mockito.when(itemRepository.existsById(id))
-                    .thenReturn(false);
+            Mockito.when(itemRepository.findById(id))
+                    .thenReturn(Optional.empty());
 
             // Then
             Assertions.assertThrows(

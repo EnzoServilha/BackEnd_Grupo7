@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 public record UsuarioRequestDto(
         @NotBlank
-        @Size(max = 150)
+        @Size(max = 100)
         String nome,
 
         @NotBlank

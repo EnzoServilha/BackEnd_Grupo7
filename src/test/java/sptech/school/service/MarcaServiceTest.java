@@ -121,29 +121,31 @@ class MarcaServiceTest {
 
 
     @Nested
-    @DisplayName("deletar()")
+    @DisplayName("desativar()")
     class DeletarTest {
 
         @Test
-        @DisplayName("Deve deletar marca com sucesso")
+        @DisplayName("Deve desativar marca sem exclusão física")
         void deletarComSucesso() {
-            when(repository.existsById(1)).thenReturn(true);
+            Marca marca = new Marca();
+            when(repository.findById(1)).thenReturn(java.util.Optional.of(marca));
 
             marcaService.deletar(1);
 
-            Mockito.verify(repository).existsById(1);
-            Mockito.verify(repository).deleteById(1);
+            assertFalse(marca.getAtivo());
+            Mockito.verify(repository).save(marca);
+            Mockito.verify(repository, never()).deleteById(Mockito.any());
         }
 
         @Test
         @DisplayName("Deve lançar EntidadeNaoEncontradaException quando marca não existir")
         void deletarNaoEncontrado() {
-            when(repository.existsById(99)).thenReturn(false);
+            when(repository.findById(99)).thenReturn(java.util.Optional.empty());
 
             assertThrows(EntidadeNaoEncontradaException.class, () ->
                     marcaService.deletar(99));
 
-            Mockito.verify(repository).existsById(99);
+            Mockito.verify(repository).findById(99);
             Mockito.verify(repository, never()).deleteById(Mockito.any());
         }
     }

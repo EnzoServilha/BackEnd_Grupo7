@@ -3,9 +3,11 @@ package sptech.school.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.item.ItemResponseDto;
+import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.entity.Item;
 import sptech.school.mapper.ItemMapper;
 import sptech.school.service.ItensSimilaresService;
+import sptech.school.service.UsuarioService;
 
 import java.util.List;
 
@@ -14,9 +16,11 @@ import java.util.List;
 public class ItensSimilaresController {
 
     private final ItensSimilaresService itensSimilaresService;
+    private final UsuarioService usuarioService;
 
-    public ItensSimilaresController(ItensSimilaresService itensSimilaresService) {
+    public ItensSimilaresController(ItensSimilaresService itensSimilaresService, UsuarioService usuarioService) {
         this.itensSimilaresService = itensSimilaresService;
+        this.usuarioService = usuarioService;
     }
 
     @GetMapping
@@ -32,6 +36,9 @@ public class ItensSimilaresController {
     @PostMapping("/{similarId}")
     public ResponseEntity<ItemResponseDto> adicionarSimilar(@PathVariable Integer itemId,
                                                             @PathVariable Integer similarId) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         Item item = itensSimilaresService.adicionarSimilar(itemId, similarId);
         return ResponseEntity.ok(ItemMapper.toResponseDto(item));
     }
@@ -39,6 +46,9 @@ public class ItensSimilaresController {
     @DeleteMapping("/{similarId}")
     public ResponseEntity<Void> removerSimilar(@PathVariable Integer itemId,
                                                @PathVariable Integer similarId) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
         itensSimilaresService.removerSimilar(itemId, similarId);
         return ResponseEntity.noContent().build();
     }

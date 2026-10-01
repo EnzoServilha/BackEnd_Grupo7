@@ -1,6 +1,10 @@
 package sptech.school.dto.itensNaMovimentacao;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+
+import java.math.BigDecimal;
 
 public record ItensNaMovimentacaoRequestDto(
         @NotNull
@@ -9,9 +13,13 @@ public record ItensNaMovimentacaoRequestDto(
         @NotNull
         Integer itemId,
 
+        @NotNull
+        @Positive
         Integer qtd,
 
-        Double precoUnitario
+        @NotNull
+        @PositiveOrZero
+        BigDecimal precoUnitario
 ) {
 }
 

@@ -12,6 +12,10 @@ public class PeriodoResponseDto {
 
     private Integer qtdPecas;
 
+    private Boolean fechado;
+
+    private LocalDateTime dataFechamento;
+
     public Integer getId() {
         return id;
     }
@@ -42,5 +46,21 @@ public class PeriodoResponseDto {
 
     public void setQtdPecas(Integer qtdPecas) {
         this.qtdPecas = qtdPecas;
+    }
+
+    public Boolean getFechado() {
+        return fechado;
+    }
+
+    public void setFechado(Boolean fechado) {
+        this.fechado = fechado;
+    }
+
+    public LocalDateTime getDataFechamento() {
+        return dataFechamento;
+    }
+
+    public void setDataFechamento(LocalDateTime dataFechamento) {
+        this.dataFechamento = dataFechamento;
     }
 }
