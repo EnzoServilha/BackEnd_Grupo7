@@ -4,6 +4,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -32,10 +37,19 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemResponseDto>> listarTodos() {
-        List<Item> itens = itemService.listarTodos();
-        if (itens.isEmpty()) return ResponseEntity.noContent().build();
-        return ResponseEntity.ok(ItemMapper.toResponseDtoList(itens));
+    public ResponseEntity<Page<ItemResponseDto>> listarTodos(
+            @ParameterObject
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC)
+            Pageable pageable
+    ) {
+
+        Page<Item> itemPage = itemService.listarTodos(pageable);
+
+        if (itemPage.isEmpty()) return ResponseEntity.noContent().build();
+
+        Page<ItemResponseDto> responsePage = itemPage.map(ItemMapper::toResponseDto);
+
+        return ResponseEntity.ok(responsePage);
     }
 
     @GetMapping("/administracao")
