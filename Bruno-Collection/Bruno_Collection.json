@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "d69ff429-50d8-4da4-b7ab-a4d6195e6007",
     "name": "Lamar Auto Pecas - API completa",
-    "description": "Importe este arquivo no Bruno. Execute Autenticacao > Login primeiro. Todas as rotas de negócio exigem JWT. Cada request contém entrada de exemplo e testes de status/formato. Rotas DELETE, PATCH, fechamento e rollback alteram dados.",
+    "description": "Importe este arquivo no Bruno como coleção Postman v2.1. Configure baseUrl, email e senha de um usuário existente e execute Autenticacao > Login e capturar JWT primeiro. O JWT é recebido no cookie authToken e usado como Bearer nas demais requisições; logout limpa a variável. Operações de escrita exigem usuário administrador. Configure os IDs conforme seu banco, especialmente periodoId (período aberto), tipoId e statusId. usuarioId é o usuário alvo; usuarioLogadoId é capturado no login sem sobrescrever o alvo. Não execute a coleção inteira automaticamente: logout, DELETE, PATCH, fechamento e rollback alteram a sessão ou os dados. Clientes > Listar retorna um objeto paginado, inclusive quando vazio. As listagens de movimentações e de seus itens são por período. A aplicação não carrega data.sql automaticamente; os IDs e credenciais de exemplo não são garantidos.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -105,6 +105,51 @@
       "key": "periodoId",
       "value": "3",
       "type": "string"
+    },
+    {
+      "key": "usuarioLogadoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "senhaNovoUsuario",
+      "value": "Senha@123",
+      "type": "string"
+    },
+    {
+      "key": "novaSenha",
+      "value": "NovaSenha@123",
+      "type": "string"
+    },
+    {
+      "key": "tipoId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "statusId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "pagina",
+      "value": "0",
+      "type": "string"
+    },
+    {
+      "key": "tamanho",
+      "value": "10",
+      "type": "string"
+    },
+    {
+      "key": "ordenacao",
+      "value": "nomeEmpresa",
+      "type": "string"
+    },
+    {
+      "key": "direcao",
+      "value": "ASC",
+      "type": "string"
     }
   ],
   "item": [
@@ -153,7 +198,10 @@
                 "exec": [
                   "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
                   "pm.test(\"Formato object\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"object\"); });",
-                  "const c=pm.response.headers.get(\"Set-Cookie\")||\"\"; const m=c.match(/authToken=([^;]+)/); pm.test(\"JWT recebido\",()=>pm.expect(m).not.eql(null)); if(m)pm.collectionVariables.set(\"authToken\",m[1]); if(pm.response.code===200)pm.collectionVariables.set(\"usuarioId\",String(pm.response.json().userId));"
+                  "pm.collectionVariables.set(\"authToken\", \"\"); pm.collectionVariables.set(\"usuarioLogadoId\", \"\");",
+                  "const cookies = pm.response.headers.all().filter(h => h.key.toLowerCase() === \"set-cookie\").map(h => h.value).join(\"; \");",
+                  "const token = cookies.match(/(?:^|;\\s*)authToken=([^;]+)/); pm.test(\"JWT recebido no cookie\", () => pm.expect(token).not.eql(null));",
+                  "if (pm.response.code === 200 && token) { pm.collectionVariables.set(\"authToken\", token[1]); const sessao = pm.response.json(); pm.test(\"ID do usuário logado\", () => pm.expect(sessao.userId).to.be.a(\"number\")); if (sessao.userId != null) pm.collectionVariables.set(\"usuarioLogadoId\", String(sessao.userId)); }"
                 ]
               }
             }
@@ -186,7 +234,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status HTTP esperado\", () => pm.expect([204]).to.include(pm.response.code));",
-                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+                  "pm.test(\"Sem corpo\", () => pm.expect(pm.response.text()).to.equal(\"\"));",
+                  "if (pm.response.code === 204) { pm.collectionVariables.set(\"authToken\", \"\"); pm.collectionVariables.set(\"usuarioLogadoId\", \"\"); }"
                 ]
               }
             }
@@ -219,7 +268,7 @@
             "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, empty.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Usuario Bruno\",\n  \"email\": \"usuario.bruno@teste.com\",\n  \"senha\": \"123456\",\n  \"permissaoId\": 2\n}",
+              "raw": "{\n  \"nome\": \"Usuario Bruno\",\n  \"email\": \"usuario.bruno@teste.com\",\n  \"senha\": \"{{senhaNovoUsuario}}\",\n  \"permissaoId\": {{permissaoId}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -382,7 +431,7 @@
             "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 204, empty.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Usuario Bruno\",\n  \"email\": \"usuario.bruno@teste.com\",\n  \"senha\": \"123456\",\n  \"permissaoId\": 2\n}",
+              "raw": "{\n  \"nome\": \"Usuario Bruno\",\n  \"email\": \"usuario.bruno@teste.com\",\n  \"senha\": \"{{senhaNovoUsuario}}\",\n  \"permissaoId\": {{permissaoId}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -456,10 +505,10 @@
                 "senha"
               ]
             },
-            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 204, empty.",
+            "description": "Configure usuarioId como o usuário alvo e senha como a senha atual desse usuário. novaSenha deve ter 8 a 72 caracteres, maiúscula, minúscula, número e caractere especial, sem espaços. Se alterar a própria senha, atualize a variável senha e faça login novamente. Retorno: HTTP 204, sem corpo.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"senhaAtual\": \"{{senha}}\",\n  \"novaSenha\": \"novaSenha123\"\n}",
+              "raw": "{\n  \"senhaAtual\": \"{{senha}}\",\n  \"novaSenha\": \"{{novaSenha}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -809,20 +858,26 @@
       "name": "Clientes",
       "item": [
         {
-          "name": "Listar",
+          "name": "Listar com paginacao",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/clientes",
+              "raw": "{{baseUrl}}/clientes?pagina={{pagina}}&tamanho={{tamanho}}&ordenacao={{ordenacao}}&direcao={{direcao}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "clientes"
+              ],
+              "query": [
+                { "key": "pagina", "value": "{{pagina}}" },
+                { "key": "tamanho", "value": "{{tamanho}}" },
+                { "key": "ordenacao", "value": "{{ordenacao}}" },
+                { "key": "direcao", "value": "{{direcao}}" }
               ]
             },
-            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200,204, array."
+            "description": "Entrada: pagina >= 0, tamanho > 0, ordenacao como campo de Cliente (ex.: nomeEmpresa) e direcao ASC ou DESC. Retorno: HTTP 200, objeto com conteudo, totalItens, paginaAtual e totalPaginas; conteudo pode ser vazio."
           },
           "event": [
             {
@@ -830,8 +885,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200,204]).to.include(pm.response.code));",
-                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect(pm.response.code).to.equal(200));",
+                  "pm.test(\"Formato paginado\", () => { const pagina = pm.response.json(); pm.expect(pagina).to.be.an(\"object\"); pm.expect(pagina.conteudo).to.be.an(\"array\"); [\"totalItens\", \"paginaAtual\", \"totalPaginas\"].forEach(campo => pm.expect(pagina[campo]).to.be.a(\"number\")); });"
                 ]
               }
             }
@@ -2845,17 +2900,20 @@
       "name": "Itens na movimentacao",
       "item": [
         {
-          "name": "Listar",
+          "name": "Listar por periodo",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/itensNaMovimentacao",
+              "raw": "{{baseUrl}}/itensNaMovimentacao/item/periodo/{{periodoId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "itensNaMovimentacao"
+                "itensNaMovimentacao",
+                "item",
+                "periodo",
+                "{{periodoId}}"
               ]
             },
             "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
@@ -2957,7 +3015,7 @@
             "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"movimentacaoEstoqueId\": 1,\n  \"itemId\": 2,\n  \"qtd\": 2,\n  \"precoUnitario\": 99.9\n}",
+              "raw": "{\n  \"movimentacaoEstoqueId\": {{movimentacaoId}},\n  \"itemId\": {{itemId}},\n  \"qtd\": 2,\n  \"precoUnitario\": 99.9\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3001,7 +3059,7 @@
             "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"movimentacaoEstoqueId\": 1,\n  \"itemId\": 2,\n  \"qtd\": 2,\n  \"precoUnitario\": 99.9\n}",
+              "raw": "{\n  \"movimentacaoEstoqueId\": {{movimentacaoId}},\n  \"itemId\": {{itemId}},\n  \"qtd\": 2,\n  \"precoUnitario\": 99.9\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3058,17 +3116,19 @@
       "name": "Movimentacoes",
       "item": [
         {
-          "name": "Listar",
+          "name": "Listar por periodo",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/movimentacoes",
+              "raw": "{{baseUrl}}/movimentacoes/periodo/{{periodoId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "movimentacoes"
+                "movimentacoes",
+                "periodo",
+                "{{periodoId}}"
               ]
             },
             "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
@@ -3197,10 +3257,10 @@
                 "movimentacoes"
               ]
             },
-            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
+            "description": "Exemplo de ENTRADA: configure tipoId para ENTRADA, statusId para PENDENTE, fornecedorId existente e periodoId aberto. SAIDA só pode ser criada pelo fechamento de cotação; COTACAO exige cliente e não aceita fornecedor. Retorno: HTTP 201, objeto.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"totalGastoImpostos\": 10.5,\n  \"precoFrete\": 20,\n  \"dataEntregaPrevista\": \"2026-08-25\",\n  \"dataEntrega\": null,\n  \"observacoes\": \"Teste Bruno\",\n  \"tipoId\": 1,\n  \"statusId\": 1,\n  \"clienteId\": null,\n  \"fornecedorId\": 1,\n  \"movimentacaoOriginalId\": null,\n  \"numeroNotaFiscal\": \"NF-BRUNO-001\",\n  \"periodoId\": 3\n}",
+              "raw": "{\n  \"totalGastoImpostos\": 10.5,\n  \"precoFrete\": 20,\n  \"dataEntregaPrevista\": \"2026-10-15\",\n  \"dataEntrega\": null,\n  \"observacoes\": \"Teste Bruno\",\n  \"tipoId\": {{tipoId}},\n  \"statusId\": {{statusId}},\n  \"clienteId\": null,\n  \"fornecedorId\": {{fornecedorId}},\n  \"movimentacaoOriginalId\": null,\n  \"numeroNotaFiscal\": \"NF-BRUNO-001\",\n  \"periodoId\": {{periodoId}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3244,7 +3304,7 @@
             "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 200, object.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"totalGastoImpostos\": 10.5,\n  \"precoFrete\": 20,\n  \"dataEntregaPrevista\": \"2026-08-25\",\n  \"dataEntrega\": null,\n  \"observacoes\": \"Teste Bruno\",\n  \"tipoId\": 1,\n  \"statusId\": 1,\n  \"clienteId\": null,\n  \"fornecedorId\": 1,\n  \"movimentacaoOriginalId\": null,\n  \"numeroNotaFiscal\": \"NF-BRUNO-001\",\n  \"periodoId\": 3\n}",
+              "raw": "{\n  \"totalGastoImpostos\": 10.5,\n  \"precoFrete\": 20,\n  \"dataEntregaPrevista\": \"2026-10-15\",\n  \"dataEntrega\": null,\n  \"observacoes\": \"Teste Bruno\",\n  \"tipoId\": {{tipoId}},\n  \"statusId\": {{statusId}},\n  \"clienteId\": null,\n  \"fornecedorId\": {{fornecedorId}},\n  \"movimentacaoOriginalId\": null,\n  \"numeroNotaFiscal\": \"NF-BRUNO-001\",\n  \"periodoId\": {{periodoId}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3287,10 +3347,10 @@
                 "fechamento"
               ]
             },
-            "description": "Entrada: JSON de exemplo incluído no body. Retorno: HTTP 201, object.",
+            "description": "Exige cotacaoId do tipo COTACAO com status PENDENTE, itemId presente na cotação, quantidade não superior à cotada, estoque suficiente e periodoId aberto. SAIDA e CONCLUIDO (e CONCLUIDO PARCIAL para venda parcial) devem existir no banco. Retorno: HTTP 201, objeto da venda.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"itens\": [\n    {\n      \"itemId\": 1,\n      \"qtd\": 5,\n      \"precoUnitario\": 150\n    }\n  ],\n  \"totalGastoImpostos\": 10,\n  \"precoFrete\": 20,\n  \"dataEntregaPrevista\": \"2026-08-30\",\n  \"dataEntrega\": null,\n  \"observacoes\": \"Fechamento teste\",\n  \"numeroNotaFiscal\": \"NF-COT-BRUNO\",\n  \"periodoId\": 3\n}",
+              "raw": "{\n  \"itens\": [\n    {\n      \"itemId\": {{itemId}},\n      \"qtd\": 5,\n      \"precoUnitario\": 150\n    }\n  ],\n  \"totalGastoImpostos\": 10,\n  \"precoFrete\": 20,\n  \"dataEntregaPrevista\": \"2026-10-15\",\n  \"dataEntrega\": null,\n  \"observacoes\": \"Fechamento teste\",\n  \"numeroNotaFiscal\": \"NF-COT-BRUNO\",\n  \"periodoId\": {{periodoId}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
