@@ -43,13 +43,15 @@ VALUES ('AMOR-001', 'Cofap', 2022, 'Amortecedor Dianteiro Direito', 'Prateleira 
 INSERT INTO item_similar (fk_item, fk_item_similar) VALUES (1, 2), (2, 1);
 
 -- MOVIMENTAÇÕES
-INSERT INTO movimentacao_estoque (fk_usuario, tipo_id, status_id, periodo_id, numero_nota_fiscal)
+INSERT INTO movimentacao_estoque (fk_usuario, tipo_id, status_id, periodo_id, numero_nota_fiscal, movimentacao_original)
 VALUES
-    (1, 1, 2, 1, 'NF-2026-P1'),
-    (1, 2, 2, 3, 'NF-2026-P1A'),
-    (1, 4, 2, 3, ''),
-    (1, 1, 2, 2, 'NF-2026-P2'),
-    (1, 1, 2, 3, 'NF-2026-P3');
+    (1, 1, 2, 1, 'NF-2026-P1', null),
+    (1, 4, 2, 3, '',null),
+    (1, 1, 2, 2, 'NF-2026-P2',null),
+    (1, 1, 2, 3, 'NF-2026-P3',null);
+INSERT INTO movimentacao_estoque (fk_usuario, tipo_id, status_id, periodo_id, numero_nota_fiscal, movimentacao_original)
+VALUES
+    (1, 2, 2, 3, 'NF-2026-P1A', 2);
 
 INSERT INTO itens_na_movimentacao (movimentacao_estoque_id, item_id, qtd, preco_unitario)
 VALUES
