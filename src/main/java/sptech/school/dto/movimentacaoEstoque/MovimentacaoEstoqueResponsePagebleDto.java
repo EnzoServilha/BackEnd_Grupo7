@@ -6,12 +6,13 @@ import sptech.school.dto.periodo.PeriodoResponseDto;
 import sptech.school.dto.status.StatusResponseDto;
 import sptech.school.dto.tipo.TipoResponseDto;
 import sptech.school.dto.usuario.UsuarioResponseDto;
+import sptech.school.entity.Pageble;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public record MovimentacaoEstoqueResponseDto(
+public record MovimentacaoEstoqueResponsePagebleDto(
         Integer id,
         UsuarioResponseDto usuario,
         BigDecimal totalGastoImpostos,
@@ -31,8 +32,8 @@ public record MovimentacaoEstoqueResponseDto(
         BigDecimal precoProdutos,
         Integer qtdItens,
         Long qtdDiasPrevistos,
-        Long qtdDiasReal
-)
-{
+        Long qtdDiasReal,
+        Pageble pageble
+) {
 }
 
