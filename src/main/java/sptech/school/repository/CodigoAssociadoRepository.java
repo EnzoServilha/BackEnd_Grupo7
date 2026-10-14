@@ -18,4 +18,15 @@ public interface CodigoAssociadoRepository extends JpaRepository<CodigoAssociado
     List<CodigoAssociado> findByCodigoContainingIgnoreCase(@Param("codigo") String codigo);
 
     List<CodigoAssociado> findByCodigoContainingIgnoreCaseAndAtivoTrue(String codigo);
+
+    @Query("SELECT DISTINCT c FROM CodigoAssociado c " +
+            "LEFT JOIN c.fornecedor f " +
+            "LEFT JOIN c.cliente cl " +
+            "WHERE " +
+            "(:termo IS NULL OR " +
+            "LOWER(f.nomeEmpresa) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
+            "LOWER(f.nomeContato) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
+            "LOWER(cl.nomeEmpresa) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
+            "LOWER(cl.nomeContato) LIKE LOWER(CONCAT('%', :termo, '%')))")
+    List<CodigoAssociado> pesquisarEFiltrar(@Param("termo") String termo);
 }

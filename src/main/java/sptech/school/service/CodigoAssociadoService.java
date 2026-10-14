@@ -109,4 +109,12 @@ public class CodigoAssociadoService {
             entity.setCliente(cliente);
         }
     }
+
+    public List<CodigoAssociadoResponseDto> pesquisarFiltro(String termo) {
+        termo = (termo == null || termo.isBlank()) ? null : termo;
+
+        List<CodigoAssociado> codigos = codigoAssociadoRepository.pesquisarEFiltrar(termo);
+
+        return CodigoAssociadoMapper.toResponseDtoList(codigos);
+    }
 }
