@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.cliente.ClienteRequestDto;
+import sptech.school.dto.cliente.ClienteResponseDto;
 import sptech.school.dto.cliente.ClienteResponseDtoPaginacao;
+import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.entity.*;
 import sptech.school.mapper.ClienteMapper;
@@ -31,25 +33,35 @@ public class ClienteController {
 
     @GetMapping
     public ResponseEntity<ClienteResponseDtoPaginacao> listar(
-            //Configura o pagebla
             @RequestParam(defaultValue = "0") int pagina,
             @RequestParam(defaultValue = "10") int tamanho,
             @RequestParam(defaultValue = "nomeEmpresa") String ordenacao,
             @RequestParam(defaultValue = "ASC") String direcao) {
 
-        // Converte a string "ASC" ou "DESC" em enum
         Sort.Direction dir = Sort.Direction.fromString(direcao);
 
-        // Define ordenação primária pelo campo escolhido + id como critério de desempate
         Sort sort = Sort.by(dir, ordenacao).and(Sort.by(Sort.Direction.ASC, "id"));
 
-        // Cria o objeto de paginação
         Pageable pageable = PageRequest.of(pagina, tamanho, sort);
 
-        // Chama o service que busca no banco e usa o ClienteMapper
         ClienteResponseDtoPaginacao response = clienteService.listarTodos(pageable);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<ClienteResponseDtoPaginacao>> pesquisarEFiltrar(
+            @RequestParam(required = false) String nomeEmpresa,
+            @RequestParam(required = false) String nomeContato,
+            @RequestParam(required = false) String telefone,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String localizacao
+    ){
+        List<ClienteResponseDtoPaginacao> resultados = clienteService.pesquisar(
+                nomeEmpresa, nomeContato, telefone, email, localizacao
+        );
+
+        return ResponseEntity.ok(resultados);
     }
 
     @GetMapping("/administracao")

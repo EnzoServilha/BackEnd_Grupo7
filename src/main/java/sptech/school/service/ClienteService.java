@@ -4,11 +4,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import sptech.school.dto.cliente.ClienteRequestDto;
+import sptech.school.dto.cliente.ClienteResponseDto;
 import sptech.school.dto.cliente.ClienteResponseDtoPaginacao;
+import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.entity.*;
 import sptech.school.exception.ClienteNaoEncontradoException;
 import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.mapper.ClienteMapper;
+import sptech.school.mapper.FornecedorMapper;
 import sptech.school.repository.*;
 
 import java.util.List;
@@ -23,6 +26,25 @@ public class ClienteService {
     public ClienteService(ClienteRepository clienteRepository, EnderecoRepository enderecoRepository) {
         this.clienteRepository = clienteRepository;
         this.enderecoRepository = enderecoRepository;
+    }
+
+    public List<ClienteResponseDtoPaginacao> pesquisar(
+            String nomeEmpresa, String nomeContato, String telefone,
+            String email, String localizacao) {
+
+        nomeEmpresa = (nomeEmpresa == null || nomeEmpresa.isBlank()) ? null : nomeEmpresa;
+        nomeContato = (nomeContato == null || nomeContato.isBlank()) ? null : nomeContato;
+        telefone = (telefone == null || telefone.isBlank()) ? null : telefone;
+        email = (email == null || email.isBlank()) ? null : email;
+        localizacao = (localizacao == null || localizacao.isBlank()) ? null : localizacao;
+
+        List<Cliente> clientes = clienteRepository.pesquisarEFiltrar(
+                nomeEmpresa, nomeContato, telefone, email, localizacao
+        );
+
+        List<ClienteResponseDtoPaginacao> response = ClienteMapper.toResponseDtoList(clientes);
+
+        return response;
     }
 
     public Cliente buscarPorId(Integer id) {
