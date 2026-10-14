@@ -2,6 +2,7 @@ package sptech.school.mapper;
 
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
+import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponsePagebleDto;
 import sptech.school.entity.*;
 
 import java.math.BigDecimal;
@@ -149,6 +150,44 @@ public class MovimentacaoEstoqueMapper {
 
     public static List<MovimentacaoEstoqueResponseDto> toResponseDtoList(List<MovimentacaoEstoque> lista) {
         return lista.stream().map(MovimentacaoEstoqueMapper::toResponse).toList();
+    }
+
+    public static MovimentacaoEstoqueResponsePagebleDto toResponsePageble(MovimentacaoEstoque entity, Pageble pageble){
+
+
+        BigDecimal valorP = valorProdutos(entity.getItens());
+
+        MovimentacaoEstoqueResponsePagebleDto response = new MovimentacaoEstoqueResponsePagebleDto(
+                entity.getId(),
+                entity.getUsuario() != null ? UsuarioMapper.toResponseDto(entity.getUsuario()) : null,
+                entity.getTotalGastoImpostos(),
+                entity.getPrecoFrete(),
+                entity.getDataMovimentacao(),
+                entity.getDataEntregaPrevista(),
+                entity.getDataEntrega(),
+                entity.getObservacoes(),
+                entity.getTipo() != null ? TipoMapper.toResponseDto(entity.getTipo()) : null,
+                entity.getStatus() != null ? StatusMapper.toResponseDto(entity.getStatus()) : null,
+                entity.getCliente() != null ? ClienteMapper.toResponseDto(entity.getCliente()) : null,
+                entity.getPeriodo() != null ? PeriodoMapper.toResponseDto(entity.getPeriodo()) : null,
+                entity.getFornecedor() != null ? FornecedorMapper.toResponseDto(entity.getFornecedor()) : null,
+                entity.getMovimentacaoOriginal() != null ? entity.getMovimentacaoOriginal().getId() : null,
+                entity.getNumeroNotaFiscal(),
+                valorTotal(valorP, entity),
+                valorP,
+                qtdItens(entity.getItens()),
+                qtdDiasPrevistos(entity),
+                qtdDiasReais(entity),
+                pageble);
+
+        return response;
+    }
+
+
+    public static List<MovimentacaoEstoqueResponsePagebleDto> toResponsePagebleDtoList(List<MovimentacaoEstoque> lista, Pageble pageble) {
+        return lista.stream()
+                .map(entity -> MovimentacaoEstoqueMapper.toResponsePageble(entity, pageble))
+                .toList();
     }
 }
 

@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.movimentacaoEstoque.FechamentoCotacaoRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
+import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponsePagebleDto;
 import sptech.school.dto.usuario.UsuarioResponseDto;
+import sptech.school.entity.Pageble;
 import sptech.school.service.MovimentacaoEstoqueService;
 import sptech.school.service.UsuarioService;
 
@@ -37,8 +39,17 @@ public class MovimentacaoEstoqueController {
     }
 
     @GetMapping("/periodo/{idPeriodo}")
-    public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> listarPorPeriodoAtual(@PathVariable Integer idPeriodo){
-        return ResponseEntity.status(200).body(service.listarPorPeriodoAtual(idPeriodo));
+    public ResponseEntity<List<MovimentacaoEstoqueResponsePagebleDto>> listarPorPeriodoAtual(
+            @PathVariable Integer idPeriodo,
+            Pageble pageble
+    ){
+        List<MovimentacaoEstoqueResponsePagebleDto> resposta = service.listarPorPeriodoAtual(idPeriodo, pageble);
+
+        if (resposta.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.status(200).body(resposta);
     }
 
     @GetMapping("/tipo/{tipo}")

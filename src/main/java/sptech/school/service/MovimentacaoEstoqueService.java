@@ -2,16 +2,8 @@ package sptech.school.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import sptech.school.dto.movimentacaoEstoque.FechamentoCotacaoRequestDto;
-import sptech.school.dto.movimentacaoEstoque.ItemFechamentoCotacaoRequestDto;
-import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
-import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
-import sptech.school.entity.ItensNaMovimentacao;
-import sptech.school.entity.MovimentacaoEstoque;
-import sptech.school.entity.Periodo;
-import sptech.school.entity.Status;
-import sptech.school.entity.Tipo;
-import sptech.school.entity.Usuario;
+import sptech.school.dto.movimentacaoEstoque.*;
+import sptech.school.entity.*;
 import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.exception.EntidadeConflitanteException;
 import sptech.school.exception.MovimentacaoNaoEncontrada;
@@ -53,10 +45,29 @@ public class MovimentacaoEstoqueService {
         return MovimentacaoEstoqueMapper.toResponse(movimentacao);
     }
 
+
     @Transactional
-    public List<MovimentacaoEstoqueResponseDto> listarPorPeriodoAtual(Integer idPeriodo){
-        return MovimentacaoEstoqueMapper.toResponseDtoList(movimentacaoRepository.listarPorPeriodoAtual(idPeriodo));
+    public List<MovimentacaoEstoqueResponsePagebleDto> listarPorPeriodoAtual(Integer idPeriodo, Pageble pagebleRequest) {
+        System.out.println("PAGINA: " + pagebleRequest.getPage());
+        System.out.println("TAMANHO: " + pagebleRequest.getSize());
+
+        int pagina = pagebleRequest.getPage() != null ? pagebleRequest.getPage() : 0;
+        int tamanho = pagebleRequest.getSize() != null ? pagebleRequest.getSize() : 10;
+
+        int offset = pagina * tamanho;
+
+        System.out.println("OFFSET CALCULADO: " + offset);
+
+        long totalRegistros = movimentacaoRepository.contarPorPeriodo(idPeriodo);
+
+        List<MovimentacaoEstoque> listaPaginada = movimentacaoRepository.listarComPaginacaoNativa(idPeriodo, tamanho, offset);
+
+        return listaPaginada.stream()
+                .map(entity -> MovimentacaoEstoqueMapper.toResponsePageble(entity, pagebleRequest))
+                .toList();
     }
+
+
 
     @Transactional
     public List<MovimentacaoEstoqueResponseDto> buscarPorTipo(String tipo){
