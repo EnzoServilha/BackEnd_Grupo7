@@ -1,5 +1,7 @@
 package sptech.school.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sptech.school.entity.CodigoAssociado;
@@ -24,8 +26,10 @@ public class ItemService {
         this.codigoAssociadoRepository = codigoAssociadoRepository;
     }
 
-    public List<Item> listarTodos() {
-        return itemRepository.findAll().stream().filter(item -> Boolean.TRUE.equals(item.getAtivo())).toList();
+    public Page<Item> listarTodos(Pageable pageable) {
+        Page<Item> itemPage = itemRepository.findAllByAtivoTrue(pageable);
+        return itemPage;
+        
     }
 
     public List<Item> listarAdministrativo(String ativo) {
