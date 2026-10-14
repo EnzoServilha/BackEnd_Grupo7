@@ -4,12 +4,14 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Null;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sptech.school.dto.item.ItemResponseDto;
 import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoRequestDto;
 import sptech.school.dto.itensNaMovimentacao.ItensNaMovimentacaoResponseDto;
 import sptech.school.service.ItemNaMovimentacaoService;
 import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.service.UsuarioService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -64,5 +66,15 @@ public class ItemNaMovimentacaoController {
         service.deletar(id);
 
         return ResponseEntity.status(204).build();
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<ItensNaMovimentacaoResponseDto>> pesquisarEFiltrar(
+            @RequestParam(required = false) String contato,
+            @RequestParam(required = false) String codigo,
+            @RequestParam(required = false) String tipo
+    ) {
+        List<ItensNaMovimentacaoResponseDto> resultados = service.pesquisarFiltro(contato, codigo, tipo);
+        return ResponseEntity.ok(resultados);
     }
 }
