@@ -2,13 +2,18 @@ package sptech.school.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sptech.school.dto.fornecedor.FornecedorResponseDto;
+import sptech.school.dto.item.ItemResponseDto;
 import sptech.school.entity.CodigoAssociado;
+import sptech.school.entity.Fornecedor;
 import sptech.school.entity.Item;
 import sptech.school.exception.EntidadeNaoEncontradaException;
+import sptech.school.mapper.ItemMapper;
 import sptech.school.repository.CodigoAssociadoRepository;
 import sptech.school.repository.ItemRepository;
 import sptech.school.util.BuscaSanitizer;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,5 +140,22 @@ public class ItemService {
             item.getCodigosAssociados().removeIf(c -> c.getId().equals(codigoAssociadoId));
         }
         return itemRepository.save(item);
+    }
+
+    public List<ItemResponseDto> pesquisarFiltro(
+            String codigoAssociado, String codigoInterno, String localizacao,
+            List<String> marcas, LocalDate dataInicial, LocalDate dataFinal,
+            Integer anoInicial, Integer anoFinal) {
+
+        codigoAssociado = (codigoAssociado == null || codigoAssociado.isBlank()) ? null : codigoAssociado;
+        codigoInterno = (codigoInterno == null || codigoInterno.isBlank()) ? null : codigoInterno;
+        localizacao = (localizacao == null || localizacao.isBlank()) ? null : localizacao;
+        List<String> marcasClean = (marcas == null || marcas.isEmpty()) ? null : marcas;
+
+        List<Item> itens = itemRepository.pesquisarEFiltrar(
+                codigoAssociado, codigoInterno, localizacao, marcasClean, dataInicial, dataFinal
+        );
+
+        return ItemMapper.toResponseDtoList(itens);
     }
 }

@@ -25,14 +25,11 @@ public class FornecedorService {
     private final MarcaRepository marcaRepository;
     private final CategoriaRepository categoriaRepository;
     private final EnderecoRepository enderecoRepository;
-    private final FornecedorMapper fornecedorMapper;
-
-    public FornecedorService(FornecedorRepository repository, MarcaRepository marcaRepository, CategoriaRepository categoriaRepository, EnderecoRepository enderecoRepository, FornecedorMapper fornecedorMapper) {
+    public FornecedorService(FornecedorRepository repository, MarcaRepository marcaRepository, CategoriaRepository categoriaRepository, EnderecoRepository enderecoRepository) {
         this.repository = repository;
         this.marcaRepository = marcaRepository;
         this.categoriaRepository = categoriaRepository;
         this.enderecoRepository = enderecoRepository;
-        this.fornecedorMapper = fornecedorMapper;
     }
 
     public List<FornecedorResponseDto> listar() {
@@ -58,7 +55,7 @@ public class FornecedorService {
                 nomeEmpresa, nomeContato, telefone, email, localizacao, fabClean, catClean
         );
 
-        List<FornecedorResponseDto> response = fornecedorMapper.toResponseDtoList(fornecedores);
+        List<FornecedorResponseDto> response = FornecedorMapper.toResponseDtoList(fornecedores);
 
         return response;
     }
