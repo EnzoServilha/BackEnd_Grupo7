@@ -3,13 +3,17 @@ package sptech.school.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.dto.periodo.FechamentoPeriodoResponseDto;
 import sptech.school.dto.periodo.PeriodoQtdPecasDTO;
+import sptech.school.dto.periodo.PeriodoResponseDto;
 import sptech.school.dto.usuario.UsuarioResponseDto;
 import sptech.school.entity.Periodo;
 import sptech.school.service.PeriodoService;
 import sptech.school.service.UsuarioService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -63,5 +67,14 @@ public class PeriodoController {
     @GetMapping("/estoque-atual")
     public ResponseEntity<List<PeriodoQtdPecasDTO>> consultarEstoqueAtual() {
         return ResponseEntity.ok(periodoService.consultarEstoqueAtual());
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<PeriodoResponseDto>> pesquisarEFiltrar(
+            @RequestParam(required = false) Integer numero,
+            @RequestParam(required = false) LocalDate dataCadastro
+    ) {
+        List<PeriodoResponseDto> resultados = periodoService.pesquisarFiltro(numero, dataCadastro);
+        return ResponseEntity.ok(resultados);
     }
 }

@@ -2,20 +2,19 @@ package sptech.school.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.dto.periodo.FechamentoPeriodoResponseDto;
 import sptech.school.dto.periodo.PeriodoQtdPecasDTO;
-import sptech.school.entity.Item;
-import sptech.school.entity.ItensNaMovimentacao;
-import sptech.school.entity.MovimentacaoEstoque;
-import sptech.school.entity.Periodo;
-import sptech.school.entity.Status;
-import sptech.school.entity.Tipo;
-import sptech.school.entity.Usuario;
+import sptech.school.dto.periodo.PeriodoResponseDto;
+import sptech.school.entity.*;
 import sptech.school.exception.EntidadeConflitanteException;
+import sptech.school.mapper.FornecedorMapper;
 import sptech.school.mapper.PeriodoMapper;
 import sptech.school.repository.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -200,6 +199,18 @@ public class PeriodoService {
     private Periodo buscarPeriodoAberto() {
         return periodoRepository.findFirstByFechadoFalseOrderByIdDesc()
                 .orElseThrow(() -> new EntidadeConflitanteException("Não há período aberto"));
+    }
+
+    public List<PeriodoResponseDto> pesquisarFiltro(Integer numero, LocalDate dataCadastro) {
+        // Se informou a data, garantimos que pegue até o final daquele dia (23:59:59)
+        LocalDateTime dataLimite = null;
+        if (dataCadastro != null) {
+            dataLimite = dataCadastro.atTime(LocalTime.MAX);
+        }
+
+        List<Periodo> periodos = periodoRepository.pesquisarEFiltrar(numero, dataLimite);
+
+        return PeriodoMapper.toResponseDtoList(periodos);
     }
 }
 
