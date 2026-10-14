@@ -18,7 +18,9 @@ import sptech.school.exception.MovimentacaoNaoEncontrada;
 import sptech.school.mapper.MovimentacaoEstoqueMapper;
 import sptech.school.repository.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -303,5 +305,26 @@ public class MovimentacaoEstoqueService {
                         .formatted(itemVendido.itemId(), itemVendido.qtd(), saldoDisponivel));
             }
         }
+    }
+
+    public List<MovimentacaoEstoqueResponseDto> pesquisarFiltro(
+            String tipo, String status, LocalDate dataEntrega,
+            LocalDate dataPrevista, LocalDate dataMovimentacao, Boolean pagadorFrete) {
+
+        tipo = (tipo == null || tipo.isBlank()) ? null : tipo;
+        status = (status == null || status.isBlank()) ? null : status;
+
+        LocalDateTime inicioMov = null;
+        LocalDateTime fimMov = null;
+        if (dataMovimentacao != null) {
+            inicioMov = dataMovimentacao.atStartOfDay();
+            fimMov = dataMovimentacao.atTime(LocalTime.MAX);
+        }
+
+        List<MovimentacaoEstoque> movimentacoes = movimentacaoRepository.pesquisarEFiltrar(
+                tipo, status, dataEntrega, dataPrevista, inicioMov, fimMov, pagadorFrete
+        );
+
+        return MovimentacaoEstoqueMapper.toResponseDtoList(movimentacoes);
     }
 }
