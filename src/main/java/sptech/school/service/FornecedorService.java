@@ -25,17 +25,42 @@ public class FornecedorService {
     private final MarcaRepository marcaRepository;
     private final CategoriaRepository categoriaRepository;
     private final EnderecoRepository enderecoRepository;
+    private final FornecedorMapper fornecedorMapper;
 
-    public FornecedorService(FornecedorRepository repository, MarcaRepository marcaRepository, CategoriaRepository categoriaRepository, EnderecoRepository enderecoRepository) {
+    public FornecedorService(FornecedorRepository repository, MarcaRepository marcaRepository, CategoriaRepository categoriaRepository, EnderecoRepository enderecoRepository, FornecedorMapper fornecedorMapper) {
         this.repository = repository;
         this.marcaRepository = marcaRepository;
         this.categoriaRepository = categoriaRepository;
         this.enderecoRepository = enderecoRepository;
+        this.fornecedorMapper = fornecedorMapper;
     }
 
     public List<FornecedorResponseDto> listar() {
         return FornecedorMapper.toResponseDtoList(repository.findAll().stream()
             .filter(fornecedor -> Boolean.TRUE.equals(fornecedor.getAtivo())).toList());
+    }
+
+    public List<FornecedorResponseDto> pesquisar(
+            String nomeEmpresa, String nomeContato, String telefone,
+            String email, String localizacao, List<String> fabricantes, List<String> categorias) {
+
+        nomeEmpresa = (nomeEmpresa == null || nomeEmpresa.isBlank()) ? null : nomeEmpresa;
+        nomeContato = (nomeContato == null || nomeContato.isBlank()) ? null : nomeContato;
+        telefone = (telefone == null || telefone.isBlank()) ? null : telefone;
+        email = (email == null || email.isBlank()) ? null : email;
+        localizacao = (localizacao == null || localizacao.isBlank()) ? null : localizacao;
+
+        // Normaliza listas vazias para null para não quebrar o IN da JPQL
+        List<String> fabClean = (fabricantes == null || fabricantes.isEmpty()) ? null : fabricantes;
+        List<String> catClean = (categorias == null || categorias.isEmpty()) ? null : categorias;
+
+        List<Fornecedor> fornecedores = repository.pesquisarEFiltrar(
+                nomeEmpresa, nomeContato, telefone, email, localizacao, fabClean, catClean
+        );
+
+        List<FornecedorResponseDto> response = fornecedorMapper.toResponseDtoList(fornecedores);
+
+        return response;
     }
 
     public List<FornecedorResponseDto> listarAdministrativo(String ativo) {
