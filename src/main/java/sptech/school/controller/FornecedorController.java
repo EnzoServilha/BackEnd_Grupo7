@@ -56,6 +56,24 @@ public class FornecedorController {
         return ResponseEntity.status(200).body(service.buscarPorNomeContato(nome));
     }
 
+    @GetMapping("/buscar")
+    public ResponseEntity<List<FornecedorResponseDto>> pesquisarEFiltrar(
+            @RequestParam(required = false) String nomeEmpresa,
+            @RequestParam(required = false) String nomeContato,
+            @RequestParam(required = false) String telefone,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String localizacao,
+            @RequestParam(required = false) List<String> fabricantes,
+            @RequestParam(required = false) List<String> categorias
+    ){
+        List<FornecedorResponseDto> resultados = service.pesquisar(
+                nomeEmpresa, nomeContato, telefone, email, localizacao, fabricantes, categorias
+        );
+
+        return ResponseEntity.ok(resultados);
+    }
+
+
     @GetMapping("/buscarPorEmpresa/{empresa}")
     public ResponseEntity<List<FornecedorResponseDto>> buscarPorNomeEmpresa(
             @PathVariable

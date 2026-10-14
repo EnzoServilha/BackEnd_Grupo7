@@ -31,4 +31,21 @@ public interface FornecedorRepository extends JpaRepository<Fornecedor, Integer>
 
     @Query("SELECT f FROM Fornecedor f JOIN f.categoria c WHERE f.ativo = true AND c.ativo = true AND c.id = :idCategoria")
     List<Fornecedor> findByIdCategoria(Integer idCategoria);
+
+    @Query("SELECT f FROM Fornecedor f WHERE " +
+            "(:nomeEmpresa IS NULL OR LOWER(f.nomeEmpresa) LIKE LOWER(CONCAT('%', :nomeEmpresa, '%'))) AND " +
+            "(:nomeContato IS NULL OR LOWER(f.nomeContato) LIKE LOWER(CONCAT('%', :nomeContato, '%'))) AND " +
+            "(:telefone IS NULL OR f.telefone LIKE CONCAT('%', :telefone, '%')) AND " +
+            "(:email IS NULL OR LOWER(f.email) LIKE LOWER(CONCAT('%', :email, '%'))) AND " +
+            "(:localizacao IS NULL OR LOWER(f.localizacao) LIKE LOWER(CONCAT('%', :localizacao, '%'))) AND " +
+            "(:fabricantes IS NULL OR f.fabricante IN :fabricantes) AND " +
+            "(:categorias IS NULL OR f.categoria IN :categorias)")
+    List<Fornecedor> pesquisarEFiltrar(
+            @Param("nomeEmpresa") String nomeEmpresa,
+            @Param("nomeContato") String nomeContato,
+            @Param("telefone") String telefone,
+            @Param("email") String email,
+            @Param("localizacao") String localizacao,
+            @Param("fabricantes") List<String> fabricantes,
+            @Param("categorias") List<String> categorias);
 }
