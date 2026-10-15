@@ -25,6 +25,7 @@ public class FornecedorService {
     private final MarcaRepository marcaRepository;
     private final CategoriaRepository categoriaRepository;
     private final EnderecoRepository enderecoRepository;
+
     public FornecedorService(FornecedorRepository repository, MarcaRepository marcaRepository, CategoriaRepository categoriaRepository, EnderecoRepository enderecoRepository) {
         this.repository = repository;
         this.marcaRepository = marcaRepository;
