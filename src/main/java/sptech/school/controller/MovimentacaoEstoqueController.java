@@ -18,6 +18,7 @@ import sptech.school.entity.Pageble;
 import sptech.school.service.MovimentacaoEstoqueService;
 import sptech.school.service.UsuarioService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -116,5 +117,20 @@ public class MovimentacaoEstoqueController {
 
         service.cancelar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> pesquisarEFiltrar(
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) LocalDate dataEntrega,
+            @RequestParam(required = false) LocalDate dataPrevista,
+            @RequestParam(required = false) LocalDate dataMovimentacao,
+            @RequestParam(required = false) Boolean pagadorFrete
+    ) {
+        List<MovimentacaoEstoqueResponseDto> resultados = service.pesquisarFiltro(
+                tipo, status, dataEntrega, dataPrevista, dataMovimentacao, pagadorFrete
+        );
+        return ResponseEntity.ok(resultados);
     }
 }

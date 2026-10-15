@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.dto.item.ItemRequestDto;
 import sptech.school.dto.item.ItemResponseDto;
 import sptech.school.dto.usuario.UsuarioResponseDto;
@@ -21,6 +22,7 @@ import sptech.school.mapper.ItemMapper;
 import sptech.school.service.ItemService;
 import sptech.school.service.UsuarioService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -179,5 +181,24 @@ public class ItemController {
 
         itemService.removerCodigoAssociado(itemId, codigoAssociadoId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<ItemResponseDto>> pesquisarEFiltrar(
+            @RequestParam(required = false) String codigoAssociado,
+            @RequestParam(required = false) String codigoInterno,
+            @RequestParam(required = false) String localizacao,
+            @RequestParam(required = false) List<String> marca,
+            @RequestParam(required = false) LocalDate dataCadastroInicial,
+            @RequestParam(required = false) LocalDate dataCadastroFinal,
+            @RequestParam(required = false) Integer anoCadastroInicial,
+            @RequestParam(required = false) Integer anoCadastroFinal
+    ){
+        List<ItemResponseDto> resultados = itemService.pesquisarFiltro(
+                codigoAssociado, codigoInterno, localizacao, marca,
+                dataCadastroInicial, dataCadastroFinal, anoCadastroInicial, anoCadastroFinal
+        );
+
+        return ResponseEntity.ok(resultados);
     }
 }

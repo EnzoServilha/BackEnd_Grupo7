@@ -9,6 +9,8 @@ import sptech.school.entity.MovimentacaoEstoque;
 import jakarta.persistence.LockModeType;
 import sptech.school.entity.Pageble;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 

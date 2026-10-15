@@ -22,6 +22,7 @@ import sptech.school.service.TentativaLoginService;
 import sptech.school.service.UsuarioService;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -228,6 +229,20 @@ public class UsuarioController {
     @SecurityRequirement(name = "Bearer")
     public ResponseEntity<UsuarioResponseDto> buscarUsuarioLogado() {
         return ResponseEntity.ok(usuarioService.buscarUsuarioLogado());
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<UsuarioResponseDto>> pesquisarEFiltrar(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) LocalDate dataCadastro,
+            @RequestParam(required = false) String cargo,
+            @RequestParam(required = false) Boolean ativo
+    ) {
+        List<UsuarioResponseDto> resultados = usuarioService.pesquisarFiltro(
+                nome, email, dataCadastro, cargo, ativo
+        );
+        return ResponseEntity.ok(resultados);
     }
 
 

@@ -48,7 +48,7 @@ public class FornecedorService {
         email = (email == null || email.isBlank()) ? null : email;
         localizacao = (localizacao == null || localizacao.isBlank()) ? null : localizacao;
 
-        // Normaliza listas vazias para null para não quebrar o IN da JPQL
+        // Normaliza listas vazias para null para não quebrar o JPQL
         List<String> fabClean = (fabricantes == null || fabricantes.isEmpty()) ? null : fabricantes;
         List<String> catClean = (categorias == null || categorias.isEmpty()) ? null : categorias;
 
