@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import sptech.school.entity.MovimentacaoEstoque;
 
 import jakarta.persistence.LockModeType;
+import sptech.school.entity.Pageble;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,24 +28,14 @@ public interface MovimentacaoRepository extends JpaRepository<MovimentacaoEstoqu
     @Query("SELECT m FROM MovimentacaoEstoque m WHERE m.id = :id")
     Optional<MovimentacaoEstoque> buscarPorIdComBloqueio(@Param("id") Integer id);
 
+    // Paginação:
 
-    @Query("SELECT DISTINCT m FROM MovimentacaoEstoque m " +
-            "LEFT JOIN m.tipo t " +
-            "LEFT JOIN m.status s " +
-            "WHERE " +
-            "(:tipo IS NULL OR LOWER(t.nome) LIKE LOWER(CONCAT('%', :tipo, '%'))) AND " +
-            "(:status IS NULL OR LOWER(s.nome) LIKE LOWER(CONCAT('%', :status, '%'))) AND " +
-            "(:dataEntrega IS NULL OR m.dataEntrega = :dataEntrega) AND " +
-            "(:dataPrevista IS NULL OR m.dataEntregaPrevista = :dataPrevista) AND " +
-            "(:dataMovimentacaoInicio IS NULL OR (m.dataMovimentacao >= :dataMovimentacaoInicio AND m.dataMovimentacao <= :dataMovimentacaoFim)) AND " +
-            "(:temFrete IS NULL OR (:temFrete = TRUE AND m.precoFrete > 0) OR (:temFrete = FALSE AND (m.precoFrete IS NULL OR m.precoFrete = 0)))")
-    List<MovimentacaoEstoque> pesquisarEFiltrar(
-            @Param("tipo") String tipo,
-            @Param("status") String status,
-            @Param("dataEntrega") LocalDate dataEntrega,
-            @Param("dataPrevista") LocalDate dataPrevista,
-            @Param("dataMovimentacaoInicio") LocalDateTime dataMovimentacaoInicio,
-            @Param("dataMovimentacaoFim") LocalDateTime dataMovimentacaoFim,
-            @Param("temFrete") Boolean temFrete
-    );
+    @Query("SELECT COUNT(m) FROM MovimentacaoEstoque m WHERE m.periodo.id = :idPeriodo")
+    long contarPorPeriodo(@Param("idPeriodo") Integer idPeriodo);
+
+    @Query("SELECT m FROM MovimentacaoEstoque m WHERE m.periodo.id = :idPeriodo ORDER BY m.id ASC")
+    List<MovimentacaoEstoque> listarComPaginacaoNativa(
+            @Param("idPeriodo") Integer idPeriodo,
+            @Param("limit") int limit,
+            @Param("offset") int offset);
 }

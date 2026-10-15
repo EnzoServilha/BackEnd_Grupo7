@@ -32,6 +32,7 @@ public record MovimentacaoEstoqueResponseDto(
         Integer qtdItens,
         Long qtdDiasPrevistos,
         Long qtdDiasReal
-) {
+)
+{
 }
 
