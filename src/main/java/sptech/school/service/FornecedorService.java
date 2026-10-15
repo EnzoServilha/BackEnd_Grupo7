@@ -2,21 +2,17 @@ package sptech.school.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sptech.school.dto.fornecedor.ContatoEmpresaResponseDto;
 import sptech.school.dto.fornecedor.FornecedorRequestDto;
 import sptech.school.dto.fornecedor.FornecedorResponseDto;
-import sptech.school.entity.Categoria;
-import sptech.school.entity.Endereco;
-import sptech.school.entity.Marca;
-import sptech.school.entity.Fornecedor;
+import sptech.school.entity.*;
 import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.mapper.FornecedorMapper;
-import sptech.school.repository.CategoriaRepository;
-import sptech.school.repository.EnderecoRepository;
-import sptech.school.repository.FornecedorRepository;
-import sptech.school.repository.MarcaRepository;
+import sptech.school.repository.*;
 import sptech.school.util.BuscaSanitizer;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,11 +21,14 @@ public class FornecedorService {
     private final MarcaRepository marcaRepository;
     private final CategoriaRepository categoriaRepository;
     private final EnderecoRepository enderecoRepository;
-    public FornecedorService(FornecedorRepository repository, MarcaRepository marcaRepository, CategoriaRepository categoriaRepository, EnderecoRepository enderecoRepository) {
+    private final ClienteRepository clienteRepository;
+
+    public FornecedorService(FornecedorRepository repository, MarcaRepository marcaRepository, CategoriaRepository categoriaRepository, EnderecoRepository enderecoRepository, ClienteRepository clienteRepository) {
         this.repository = repository;
         this.marcaRepository = marcaRepository;
         this.categoriaRepository = categoriaRepository;
         this.enderecoRepository = enderecoRepository;
+        this.clienteRepository = clienteRepository;
     }
 
     public List<FornecedorResponseDto> listar() {
@@ -163,5 +162,58 @@ public class FornecedorService {
                     .orElseThrow(() -> new EntidadeNaoEncontradaException("Endereço não encontrado", fornecedor.getEnderecoId()));
             novoFornecedor.setEndereco(endereco);
         }
+    }
+
+    public List<ContatoEmpresaResponseDto> pesquisarGeral(
+            String nomeEmpresa, String nomeContato, String telefone, String email, String localizacao) {
+
+        nomeEmpresa = (nomeEmpresa == null || nomeEmpresa.isBlank()) ? null : nomeEmpresa;
+        nomeContato = (nomeContato == null || nomeContato.isBlank()) ? null : nomeContato;
+        telefone = (telefone == null || telefone.isBlank()) ? null : telefone;
+        email = (email == null || email.isBlank()) ? null : email;
+        localizacao = (localizacao == null || localizacao.isBlank()) ? null : localizacao;
+
+        // Busca nas duas entidades
+        List<Fornecedor> fornecedores = repository.pesquisarEFiltrar(
+                nomeEmpresa, nomeContato, telefone, email, localizacao, null, null
+        );
+
+        List<Cliente> clientes = clienteRepository.pesquisarEFiltrar(
+                nomeEmpresa, nomeContato, telefone, email, localizacao
+        );
+
+        List<ContatoEmpresaResponseDto> resultados = new ArrayList<>();
+
+        for (Fornecedor f : fornecedores) {
+            ContatoEmpresaResponseDto dto = new ContatoEmpresaResponseDto();
+            dto.setId(f.getId());
+            dto.setTipoEntidade("FORNECEDOR");
+            dto.setNomeEmpresa(f.getNomeEmpresa());
+            dto.setNomeContato(f.getNomeContato());
+            dto.setTelefone(f.getTelefone());
+            dto.setEmail(f.getEmail());
+            if (f.getEndereco() != null) {
+                dto.setCidade(f.getEndereco().getCidade());
+                dto.setLogradouro(f.getEndereco().getLogradouro());
+            }
+            resultados.add(dto);
+        }
+
+        for (Cliente c : clientes) {
+            ContatoEmpresaResponseDto dto = new ContatoEmpresaResponseDto();
+            dto.setId(c.getId());
+            dto.setTipoEntidade("CLIENTE");
+            dto.setNomeEmpresa(c.getNomeEmpresa());
+            dto.setNomeContato(c.getNomeContato());
+            dto.setTelefone(c.getTelefone());
+            dto.setEmail(c.getEmail());
+            if (c.getEndereco() != null) {
+                dto.setCidade(c.getEndereco().getCidade());
+                dto.setLogradouro(c.getEndereco().getLogradouro());
+            }
+            resultados.add(dto);
+        }
+
+        return resultados;
     }
 }
