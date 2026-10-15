@@ -2,6 +2,8 @@ package sptech.school.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import sptech.school.dto.dashboard.FornecedorEstatisticasDto;
+import sptech.school.dto.dashboard.PrecosMediosDto;
 import sptech.school.dto.movimentacaoEstoque.*;
 import sptech.school.entity.*;
 import sptech.school.exception.EntidadeNaoEncontradaException;
@@ -10,9 +12,11 @@ import sptech.school.exception.MovimentacaoNaoEncontrada;
 import sptech.school.mapper.MovimentacaoEstoqueMapper;
 import sptech.school.repository.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -338,4 +342,20 @@ public class MovimentacaoEstoqueService {
 
         return MovimentacaoEstoqueMapper.toResponseDtoList(movimentacoes);
     }
+
+    public List<FornecedorEstatisticasDto> obterEstatisticasFornecedores(Integer itemId) {
+        List<Object[]> resultados = movimentacaoRepository.buscarEstatisticasPorFornecedor(itemId);
+        List<FornecedorEstatisticasDto> dtos = new ArrayList<>();
+
+        for (Object[] row : resultados) {
+            FornecedorEstatisticasDto dto = new FornecedorEstatisticasDto();
+            dto.setFornecedorId((Integer) row[0]);
+            dto.setNomeEmpresa((String) row[1]);
+            dto.setPercentualEntregasNoPrazo(row[2] != null ? (Double) row[2] : 0.0);
+            dto.setPercentualFretePago(row[3] != null ? (Double) row[3] : 0.0);
+            dtos.add(dto);
+        }
+        return dtos;
+    }
+
 }

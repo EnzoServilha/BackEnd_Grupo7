@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import sptech.school.dto.dashboard.FornecedorEstatisticasDto;
 import sptech.school.dto.movimentacaoEstoque.FechamentoCotacaoRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
@@ -132,5 +133,10 @@ public class MovimentacaoEstoqueController {
                 tipo, status, dataEntrega, dataPrevista, dataMovimentacao, pagadorFrete
         );
         return ResponseEntity.ok(resultados);
+    }
+
+    @GetMapping("/{id}/fornecedores-estatisticas")
+    public ResponseEntity<List<FornecedorEstatisticasDto>> getEstatisticasFornecedores(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.obterEstatisticasFornecedores(id));
     }
 }

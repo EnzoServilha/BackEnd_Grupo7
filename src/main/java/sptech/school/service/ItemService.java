@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sptech.school.dto.dashboard.PrecosMediosDto;
 import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.dto.item.ItemResponseDto;
 import sptech.school.entity.CodigoAssociado;
@@ -15,6 +16,7 @@ import sptech.school.repository.CodigoAssociadoRepository;
 import sptech.school.repository.ItemRepository;
 import sptech.school.util.BuscaSanitizer;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -161,5 +163,11 @@ public class ItemService {
         );
 
         return ItemMapper.toResponseDtoList(itens);
+    }
+    public PrecosMediosDto obterPrecosMedios(Integer itemId) {
+        BigDecimal compra = itemRepository.calcularPrecoMedioCompra(itemId);
+        BigDecimal venda = itemRepository.calcularPrecoMedioVenda(itemId);
+        return new PrecosMediosDto(compra != null ? compra : BigDecimal.ZERO,
+                venda != null ? venda : BigDecimal.ZERO);
     }
 }
