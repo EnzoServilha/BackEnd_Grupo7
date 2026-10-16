@@ -205,7 +205,7 @@ public class ItemController {
     }
 
     @GetMapping("/{id}/precos-medios")
-    public ResponseEntity<PrecosMediosDto> getPrecosMedios(@PathVariable Integer id) {
+    public ResponseEntity<PrecosMediosDto> getPrecosMedios(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(itemService.obterPrecosMedios(id));
     }
 }

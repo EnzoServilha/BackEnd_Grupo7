@@ -136,7 +136,7 @@ public class MovimentacaoEstoqueController {
     }
 
     @GetMapping("/{id}/fornecedores-estatisticas")
-    public ResponseEntity<List<FornecedorEstatisticasDto>> getEstatisticasFornecedores(@PathVariable Integer id) {
+    public ResponseEntity<List<FornecedorEstatisticasDto>> getEstatisticasFornecedores(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(service.obterEstatisticasFornecedores(id));
     }
 }
