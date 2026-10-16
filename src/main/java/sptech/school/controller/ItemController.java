@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import sptech.school.dto.dashboard.FornecedorEstatisticasDto;
+import sptech.school.dto.dashboard.PrecosMediosDto;
 import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.dto.item.ItemRequestDto;
 import sptech.school.dto.item.ItemResponseDto;
@@ -200,5 +202,10 @@ public class ItemController {
         );
 
         return ResponseEntity.ok(resultados);
+    }
+
+    @GetMapping("/{id}/precos-medios")
+    public ResponseEntity<PrecosMediosDto> getPrecosMedios(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(itemService.obterPrecosMedios(id));
     }
 }

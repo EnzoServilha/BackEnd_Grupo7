@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import sptech.school.entity.Item;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -54,4 +55,14 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
             @Param("dataInicial") LocalDate dataInicial,
             @Param("dataFinal") LocalDate dataFinal
     );
+
+    @Query("SELECT AVG(i.precoUnitario) FROM ItensNaMovimentacao i " +
+            "JOIN i.movimentacaoEstoque m JOIN m.tipo t " +
+            "WHERE i.item.id = :itemId AND LOWER(t.nome) LIKE '%compra%'")
+    BigDecimal calcularPrecoMedioCompra(@Param("itemId") Integer itemId);
+
+    @Query("SELECT AVG(i.precoUnitario) FROM ItensNaMovimentacao i " +
+            "JOIN i.movimentacaoEstoque m JOIN m.tipo t " +
+            "WHERE i.item.id = :itemId AND LOWER(t.nome) LIKE '%venda%'")
+    BigDecimal calcularPrecoMedioVenda(@Param("itemId") Integer itemId);
 }
