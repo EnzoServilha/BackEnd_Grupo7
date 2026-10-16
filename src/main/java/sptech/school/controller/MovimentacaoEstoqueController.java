@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import sptech.school.dto.dashboard.CotacoesPorcentagemDto;
+import sptech.school.dto.dashboard.DashboardMensalDto;
 import sptech.school.dto.dashboard.FornecedorEstatisticasDto;
 import sptech.school.dto.movimentacaoEstoque.FechamentoCotacaoRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
@@ -139,4 +141,14 @@ public class MovimentacaoEstoqueController {
     public ResponseEntity<List<FornecedorEstatisticasDto>> getEstatisticasFornecedores(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(service.obterEstatisticasFornecedores(id));
     }
-}
+
+    @GetMapping("/{id}/status-cotacoes")
+    public ResponseEntity<CotacoesPorcentagemDto> getEstatisticasCotacoes(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(service.obterEstatisticasCotacoes(id));
+    }
+
+    @GetMapping("/{id}/dados-mensais")
+    public ResponseEntity<List<DashboardMensalDto>> getDadosMensais(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(service.obterEstatisticasMensais(id));
+    }
+    }

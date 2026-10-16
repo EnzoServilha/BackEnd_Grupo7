@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import sptech.school.dto.dashboard.CotacoesPorcentagemDto;
+import sptech.school.dto.dashboard.DashboardMensalDto;
 import sptech.school.entity.MovimentacaoEstoque;
 
 import jakarta.persistence.LockModeType;
@@ -68,4 +70,26 @@ public interface MovimentacaoRepository extends JpaRepository<MovimentacaoEstoqu
             "WHERE i.item.id = :itemId AND m.fornecedor IS NOT NULL " +
             "GROUP BY m.fornecedor.id, m.fornecedor.nomeEmpresa")
     List<Object[]> buscarEstatisticasPorFornecedor(@Param("itemId") Integer itemId);
+
+    @Query("SELECT " +
+            "COUNT(m), " +
+            "SUM(CASE WHEN s.nome = 'CONCLUIDO PARCIAL' THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN s.nome = 'CONCLUIDO' THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN m.movimentacaoOriginal IS NOT NULL THEN 1 ELSE 0 END) " +
+            "FROM MovimentacaoEstoque m " +
+            "JOIN m.tipo t JOIN m.status s " +
+            "WHERE m.periodo.id = :periodoId AND t.nome = 'COTACAO'")
+    CotacoesPorcentagemDto buscarCotacoesPorPeriodo(@Param("periodoId") Integer periodoId);
+
+    @Query("SELECT NEW sptech.school.dto.dashboard.DashboardMensalDto(" +
+            "FUNCTION('MONTH', m.dataMovimentacao), " +
+            "SUM(CASE WHEN t.nome = 'ENTRADA' THEN (i.qtd * i.precoUnitario) ELSE 0 END), " +
+            "SUM(CASE WHEN t.nome = 'SAIDA' THEN (i.qtd * i.precoUnitario) ELSE 0 END)) " +
+            "FROM MovimentacaoEstoque m " +
+            "JOIN m.tipo t " +
+            "JOIN ItensNaMovimentacao i ON i.movimentacaoEstoque.id = m.id " +
+            "WHERE m.periodo.id = :periodoId " +
+            "GROUP BY FUNCTION('MONTH', m.dataMovimentacao) " +
+            "ORDER BY FUNCTION('MONTH', m.dataMovimentacao)")
+    List<DashboardMensalDto> obterDadosMensaisPorPeriodo(@Param("periodoId") Integer periodoId);
 }

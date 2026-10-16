@@ -2,6 +2,8 @@ package sptech.school.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import sptech.school.dto.dashboard.CotacoesPorcentagemDto;
+import sptech.school.dto.dashboard.DashboardMensalDto;
 import sptech.school.dto.dashboard.FornecedorEstatisticasDto;
 import sptech.school.dto.dashboard.PrecosMediosDto;
 import sptech.school.dto.movimentacaoEstoque.*;
@@ -356,6 +358,15 @@ public class MovimentacaoEstoqueService {
             dtos.add(dto);
         }
         return dtos;
+    }
+
+    public CotacoesPorcentagemDto obterEstatisticasCotacoes (Integer PeriodoId){
+        return (movimentacaoRepository.buscarCotacoesPorPeriodo(PeriodoId));
+
+    }
+
+    public List<DashboardMensalDto> obterEstatisticasMensais(Integer periodoId) {
+        return movimentacaoRepository.obterDadosMensaisPorPeriodo(periodoId);
     }
 
 }
