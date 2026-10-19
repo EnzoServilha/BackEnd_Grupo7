@@ -134,26 +134,36 @@ public class FornecedorService {
     }
 
     public void preencher(Fornecedor novoFornecedor, FornecedorRequestDto fornecedor){
-        if (fornecedor.getMarcaId() != null && !fornecedor.getMarcaId().isEmpty()) {
+        if (fornecedor.getMarcaId() != null) {
+            if (fornecedor.getMarcaId().isEmpty()) {
+                novoFornecedor.setMarcas(new ArrayList<>());
+            } else {
                 List<Marca> marcasEncontradas = marcaRepository.findAllById(fornecedor.getMarcaId()).stream()
-                    .filter(marca -> Boolean.TRUE.equals(marca.getAtivo())).toList();
+                        .filter(marca -> Boolean.TRUE.equals(marca.getAtivo()))
+                        .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 
-            if (marcasEncontradas.size() != fornecedor.getMarcaId().size()) {
-                throw new EntidadeNaoEncontradaException("Nenhuma marca encontrada para os IDs fornecidos", fornecedor.getMarcaId());
+                if (marcasEncontradas.size() != fornecedor.getMarcaId().size()) {
+                    throw new EntidadeNaoEncontradaException("Nenhuma marca encontrada para os IDs fornecidos", fornecedor.getMarcaId());
+                }
+
+                novoFornecedor.setMarcas(marcasEncontradas);
             }
-
-            novoFornecedor.setMarcas(marcasEncontradas);
         }
 
-        if (fornecedor.getCategoriaId() != null && !fornecedor.getCategoriaId().isEmpty()) {
+        if (fornecedor.getCategoriaId() != null) {
+            if (fornecedor.getCategoriaId().isEmpty()) {
+                novoFornecedor.setCategoria(new ArrayList<>());
+            } else {
                 List<Categoria> categoriasEncontradas = categoriaRepository.findAllById(fornecedor.getCategoriaId()).stream()
-                    .filter(categoria -> Boolean.TRUE.equals(categoria.getAtivo())).toList();
+                        .filter(categoria -> Boolean.TRUE.equals(categoria.getAtivo()))
+                        .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 
-            if(categoriasEncontradas.size() != fornecedor.getCategoriaId().size()){
-                throw new EntidadeNaoEncontradaException("Nenhuma categoria encontrada para os IDs fornecidos", fornecedor.getCategoriaId());
+                if (categoriasEncontradas.size() != fornecedor.getCategoriaId().size()) {
+                    throw new EntidadeNaoEncontradaException("Nenhuma categoria encontrada para os IDs fornecidos", fornecedor.getCategoriaId());
+                }
+
+                novoFornecedor.setCategoria(categoriasEncontradas);
             }
-
-            novoFornecedor.setCategoria(categoriasEncontradas);
         }
 
         if (fornecedor.getEnderecoId() != null) {
@@ -161,6 +171,8 @@ public class FornecedorService {
                     .filter(enderecoEncontrado -> Boolean.TRUE.equals(enderecoEncontrado.getAtivo()))
                     .orElseThrow(() -> new EntidadeNaoEncontradaException("Endereço não encontrado", fornecedor.getEnderecoId()));
             novoFornecedor.setEndereco(endereco);
+        } else if (novoFornecedor.getEndereco() != null) {
+            novoFornecedor.setEndereco(null);
         }
     }
 
