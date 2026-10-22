@@ -161,13 +161,13 @@ public class UsuarioController {
 
     @GetMapping("/{id}")
     @SecurityRequirement(name = "Bearer")
-    public ResponseEntity<UsuarioResponseDto> buscarPorId(@PathVariable("id") Long id) {
+    public ResponseEntity<UsuarioResponseDto> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.buscarPorId(id));
     }
 
     @PutMapping("/{id}")
     @SecurityRequirement(name = "Bearer")
-    public ResponseEntity<Void> atualizar(@PathVariable("id") Long id, @RequestBody @Valid UsuarioCriacaoDto dto) {
+    public ResponseEntity<Void> atualizar(@PathVariable Long id, @RequestBody @Valid UsuarioCriacaoDto dto) {
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
         usuarioService.verificarAcesso(logado);
 
@@ -177,7 +177,7 @@ public class UsuarioController {
 
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "Bearer")
-    public ResponseEntity<Void> deletar(@PathVariable("id") Long id, Authentication authentication) {
+    public ResponseEntity<Void> deletar(@PathVariable Long id, Authentication authentication) {
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
         usuarioService.verificarAcesso(logado);
 
@@ -187,7 +187,7 @@ public class UsuarioController {
 
     @PatchMapping("/{id}/desativacao")
     @SecurityRequirement(name = "Bearer")
-    public ResponseEntity<Void> desativar(@PathVariable("id") Long id, Authentication authentication) {
+    public ResponseEntity<Void> desativar(@PathVariable Long id, Authentication authentication) {
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
         usuarioService.verificarAcesso(logado);
 
@@ -197,7 +197,7 @@ public class UsuarioController {
 
     @PatchMapping("/{id}/reativacao")
     @SecurityRequirement(name = "Bearer")
-    public ResponseEntity<Void> reativar(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> reativar(@PathVariable Long id) {
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
         usuarioService.verificarAcesso(logado);
 
@@ -207,7 +207,7 @@ public class UsuarioController {
 
     @PatchMapping("/{id}/permissao/{permissaoId}")
     @SecurityRequirement(name = "Bearer")
-    public ResponseEntity<Void> atualizarPermissao(@PathVariable("id") Long id, @PathVariable("permissaoId") Integer permissaoId) {
+    public ResponseEntity<Void> atualizarPermissao(@PathVariable Long id, @PathVariable Integer permissaoId) {
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
         usuarioService.verificarAcesso(logado);
 
@@ -217,7 +217,7 @@ public class UsuarioController {
 
     @PatchMapping("/{id}/senha")
     @SecurityRequirement(name = "Bearer")
-    public ResponseEntity<Void> alterarSenha(@PathVariable("id") Long id, @RequestBody @Valid UsuarioSenhaDto dto) {
+    public ResponseEntity<Void> alterarSenha(@PathVariable Long id, @RequestBody @Valid UsuarioSenhaDto dto) {
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
         usuarioService.verificarAcesso(logado);
 
