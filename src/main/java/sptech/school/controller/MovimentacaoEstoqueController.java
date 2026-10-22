@@ -38,13 +38,13 @@ public class MovimentacaoEstoqueController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MovimentacaoEstoqueResponseDto> buscarPorId(@PathVariable Integer id){
+    public ResponseEntity<MovimentacaoEstoqueResponseDto> buscarPorId(@PathVariable("id") Integer id){
         return ResponseEntity.status(200).body(service.buscarPorId(id));
     }
 
     @GetMapping("/periodo/{idPeriodo}")
     public ResponseEntity<List<MovimentacaoEstoqueResponsePagebleDto>> listarPorPeriodoAtual(
-            @PathVariable Integer idPeriodo,
+            @PathVariable("idPeriodo") Integer idPeriodo,
             Pageble pageble
     ){
         List<MovimentacaoEstoqueResponsePagebleDto> resposta = service.listarPorPeriodoAtual(idPeriodo, pageble);
@@ -58,7 +58,7 @@ public class MovimentacaoEstoqueController {
 
     @GetMapping("/tipo/{tipo}")
     public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> buscarPorTipo(
-            @PathVariable
+            @PathVariable("tipo")
             @NotBlank
             @Size(max = 45)
             @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
@@ -68,7 +68,7 @@ public class MovimentacaoEstoqueController {
 
     @GetMapping("/status/{status}")
     public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> buscarPorStatus(
-            @PathVariable
+            @PathVariable("status")
             @NotBlank
             @Size(max = 45)
             @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
@@ -86,7 +86,7 @@ public class MovimentacaoEstoqueController {
 
     @PostMapping("/cotacoes/{id}/fechamento")
     public ResponseEntity<MovimentacaoEstoqueResponseDto> fecharCotacao(
-            @PathVariable Integer id,
+            @PathVariable("id") Integer id,
             @RequestBody @Valid FechamentoCotacaoRequestDto requestDto,
             Authentication authentication) {
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
@@ -96,7 +96,7 @@ public class MovimentacaoEstoqueController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MovimentacaoEstoqueResponseDto> editar(@RequestBody @Valid MovimentacaoEstoqueRequestDto requestDto, @PathVariable Integer id, Authentication authentication){
+    public ResponseEntity<MovimentacaoEstoqueResponseDto> editar(@RequestBody @Valid MovimentacaoEstoqueRequestDto requestDto, @PathVariable("id") Integer id, Authentication authentication){
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
         usuarioService.verificarAcesso(logado);
 
@@ -104,7 +104,7 @@ public class MovimentacaoEstoqueController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Null> deletar(@PathVariable Integer id){
+    public ResponseEntity<Null> deletar(@PathVariable("id") Integer id){
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
         usuarioService.verificarAcesso(logado);
 
@@ -114,7 +114,7 @@ public class MovimentacaoEstoqueController {
     }
 
     @PatchMapping("/{id}/cancelamento")
-    public ResponseEntity<Void> cancelar(@PathVariable Integer id) {
+    public ResponseEntity<Void> cancelar(@PathVariable("id") Integer id) {
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
         usuarioService.verificarAcesso(logado);
 
