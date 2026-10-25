@@ -48,6 +48,7 @@ public class ClienteMapper {
     public static List<ClienteResponseDtoPaginacao> toResponseDtoList(List<Cliente> clientes) {
         return clientes.stream().map(ClienteMapper::toResponseDto).toList();
     }
+
     public static ClienteResponseDtoPaginacao toPaginadoDto(Page<Cliente> page) {
         return new ClienteResponseDtoPaginacao(
                 page.getContent(),

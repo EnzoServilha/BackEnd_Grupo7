@@ -4,10 +4,18 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import sptech.school.dto.dashboard.FornecedorEstatisticasDto;
+import sptech.school.dto.dashboard.PrecosMediosDto;
+import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.dto.item.ItemRequestDto;
 import sptech.school.dto.item.ItemResponseDto;
 import sptech.school.dto.usuario.UsuarioResponseDto;
@@ -16,6 +24,7 @@ import sptech.school.mapper.ItemMapper;
 import sptech.school.service.ItemService;
 import sptech.school.service.UsuarioService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -32,10 +41,19 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemResponseDto>> listarTodos() {
-        List<Item> itens = itemService.listarTodos();
-        if (itens.isEmpty()) return ResponseEntity.noContent().build();
-        return ResponseEntity.ok(ItemMapper.toResponseDtoList(itens));
+    public ResponseEntity<Page<ItemResponseDto>> listarTodos(
+            @ParameterObject
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC)
+            Pageable pageable
+    ) {
+
+        Page<Item> itemPage = itemService.listarTodos(pageable);
+
+        if (itemPage.isEmpty()) return ResponseEntity.noContent().build();
+
+        Page<ItemResponseDto> responsePage = itemPage.map(ItemMapper::toResponseDto);
+
+        return ResponseEntity.ok(responsePage);
     }
 
     @GetMapping("/administracao")
@@ -165,5 +183,29 @@ public class ItemController {
 
         itemService.removerCodigoAssociado(itemId, codigoAssociadoId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<ItemResponseDto>> pesquisarEFiltrar(
+            @RequestParam(required = false) String codigoAssociado,
+            @RequestParam(required = false) String codigoInterno,
+            @RequestParam(required = false) String localizacao,
+            @RequestParam(required = false) List<String> marca,
+            @RequestParam(required = false) LocalDate dataCadastroInicial,
+            @RequestParam(required = false) LocalDate dataCadastroFinal,
+            @RequestParam(required = false) Integer anoCadastroInicial,
+            @RequestParam(required = false) Integer anoCadastroFinal
+    ){
+        List<ItemResponseDto> resultados = itemService.pesquisarFiltro(
+                codigoAssociado, codigoInterno, localizacao, marca,
+                dataCadastroInicial, dataCadastroFinal, anoCadastroInicial, anoCadastroFinal
+        );
+
+        return ResponseEntity.ok(resultados);
+    }
+
+    @GetMapping("/{id}/precos-medios")
+    public ResponseEntity<PrecosMediosDto> getPrecosMedios(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(itemService.obterPrecosMedios(id));
     }
 }

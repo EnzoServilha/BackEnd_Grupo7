@@ -27,7 +27,9 @@ import sptech.school.entity.Usuario;
 import sptech.school.repository.PermissaoRepository;
 import sptech.school.repository.UsuarioRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -195,4 +197,23 @@ public class UsuarioService {
       throw new AcessoNegadoexception("Você não tem permissão para acessar!");
     }
   }
+
+    public List<UsuarioResponseDto> pesquisarFiltro(
+            String nome, String email, LocalDate dataCadastro, String cargo, Boolean ativo) {
+
+        nome = (nome == null || nome.isBlank()) ? null : nome;
+        email = (email == null || email.isBlank()) ? null : email;
+        cargo = (cargo == null || cargo.isBlank()) ? null : cargo;
+
+        LocalDateTime dataLimite = null;
+        if (dataCadastro != null) {
+            dataLimite = dataCadastro.atTime(LocalTime.MAX);
+        }
+
+        List<Usuario> usuarios = usuarioRepository.pesquisarEFiltrar(
+                nome, email, dataLimite, cargo, ativo
+        );
+
+        return UsuarioMapper.toResponseDtoList(usuarios);
+    }
 }

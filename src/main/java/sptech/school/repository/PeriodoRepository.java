@@ -7,8 +7,10 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import sptech.school.dto.periodo.PeriodoQtdPecasDTO;
+import sptech.school.entity.Fornecedor;
 import sptech.school.entity.Periodo;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,4 +83,12 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
 """)
     List<PeriodoQtdPecasDTO> pegarSaldoPorItemDoPeriodo(@Param("idPeriodo") Integer idPeriodo);
 
+
+    @Query("SELECT p FROM Periodo p WHERE " +
+            "(:numero IS NULL OR p.id = :numero) AND " +
+            "(:dataCadastro IS NULL OR p.dataCriacao <= :dataCadastro)")
+    List<Periodo> pesquisarEFiltrar(
+            @Param("numero") Integer numero,
+            @Param("dataCadastro") LocalDateTime dataCadastro
+    );
 }

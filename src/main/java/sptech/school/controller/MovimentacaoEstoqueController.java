@@ -9,13 +9,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import sptech.school.dto.dashboard.CotacoesPorcentagemDto;
+import sptech.school.dto.dashboard.DashboardMensalDto;
+import sptech.school.dto.dashboard.FornecedorEstatisticasDto;
 import sptech.school.dto.movimentacaoEstoque.FechamentoCotacaoRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
+import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponsePagebleDto;
 import sptech.school.dto.usuario.UsuarioResponseDto;
+import sptech.school.entity.Pageble;
 import sptech.school.service.MovimentacaoEstoqueService;
 import sptech.school.service.UsuarioService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -37,8 +43,17 @@ public class MovimentacaoEstoqueController {
     }
 
     @GetMapping("/periodo/{idPeriodo}")
-    public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> listarPorPeriodoAtual(@PathVariable Integer idPeriodo){
-        return ResponseEntity.status(200).body(service.listarPorPeriodoAtual(idPeriodo));
+    public ResponseEntity<List<MovimentacaoEstoqueResponsePagebleDto>> listarPorPeriodoAtual(
+            @PathVariable Integer idPeriodo,
+            Pageble pageble
+    ){
+        List<MovimentacaoEstoqueResponsePagebleDto> resposta = service.listarPorPeriodoAtual(idPeriodo, pageble);
+
+        if (resposta.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.status(200).body(resposta);
     }
 
     @GetMapping("/tipo/{tipo}")
@@ -106,4 +121,34 @@ public class MovimentacaoEstoqueController {
         service.cancelar(id);
         return ResponseEntity.noContent().build();
     }
-}
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> pesquisarEFiltrar(
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) LocalDate dataEntrega,
+            @RequestParam(required = false) LocalDate dataPrevista,
+            @RequestParam(required = false) LocalDate dataMovimentacao,
+            @RequestParam(required = false) Boolean pagadorFrete
+    ) {
+        List<MovimentacaoEstoqueResponseDto> resultados = service.pesquisarFiltro(
+                tipo, status, dataEntrega, dataPrevista, dataMovimentacao, pagadorFrete
+        );
+        return ResponseEntity.ok(resultados);
+    }
+
+    @GetMapping("/{id}/fornecedores-estatisticas")
+    public ResponseEntity<List<FornecedorEstatisticasDto>> getEstatisticasFornecedores(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(service.obterEstatisticasFornecedores(id));
+    }
+
+    @GetMapping("/{id}/status-cotacoes")
+    public ResponseEntity<CotacoesPorcentagemDto> getEstatisticasCotacoes(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(service.obterEstatisticasCotacoes(id));
+    }
+
+    @GetMapping("/{id}/dados-mensais")
+    public ResponseEntity<List<DashboardMensalDto>> getDadosMensais(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(service.obterEstatisticasMensais(id));
+    }
+    }

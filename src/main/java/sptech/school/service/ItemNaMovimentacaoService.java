@@ -103,4 +103,15 @@ public class ItemNaMovimentacaoService {
             throw new EntidadeConflitanteException("Os itens de uma cotação são imutáveis");
         }
     }
+
+    public List<ItensNaMovimentacaoResponseDto> pesquisarFiltro(
+            String contato, String codigo, String tipo) {
+        contato = (contato == null || contato.isBlank()) ? null : contato;
+        codigo = (codigo == null || codigo.isBlank()) ? null : codigo;
+        tipo = (tipo == null || tipo.isBlank()) ? null : tipo;
+
+        List<ItensNaMovimentacao> itens = itemMovimentacaoRepository.pesquisarEFiltrar(contato, codigo, tipo);
+
+        return ItensNaMovimentacaoMapper.toResponseDtoList(itens);
+    }
 }

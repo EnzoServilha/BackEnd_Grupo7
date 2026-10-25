@@ -2,23 +2,23 @@ package sptech.school.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import sptech.school.dto.movimentacaoEstoque.FechamentoCotacaoRequestDto;
-import sptech.school.dto.movimentacaoEstoque.ItemFechamentoCotacaoRequestDto;
-import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
-import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
-import sptech.school.entity.ItensNaMovimentacao;
-import sptech.school.entity.MovimentacaoEstoque;
-import sptech.school.entity.Periodo;
-import sptech.school.entity.Status;
-import sptech.school.entity.Tipo;
-import sptech.school.entity.Usuario;
+import sptech.school.dto.dashboard.CotacoesPorcentagemDto;
+import sptech.school.dto.dashboard.DashboardMensalDto;
+import sptech.school.dto.dashboard.FornecedorEstatisticasDto;
+import sptech.school.dto.dashboard.PrecosMediosDto;
+import sptech.school.dto.movimentacaoEstoque.*;
+import sptech.school.entity.*;
 import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.exception.EntidadeConflitanteException;
 import sptech.school.exception.MovimentacaoNaoEncontrada;
 import sptech.school.mapper.MovimentacaoEstoqueMapper;
 import sptech.school.repository.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,10 +53,29 @@ public class MovimentacaoEstoqueService {
         return MovimentacaoEstoqueMapper.toResponse(movimentacao);
     }
 
+
     @Transactional
-    public List<MovimentacaoEstoqueResponseDto> listarPorPeriodoAtual(Integer idPeriodo){
-        return MovimentacaoEstoqueMapper.toResponseDtoList(movimentacaoRepository.listarPorPeriodoAtual(idPeriodo));
+    public List<MovimentacaoEstoqueResponsePagebleDto> listarPorPeriodoAtual(Integer idPeriodo, Pageble pagebleRequest) {
+        System.out.println("PAGINA: " + pagebleRequest.getPage());
+        System.out.println("TAMANHO: " + pagebleRequest.getSize());
+
+        int pagina = pagebleRequest.getPage() != null ? pagebleRequest.getPage() : 0;
+        int tamanho = pagebleRequest.getSize() != null ? pagebleRequest.getSize() : 10;
+
+        int offset = pagina * tamanho;
+
+        System.out.println("OFFSET CALCULADO: " + offset);
+
+        long totalRegistros = movimentacaoRepository.contarPorPeriodo(idPeriodo);
+
+        List<MovimentacaoEstoque> listaPaginada = movimentacaoRepository.listarComPaginacaoNativa(idPeriodo, tamanho, offset);
+
+        return listaPaginada.stream()
+                .map(entity -> MovimentacaoEstoqueMapper.toResponsePageble(entity, pagebleRequest))
+                .toList();
     }
+
+
 
     @Transactional
     public List<MovimentacaoEstoqueResponseDto> buscarPorTipo(String tipo){
@@ -304,4 +323,50 @@ public class MovimentacaoEstoqueService {
             }
         }
     }
+
+    public List<MovimentacaoEstoqueResponseDto> pesquisarFiltro(
+            String tipo, String status, LocalDate dataEntrega,
+            LocalDate dataPrevista, LocalDate dataMovimentacao, Boolean pagadorFrete) {
+
+        tipo = (tipo == null || tipo.isBlank()) ? null : tipo;
+        status = (status == null || status.isBlank()) ? null : status;
+
+        LocalDateTime inicioMov = null;
+        LocalDateTime fimMov = null;
+        if (dataMovimentacao != null) {
+            inicioMov = dataMovimentacao.atStartOfDay();
+            fimMov = dataMovimentacao.atTime(LocalTime.MAX);
+        }
+
+        List<MovimentacaoEstoque> movimentacoes = movimentacaoRepository.pesquisarEFiltrar(
+                tipo, status, dataEntrega, dataPrevista, inicioMov, fimMov, pagadorFrete
+        );
+
+        return MovimentacaoEstoqueMapper.toResponseDtoList(movimentacoes);
+    }
+
+    public List<FornecedorEstatisticasDto> obterEstatisticasFornecedores(Integer itemId) {
+        List<Object[]> resultados = movimentacaoRepository.buscarEstatisticasPorFornecedor(itemId);
+        List<FornecedorEstatisticasDto> dtos = new ArrayList<>();
+
+        for (Object[] row : resultados) {
+            FornecedorEstatisticasDto dto = new FornecedorEstatisticasDto();
+            dto.setFornecedorId((Integer) row[0]);
+            dto.setNomeEmpresa((String) row[1]);
+            dto.setPercentualEntregasNoPrazo(row[2] != null ? (Double) row[2] : 0.0);
+            dto.setPercentualFretePago(row[3] != null ? (Double) row[3] : 0.0);
+            dtos.add(dto);
+        }
+        return dtos;
+    }
+
+    public CotacoesPorcentagemDto obterEstatisticasCotacoes (Integer PeriodoId){
+        return (movimentacaoRepository.buscarCotacoesPorPeriodo(PeriodoId));
+
+    }
+
+    public List<DashboardMensalDto> obterEstatisticasMensais(Integer periodoId) {
+        return movimentacaoRepository.obterDadosMensaisPorPeriodo(periodoId);
+    }
+
 }

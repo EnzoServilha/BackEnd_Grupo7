@@ -2,21 +2,17 @@ package sptech.school.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sptech.school.dto.fornecedor.ContatoEmpresaResponseDto;
 import sptech.school.dto.fornecedor.FornecedorRequestDto;
 import sptech.school.dto.fornecedor.FornecedorResponseDto;
-import sptech.school.entity.Categoria;
-import sptech.school.entity.Endereco;
-import sptech.school.entity.Marca;
-import sptech.school.entity.Fornecedor;
+import sptech.school.entity.*;
 import sptech.school.exception.EntidadeNaoEncontradaException;
 import sptech.school.mapper.FornecedorMapper;
-import sptech.school.repository.CategoriaRepository;
-import sptech.school.repository.EnderecoRepository;
-import sptech.school.repository.FornecedorRepository;
-import sptech.school.repository.MarcaRepository;
+import sptech.school.repository.*;
 import sptech.school.util.BuscaSanitizer;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,17 +21,42 @@ public class FornecedorService {
     private final MarcaRepository marcaRepository;
     private final CategoriaRepository categoriaRepository;
     private final EnderecoRepository enderecoRepository;
+    private final ClienteRepository clienteRepository;
 
-    public FornecedorService(FornecedorRepository repository, MarcaRepository marcaRepository, CategoriaRepository categoriaRepository, EnderecoRepository enderecoRepository) {
+    public FornecedorService(FornecedorRepository repository, MarcaRepository marcaRepository, CategoriaRepository categoriaRepository, EnderecoRepository enderecoRepository, ClienteRepository clienteRepository) {
         this.repository = repository;
         this.marcaRepository = marcaRepository;
         this.categoriaRepository = categoriaRepository;
         this.enderecoRepository = enderecoRepository;
+        this.clienteRepository = clienteRepository;
     }
 
     public List<FornecedorResponseDto> listar() {
         return FornecedorMapper.toResponseDtoList(repository.findAll().stream()
             .filter(fornecedor -> Boolean.TRUE.equals(fornecedor.getAtivo())).toList());
+    }
+
+    public List<FornecedorResponseDto> pesquisar(
+            String nomeEmpresa, String nomeContato, String telefone,
+            String email, String localizacao, List<String> fabricantes, List<String> categorias) {
+
+        nomeEmpresa = (nomeEmpresa == null || nomeEmpresa.isBlank()) ? null : nomeEmpresa;
+        nomeContato = (nomeContato == null || nomeContato.isBlank()) ? null : nomeContato;
+        telefone = (telefone == null || telefone.isBlank()) ? null : telefone;
+        email = (email == null || email.isBlank()) ? null : email;
+        localizacao = (localizacao == null || localizacao.isBlank()) ? null : localizacao;
+
+        // Normaliza listas vazias para null para não quebrar o JPQL
+        List<String> fabClean = (fabricantes == null || fabricantes.isEmpty()) ? null : fabricantes;
+        List<String> catClean = (categorias == null || categorias.isEmpty()) ? null : categorias;
+
+        List<Fornecedor> fornecedores = repository.pesquisarEFiltrar(
+                nomeEmpresa, nomeContato, telefone, email, localizacao, fabClean, catClean
+        );
+
+        List<FornecedorResponseDto> response = FornecedorMapper.toResponseDtoList(fornecedores);
+
+        return response;
     }
 
     public List<FornecedorResponseDto> listarAdministrativo(String ativo) {
@@ -113,26 +134,36 @@ public class FornecedorService {
     }
 
     public void preencher(Fornecedor novoFornecedor, FornecedorRequestDto fornecedor){
-        if (fornecedor.getMarcaId() != null && !fornecedor.getMarcaId().isEmpty()) {
+        if (fornecedor.getMarcaId() != null) {
+            if (fornecedor.getMarcaId().isEmpty()) {
+                novoFornecedor.setMarcas(new ArrayList<>());
+            } else {
                 List<Marca> marcasEncontradas = marcaRepository.findAllById(fornecedor.getMarcaId()).stream()
-                    .filter(marca -> Boolean.TRUE.equals(marca.getAtivo())).toList();
+                        .filter(marca -> Boolean.TRUE.equals(marca.getAtivo()))
+                        .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 
-            if (marcasEncontradas.size() != fornecedor.getMarcaId().size()) {
-                throw new EntidadeNaoEncontradaException("Nenhuma marca encontrada para os IDs fornecidos", fornecedor.getMarcaId());
+                if (marcasEncontradas.size() != fornecedor.getMarcaId().size()) {
+                    throw new EntidadeNaoEncontradaException("Nenhuma marca encontrada para os IDs fornecidos", fornecedor.getMarcaId());
+                }
+
+                novoFornecedor.setMarcas(marcasEncontradas);
             }
-
-            novoFornecedor.setMarcas(marcasEncontradas);
         }
 
-        if (fornecedor.getCategoriaId() != null && !fornecedor.getCategoriaId().isEmpty()) {
+        if (fornecedor.getCategoriaId() != null) {
+            if (fornecedor.getCategoriaId().isEmpty()) {
+                novoFornecedor.setCategoria(new ArrayList<>());
+            } else {
                 List<Categoria> categoriasEncontradas = categoriaRepository.findAllById(fornecedor.getCategoriaId()).stream()
-                    .filter(categoria -> Boolean.TRUE.equals(categoria.getAtivo())).toList();
+                        .filter(categoria -> Boolean.TRUE.equals(categoria.getAtivo()))
+                        .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 
-            if(categoriasEncontradas.size() != fornecedor.getCategoriaId().size()){
-                throw new EntidadeNaoEncontradaException("Nenhuma categoria encontrada para os IDs fornecidos", fornecedor.getCategoriaId());
+                if (categoriasEncontradas.size() != fornecedor.getCategoriaId().size()) {
+                    throw new EntidadeNaoEncontradaException("Nenhuma categoria encontrada para os IDs fornecidos", fornecedor.getCategoriaId());
+                }
+
+                novoFornecedor.setCategoria(categoriasEncontradas);
             }
-
-            novoFornecedor.setCategoria(categoriasEncontradas);
         }
 
         if (fornecedor.getEnderecoId() != null) {
@@ -140,6 +171,61 @@ public class FornecedorService {
                     .filter(enderecoEncontrado -> Boolean.TRUE.equals(enderecoEncontrado.getAtivo()))
                     .orElseThrow(() -> new EntidadeNaoEncontradaException("Endereço não encontrado", fornecedor.getEnderecoId()));
             novoFornecedor.setEndereco(endereco);
+        } else if (novoFornecedor.getEndereco() != null) {
+            novoFornecedor.setEndereco(null);
         }
+    }
+
+    public List<ContatoEmpresaResponseDto> pesquisarGeral(
+            String nomeEmpresa, String nomeContato, String telefone, String email, String localizacao) {
+
+        nomeEmpresa = (nomeEmpresa == null || nomeEmpresa.isBlank()) ? null : nomeEmpresa;
+        nomeContato = (nomeContato == null || nomeContato.isBlank()) ? null : nomeContato;
+        telefone = (telefone == null || telefone.isBlank()) ? null : telefone;
+        email = (email == null || email.isBlank()) ? null : email;
+        localizacao = (localizacao == null || localizacao.isBlank()) ? null : localizacao;
+
+        // Busca nas duas entidades
+        List<Fornecedor> fornecedores = repository.pesquisarEFiltrar(
+                nomeEmpresa, nomeContato, telefone, email, localizacao, null, null
+        );
+
+        List<Cliente> clientes = clienteRepository.pesquisarEFiltrar(
+                nomeEmpresa, nomeContato, telefone, email, localizacao
+        );
+
+        List<ContatoEmpresaResponseDto> resultados = new ArrayList<>();
+
+        for (Fornecedor f : fornecedores) {
+            ContatoEmpresaResponseDto dto = new ContatoEmpresaResponseDto();
+            dto.setId(f.getId());
+            dto.setTipoEntidade("FORNECEDOR");
+            dto.setNomeEmpresa(f.getNomeEmpresa());
+            dto.setNomeContato(f.getNomeContato());
+            dto.setTelefone(f.getTelefone());
+            dto.setEmail(f.getEmail());
+            if (f.getEndereco() != null) {
+                dto.setCidade(f.getEndereco().getCidade());
+                dto.setLogradouro(f.getEndereco().getLogradouro());
+            }
+            resultados.add(dto);
+        }
+
+        for (Cliente c : clientes) {
+            ContatoEmpresaResponseDto dto = new ContatoEmpresaResponseDto();
+            dto.setId(c.getId());
+            dto.setTipoEntidade("CLIENTE");
+            dto.setNomeEmpresa(c.getNomeEmpresa());
+            dto.setNomeContato(c.getNomeContato());
+            dto.setTelefone(c.getTelefone());
+            dto.setEmail(c.getEmail());
+            if (c.getEndereco() != null) {
+                dto.setCidade(c.getEndereco().getCidade());
+                dto.setLogradouro(c.getEndereco().getLogradouro());
+            }
+            resultados.add(dto);
+        }
+
+        return resultados;
     }
 }

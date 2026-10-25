@@ -106,4 +106,12 @@ public class CodigoAssociadoController {
         codigoAssociadoService.reativar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<CodigoAssociadoResponseDto>> pesquisarEFiltrar(
+            @RequestParam(required = false) String termo
+    ) {
+        List<CodigoAssociadoResponseDto> resultados = codigoAssociadoService.pesquisarFiltro(termo);
+        return ResponseEntity.ok(resultados);
+    }
 }

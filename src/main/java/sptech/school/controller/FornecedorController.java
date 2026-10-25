@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import sptech.school.dto.fornecedor.ContatoEmpresaResponseDto;
 import sptech.school.dto.fornecedor.FornecedorRequestDto;
 import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.dto.usuario.UsuarioResponseDto;
@@ -55,6 +56,24 @@ public class FornecedorController {
             String nome){
         return ResponseEntity.status(200).body(service.buscarPorNomeContato(nome));
     }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<FornecedorResponseDto>> pesquisarEFiltrar(
+            @RequestParam(required = false) String nomeEmpresa,
+            @RequestParam(required = false) String nomeContato,
+            @RequestParam(required = false) String telefone,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String localizacao,
+            @RequestParam(required = false) List<String> fabricantes,
+            @RequestParam(required = false) List<String> categorias
+    ){
+        List<FornecedorResponseDto> resultados = service.pesquisar(
+                nomeEmpresa, nomeContato, telefone, email, localizacao, fabricantes, categorias
+        );
+
+        return ResponseEntity.ok(resultados);
+    }
+
 
     @GetMapping("/buscarPorEmpresa/{empresa}")
     public ResponseEntity<List<FornecedorResponseDto>> buscarPorNomeEmpresa(
@@ -118,5 +137,19 @@ public class FornecedorController {
 
         service.reativar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/buscar-geral")
+    public ResponseEntity<List<ContatoEmpresaResponseDto>> pesquisarGeral(
+            @RequestParam(required = false) String nomeEmpresa,
+            @RequestParam(required = false) String nomeContato,
+            @RequestParam(required = false) String telefone,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String localizacao
+    ) {
+        List<ContatoEmpresaResponseDto> resultados = service.pesquisarGeral(
+                nomeEmpresa, nomeContato, telefone, email, localizacao
+        );
+        return ResponseEntity.ok(resultados);
     }
 }
