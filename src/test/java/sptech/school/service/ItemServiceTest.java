@@ -9,6 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import sptech.school.entity.CodigoAssociado;
 import sptech.school.entity.Item;
 import sptech.school.exception.EntidadeNaoEncontradaException;
@@ -40,18 +44,19 @@ class ItemServiceTest {
         @DisplayName("Deve retornar a lista com todos os itens")
         void deveListarCorretamente() {
             // Given
+            Pageable pageable = PageRequest.of(0, 10);
             Item item = new Item();
             item.setId(1);
-            List<Item> itens = List.of(item);
+            Page<Item> itens = new PageImpl<>(List.of(item), pageable, 1);
 
             // When
-            Mockito.when(itemRepository.findAll())
+            Mockito.when(itemRepository.findAllByAtivoTrue(pageable))
                     .thenReturn(itens);
-            List<Item> resultado = itemService.listarTodos();
+            Page<Item> resultado = itemService.listarTodos(pageable);
 
             // Then
-            Assertions.assertEquals(1, resultado.size());
-            Assertions.assertEquals(1, resultado.get(0).getId());
+            Assertions.assertEquals(1, resultado.getContent().size());
+            Assertions.assertEquals(1, resultado.getContent().get(0).getId());
         }
 
         // Cenário triste
@@ -60,12 +65,12 @@ class ItemServiceTest {
         void deveRetornarListaVazia() {
             // CENÁRIO: Não há itens cadastrados
             // Given
-            List<Item> itens = Collections.emptyList();
+            Pageable pageable = PageRequest.of(0, 10);
 
             // When
-            Mockito.when(itemRepository.findAll())
-                    .thenReturn(itens);
-            List<Item> resultado = itemService.listarTodos();
+            Mockito.when(itemRepository.findAllByAtivoTrue(pageable))
+                    .thenReturn(Page.empty(pageable));
+            Page<Item> resultado = itemService.listarTodos(pageable);
 
             // Then
             Assertions.assertTrue(resultado.isEmpty());
