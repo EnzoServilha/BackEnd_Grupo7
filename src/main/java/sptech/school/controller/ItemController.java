@@ -133,7 +133,7 @@ public class ItemController {
         usuarioService.verificarAcesso(logado);
 
         Item item = ItemMapper.toEntity(request);
-        Item atualizado = itemService.atualizar(id, item);
+        Item atualizado = itemService.atualizar(id, item, request.codigosAssociadosIds(), request.itensSimilaresIds());
         return ResponseEntity.ok(ItemMapper.toResponseDto(atualizado));
     }
 

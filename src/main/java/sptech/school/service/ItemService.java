@@ -93,13 +93,32 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
-    public Item atualizar(Integer id, Item itemAtualizado) {
+    public Item atualizar(Integer id, Item itemAtualizado, List<Integer> codigosAssociadosIds, List<Integer> itensSimilaresIds) {
         Item item = buscarPorId(id);
         item.setCodigoInterno(itemAtualizado.getCodigoInterno());
         item.setMarca(itemAtualizado.getMarca());
         item.setAno(itemAtualizado.getAno());
         item.setDescricao(itemAtualizado.getDescricao());
         item.setLocalizacao(itemAtualizado.getLocalizacao());
+
+        if (codigosAssociadosIds != null && !codigosAssociadosIds.isEmpty()) {
+            List<CodigoAssociado> codigos = new ArrayList<>(codigoAssociadoRepository.findAllById(codigosAssociadosIds).stream()
+                    .filter(codigo -> Boolean.TRUE.equals(codigo.getAtivo())).toList());
+            if (codigos.size() != codigosAssociadosIds.size()) {
+                throw new EntidadeNaoEncontradaException("Código Associado ativo", codigosAssociadosIds);
+            }
+            item.setCodigosAssociados(codigos);
+        }
+
+        if (itensSimilaresIds != null && !itensSimilaresIds.isEmpty()) {
+            List<Item> similares = new ArrayList<>(itemRepository.findAllById(itensSimilaresIds).stream()
+                    .filter(similar -> Boolean.TRUE.equals(similar.getAtivo())).toList());
+            if (similares.size() != itensSimilaresIds.size()) {
+                throw new EntidadeNaoEncontradaException("Item similar ativo", itensSimilaresIds);
+            }
+            item.setItensSimilares(similares);
+        }
+
         return itemRepository.save(item);
     }
 

@@ -197,6 +197,9 @@ public class FornecedorService {
         List<ContatoEmpresaResponseDto> resultados = new ArrayList<>();
 
         for (Fornecedor f : fornecedores) {
+            if (Boolean.FALSE.equals(f.getAtivo())) {
+                continue;
+            }
             ContatoEmpresaResponseDto dto = new ContatoEmpresaResponseDto();
             dto.setId(f.getId());
             dto.setTipoEntidade("FORNECEDOR");
@@ -212,6 +215,9 @@ public class FornecedorService {
         }
 
         for (Cliente c : clientes) {
+            if (Boolean.FALSE.equals(c.getAtivo())) {
+                continue;
+            }
             ContatoEmpresaResponseDto dto = new ContatoEmpresaResponseDto();
             dto.setId(c.getId());
             dto.setTipoEntidade("CLIENTE");
