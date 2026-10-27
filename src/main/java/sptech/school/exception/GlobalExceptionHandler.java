@@ -31,6 +31,13 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    // O motivo técnico já foi registrado no log pelo publisher; ao cliente não se expõem detalhes do broker.
+    @ExceptionHandler(PublicacaoEtiquetaException.class)
+    public ResponseEntity<Map<String, Object>> handlePublicacaoEtiqueta(PublicacaoEtiquetaException ex) {
+        return buildResponse(HttpStatus.SERVICE_UNAVAILABLE,
+                "Não foi possível enviar a solicitação de etiqueta para processamento. Tente novamente em instantes.");
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, Object>> handleAutenticacao(AuthenticationException ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "Usuário ou senha inválidos");

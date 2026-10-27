@@ -39,6 +39,20 @@ spring.mail.properties.mail.smtp.starttls.required=true
 spring.mail.properties.mail.smtp.ssl.properties.mail.smtp.ssl.protocols=TLSv1.2 TLSv1.3
 
 # =============================================================================
+# RABBITMQ (producer das solicitações de etiqueta)
+# O PDF é gerado e enviado por e-mail pelo microserviço "etiquetas", que consome a fila.
+# =============================================================================
+spring.rabbitmq.host=${RABBITMQ_HOST:localhost}
+spring.rabbitmq.port=${RABBITMQ_PORT:5672}
+spring.rabbitmq.username=${RABBITMQ_USERNAME:admin}
+spring.rabbitmq.password=${RABBITMQ_PASSWORD:admin}
+spring.rabbitmq.connection-timeout=${RABBITMQ_CONNECTION_TIMEOUT:5s}
+spring.rabbitmq.publisher-confirm-type=correlated
+spring.rabbitmq.publisher-returns=true
+spring.rabbitmq.template.mandatory=true
+etiqueta.fila.timeout-confirmacao=${ETIQUETA_FILA_TIMEOUT_CONFIRMACAO:5s}
+
+# =============================================================================
 # PROTEÇÃO CONTRA BRUTE FORCE NO LOGIN
 # =============================================================================
 security.login.max-failed-attempts=${LOGIN_MAX_FAILED_ATTEMPTS:5}

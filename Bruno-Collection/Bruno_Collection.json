@@ -3882,22 +3882,22 @@
       "name": "Etiquetas",
       "item": [
         {
-          "name": "Gerar PDF",
+          "name": "Solicitar geração de etiqueta",
           "request": {
-            "method": "GET",
+            "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/etiquetas/{{itemId}}/pdf",
+              "raw": "{{baseUrl}}/etiquetas/{{itemId}}/fila",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "etiquetas",
                 "{{itemId}}",
-                "pdf"
+                "fila"
               ]
             },
-            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, pdf."
+            "description": "Entrada: sem body; use o itemId na URL. Publica a solicitação no RabbitMQ; o PDF é gerado e enviado por e-mail pelo microserviço de etiquetas. Retorno: HTTP 202 com solicitacaoId (404 se o item não existir, 503 se a fila estiver indisponível)."
           },
           "event": [
             {
@@ -3905,8 +3905,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
-                  "pm.test(\"PDF válido\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/pdf\"));"
+                  "pm.test(\"Status HTTP esperado\", () => pm.expect([202]).to.include(pm.response.code));",
+                  "pm.test(\"Solicitação aceita\", () => { const body = pm.response.json(); pm.expect(body).to.have.property(\"solicitacaoId\"); pm.expect(body.status).to.eql(\"ACEITA\"); });"
                 ]
               }
             }
