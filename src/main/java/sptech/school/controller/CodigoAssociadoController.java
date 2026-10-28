@@ -23,6 +23,9 @@ import java.util.List;
 @Validated
 public class CodigoAssociadoController {
 
+    // Mesma regex do ItemController: aceita / # + ( ) , : & etc. em códigos
+    private static final String REGEX_BUSCA = "^[\\p{L}\\p{N}\\s._@/#+(),:;&*'\\-]+$";
+
     private final CodigoAssociadoService codigoAssociadoService;
     private final UsuarioService usuarioService;
 
@@ -56,7 +59,7 @@ public class CodigoAssociadoController {
             @RequestParam
             @NotBlank
             @Size(max = 100)
-            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            @Pattern(regexp = REGEX_BUSCA)
             String codigo) {
         List<CodigoAssociado> codigos = codigoAssociadoService.pesquisarPorCodigo(codigo);
         if (codigos.isEmpty()) return ResponseEntity.noContent().build();

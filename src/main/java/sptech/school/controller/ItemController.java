@@ -13,9 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import sptech.school.dto.dashboard.FornecedorEstatisticasDto;
 import sptech.school.dto.dashboard.PrecosMediosDto;
-import sptech.school.dto.fornecedor.FornecedorResponseDto;
 import sptech.school.dto.item.ItemRequestDto;
 import sptech.school.dto.item.ItemResponseDto;
 import sptech.school.dto.usuario.UsuarioResponseDto;
@@ -31,6 +29,10 @@ import java.util.List;
 @RequestMapping("/itens")
 @Validated
 public class ItemController {
+
+    // Códigos de peça costumam ter / # + ( ) , : & etc. A regex antiga (só letras, números,
+    // espaço e . _ @ -) rejeitava essas buscas com 400.
+    private static final String REGEX_BUSCA = "^[\\p{L}\\p{N}\\s._@/#+(),:;&*'\\-]+$";
 
     private final ItemService itemService;
     private final UsuarioService usuarioService;
@@ -73,7 +75,7 @@ public class ItemController {
             @PathVariable
             @NotBlank
             @Size(max = 50)
-            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            @Pattern(regexp = REGEX_BUSCA)
             String codigoInterno) {
         Item item = itemService.buscarPorCodigoInterno(codigoInterno);
         return ResponseEntity.ok(ItemMapper.toResponseDto(item));
@@ -84,7 +86,7 @@ public class ItemController {
             @PathVariable
             @NotBlank
             @Size(max = 50)
-            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            @Pattern(regexp = REGEX_BUSCA)
             String marca) {
         List<Item> itens = itemService.listarPorMarca(marca);
         if (itens.isEmpty()) return ResponseEntity.noContent().build();
@@ -96,7 +98,7 @@ public class ItemController {
             @RequestParam
             @NotBlank
             @Size(max = 100)
-            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            @Pattern(regexp = REGEX_BUSCA)
             String termo) {
         List<Item> itens = itemService.pesquisar(termo);
         if (itens.isEmpty()) return ResponseEntity.noContent().build();
@@ -108,7 +110,7 @@ public class ItemController {
             @RequestParam
             @NotBlank
             @Size(max = 100)
-            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            @Pattern(regexp = REGEX_BUSCA)
             String codigo) {
         List<Item> itens = itemService.buscarPorCodigoAssociado(codigo);
         if (itens.isEmpty()) return ResponseEntity.noContent().build();
