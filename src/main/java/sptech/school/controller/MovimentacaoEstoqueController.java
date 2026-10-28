@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import sptech.school.dto.dashboard.CotacoesPorcentagemDto;
 import sptech.school.dto.dashboard.DashboardMensalDto;
 import sptech.school.dto.dashboard.FornecedorEstatisticasDto;
+import sptech.school.dto.movimentacaoEstoque.AlteracaoStatusRequestDto;
 import sptech.school.dto.movimentacaoEstoque.FechamentoCotacaoRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
@@ -122,6 +123,16 @@ public class MovimentacaoEstoqueController {
         return ResponseEntity.noContent().build();
     }
 
+    // Conclui ou cancela uma ou várias movimentações (tudo ou nada)
+    @PatchMapping("/status")
+    public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> alterarStatus(
+            @RequestBody @Valid AlteracaoStatusRequestDto requestDto) {
+        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
+        usuarioService.verificarAcesso(logado);
+
+        return ResponseEntity.ok(service.alterarStatus(requestDto));
+    }
+
     @GetMapping("/buscar")
     public ResponseEntity<List<MovimentacaoEstoqueResponseDto>> pesquisarEFiltrar(
             @RequestParam(required = false) String tipo,
@@ -151,4 +162,4 @@ public class MovimentacaoEstoqueController {
     public ResponseEntity<List<DashboardMensalDto>> getDadosMensais(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(service.obterEstatisticasMensais(id));
     }
-    }
+}

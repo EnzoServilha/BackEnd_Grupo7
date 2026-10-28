@@ -14,4 +14,5 @@ public interface MovimentacaoEstoqueRepository extends JpaRepository<Movimentaca
     List<MovimentacaoEstoque> findAllByPeriodoId(Integer periodoId);
     List<MovimentacaoEstoque> findAllByPeriodoIdAndTipoNomeAndStatusNome(
             Integer periodoId, String tipoNome, String statusNome);
+    List<MovimentacaoEstoque> findAllByPeriodoIdAndStatusNome(Integer periodoId, String statusNome);
 }

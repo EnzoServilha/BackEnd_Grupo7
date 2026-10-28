@@ -12,6 +12,7 @@ import sptech.school.mapper.FornecedorMapper;
 import sptech.school.mapper.PeriodoMapper;
 import sptech.school.repository.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -96,12 +97,14 @@ public class PeriodoService {
         novoPeriodo.setFechado(false);
         novoPeriodo = periodoRepository.save(novoPeriodo);
 
-        List<MovimentacaoEstoque> cotacoesPendentes = movimentacaoEstoqueRepository
-            .findAllByPeriodoIdAndTipoNomeAndStatusNome(periodoAtual.getId(), "COTACAO", "PENDENTE");
-        for (MovimentacaoEstoque cotacao : cotacoesPendentes) {
-            cotacao.setPeriodo(novoPeriodo);
+        // Tudo que ainda está PENDENTE (entradas, saídas e cotações) segue para o novo período,
+        // pois só movimentações de período aberto podem ser concluídas.
+        List<MovimentacaoEstoque> pendentes = movimentacaoEstoqueRepository
+                .findAllByPeriodoIdAndStatusNome(periodoAtual.getId(), "PENDENTE");
+        for (MovimentacaoEstoque pendente : pendentes) {
+            pendente.setPeriodo(novoPeriodo);
         }
-        movimentacaoEstoqueRepository.saveAll(cotacoesPendentes);
+        movimentacaoEstoqueRepository.saveAll(pendentes);
 
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new EntidadeConflitanteException("Usuário responsável pelo fechamento não encontrado"));
@@ -127,6 +130,7 @@ public class PeriodoService {
             itemAjuste.setMovimentacaoEstoque(movimentacaoAjuste);
             itemAjuste.setItem(item);
             itemAjuste.setQtd(saldo.getQtd());
+            itemAjuste.setPrecoUnitario(BigDecimal.ZERO); // coluna é NOT NULL
             itensAjuste.add(itemAjuste);
         }
         itensNaMovimentacaoRepository.saveAll(itensAjuste);
@@ -139,38 +143,39 @@ public class PeriodoService {
         );
     }
 
-        @Transactional
-        public Periodo rollbackPeriodo() {
+    @Transactional
+    public Periodo rollbackPeriodo() {
         Periodo periodoAtual = buscarPeriodoAberto();
         Periodo periodoAnterior = periodoRepository.findFirstByFechadoTrueOrderByIdDesc()
-            .orElseThrow(() -> new EntidadeConflitanteException("Não há período anterior para restaurar"));
+                .orElseThrow(() -> new EntidadeConflitanteException("Não há período anterior para restaurar"));
 
         List<MovimentacaoEstoque> movimentacoesAtuais = movimentacaoEstoqueRepository
-            .findAllByPeriodoId(periodoAtual.getId());
+                .findAllByPeriodoId(periodoAtual.getId());
         String observacaoAjuste = "Saldo inicial transferido do período " + periodoAnterior.getId();
 
         List<MovimentacaoEstoque> ajustesAutomaticos = movimentacoesAtuais.stream()
-            .filter(movimentacao -> ehAjusteAutomatico(movimentacao, observacaoAjuste))
-            .toList();
+                .filter(movimentacao -> ehAjusteAutomatico(movimentacao, observacaoAjuste))
+                .toList();
         if (ajustesAutomaticos.size() != 1) {
             throw new EntidadeConflitanteException("O período atual não possui um único ajuste automático de abertura");
         }
 
         boolean possuiMovimentacaoPosterior = movimentacoesAtuais.stream()
-            .anyMatch(movimentacao -> !ehAjusteAutomatico(movimentacao, observacaoAjuste)
-                && !ehCotacaoPendente(movimentacao));
+                .anyMatch(movimentacao -> !ehAjusteAutomatico(movimentacao, observacaoAjuste)
+                        && !ehPendente(movimentacao));
         if (possuiMovimentacaoPosterior) {
             throw new EntidadeConflitanteException(
-                "O período atual possui movimentações e não pode ser removido");
+                    "O período atual possui movimentações e não pode ser removido");
         }
 
-        List<MovimentacaoEstoque> cotacoesPendentes = movimentacoesAtuais.stream()
-            .filter(this::ehCotacaoPendente)
-            .toList();
-        for (MovimentacaoEstoque cotacao : cotacoesPendentes) {
-            cotacao.setPeriodo(periodoAnterior);
+        // As pendentes (que vieram do período anterior) voltam para ele
+        List<MovimentacaoEstoque> pendentes = movimentacoesAtuais.stream()
+                .filter(this::ehPendente)
+                .toList();
+        for (MovimentacaoEstoque pendente : pendentes) {
+            pendente.setPeriodo(periodoAnterior);
         }
-        movimentacaoEstoqueRepository.saveAll(cotacoesPendentes);
+        movimentacaoEstoqueRepository.saveAll(pendentes);
 
         MovimentacaoEstoque ajusteAutomatico = ajustesAutomaticos.get(0);
         itensNaMovimentacaoRepository.deleteAllByMovimentacaoEstoqueId(ajusteAutomatico.getId());
@@ -181,20 +186,18 @@ public class PeriodoService {
         periodoAnterior.setDataFechamento(null);
         periodoAnterior.setQtdPecas(null);
         return periodoRepository.save(periodoAnterior);
-        }
+    }
 
-        private boolean ehAjusteAutomatico(MovimentacaoEstoque movimentacao, String observacaoEsperada) {
+    private boolean ehAjusteAutomatico(MovimentacaoEstoque movimentacao, String observacaoEsperada) {
         return movimentacao.getTipo() != null
-            && "AJUSTE".equals(movimentacao.getTipo().getNome())
-            && observacaoEsperada.equals(movimentacao.getObservacoes());
-        }
+                && "AJUSTE".equals(movimentacao.getTipo().getNome())
+                && observacaoEsperada.equals(movimentacao.getObservacoes());
+    }
 
-        private boolean ehCotacaoPendente(MovimentacaoEstoque movimentacao) {
-        return movimentacao.getTipo() != null
-            && "COTACAO".equals(movimentacao.getTipo().getNome())
-            && movimentacao.getStatus() != null
-            && "PENDENTE".equals(movimentacao.getStatus().getNome());
-        }
+    private boolean ehPendente(MovimentacaoEstoque movimentacao) {
+        return movimentacao.getStatus() != null
+                && "PENDENTE".equals(movimentacao.getStatus().getNome());
+    }
 
     private Periodo buscarPeriodoAberto() {
         return periodoRepository.findFirstByFechadoFalseOrderByIdDesc()
@@ -213,4 +216,3 @@ public class PeriodoService {
         return PeriodoMapper.toResponseDtoList(periodos);
     }
 }
-

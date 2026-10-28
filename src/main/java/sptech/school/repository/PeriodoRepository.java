@@ -26,6 +26,7 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
     @Query("SELECT p FROM Periodo p WHERE p.id = :periodoId AND p.fechado = false")
     Optional<Periodo> buscarPeriodoAbertoComBloqueio(@Param("periodoId") Integer periodoId);
 
+    // Só movimentações concluídas (inclusive com atraso) movem o saldo
     @Query("""
         SELECT COALESCE(SUM(
             CASE
@@ -39,7 +40,7 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
         JOIN itm.movimentacaoEstoque me
         WHERE me.periodo.id = :periodoId
           AND itm.item.id = :itemId
-          AND me.status.nome = 'CONCLUIDO'
+          AND me.status.nome IN ('CONCLUIDO', 'CONCLUIDO COM ATRASO')
     """)
     Long pegarSaldoDisponivelDoItem(@Param("periodoId") Integer periodoId,
                                     @Param("itemId") Integer itemId);
@@ -59,8 +60,7 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
         JOIN ItensNaMovimentacao itm ON itm.movimentacaoEstoque.id = me.id
         JOIN me.tipo t
                 WHERE p.id = :idPeriodo
-                    AND me.status.nome = 'CONCLUIDO'
-                    AND me.status.nome <> 'CANCELADO'
+                    AND me.status.nome IN ('CONCLUIDO', 'CONCLUIDO COM ATRASO')
     """)
     Integer pegarTotalDePecasDoPeriodo(@Param("idPeriodo") Integer idPeriodo);
 
@@ -77,8 +77,7 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Integer> {
     JOIN ItensNaMovimentacao itm ON itm.movimentacaoEstoque.id = me.id
     JOIN me.tipo t
         WHERE me.periodo.id = :idPeriodo
-            AND me.status.nome = 'CONCLUIDO'
-            AND me.status.nome <> 'CANCELADO'
+            AND me.status.nome IN ('CONCLUIDO', 'CONCLUIDO COM ATRASO')
     GROUP BY itm.item.id
 """)
     List<PeriodoQtdPecasDTO> pegarSaldoPorItemDoPeriodo(@Param("idPeriodo") Integer idPeriodo);
