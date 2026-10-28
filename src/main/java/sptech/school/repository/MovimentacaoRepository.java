@@ -63,33 +63,50 @@ public interface MovimentacaoRepository extends JpaRepository<MovimentacaoEstoqu
             @Param("pagadorFrete") Boolean pagadorFrete
     );
 
-    @Query("SELECT m.fornecedor.id, m.fornecedor.nomeEmpresa, " +
-            "SUM(CASE WHEN m.dataEntrega <= m.dataEntregaPrevista THEN 1 ELSE 0 END) * 100.0 / COUNT(m), " +
+    @Query("SELECT f.id, f.nomeEmpresa, e.uf, e.cidade, " +
+            "SUM(CASE WHEN m.dataEntrega IS NOT NULL AND m.dataEntrega <= m.dataEntregaPrevista THEN 1 ELSE 0 END) * 100.0 / COUNT(m), " +
             "SUM(CASE WHEN m.precoFrete > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(m) " +
-            "FROM ItensNaMovimentacao i JOIN i.movimentacaoEstoque m " +
-            "WHERE i.item.id = :itemId AND m.fornecedor IS NOT NULL " +
-            "GROUP BY m.fornecedor.id, m.fornecedor.nomeEmpresa")
+            "FROM ItensNaMovimentacao i " +
+            "JOIN i.movimentacaoEstoque m " +
+            "JOIN m.fornecedor f " +
+            "LEFT JOIN f.endereco e " +
+            "LEFT JOIN m.status s " +
+            "WHERE i.item.id = :itemId AND m.tipo.nome = 'ENTRADA' AND (s IS NULL OR s.nome <> 'CANCELADO') " +
+            "GROUP BY f.id, f.nomeEmpresa, e.uf, e.cidade")
     List<Object[]> buscarEstatisticasPorFornecedor(@Param("itemId") Integer itemId);
+
+    @Query("SELECT m.fornecedor.id, m.dataMovimentacao, m.dataEntrega " +
+            "FROM ItensNaMovimentacao i " +
+            "JOIN i.movimentacaoEstoque m " +
+            "LEFT JOIN m.status s " +
+            "WHERE i.item.id = :itemId AND m.fornecedor IS NOT NULL " +
+            "AND m.dataEntrega IS NOT NULL AND m.dataMovimentacao IS NOT NULL " +
+            "AND (s IS NULL OR s.nome <> 'CANCELADO')")
+    List<Object[]> buscarEntregasPorFornecedor(@Param("itemId") Integer itemId);
 
     @Query("SELECT " +
             "COUNT(m), " +
-            "SUM(CASE WHEN s.nome = 'CONCLUIDO PARCIAL' THEN 1 ELSE 0 END), " +
-            "SUM(CASE WHEN s.nome = 'CONCLUIDO' THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN s.nome = 'CONCLUIDO PARCIALMENTE' THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN s.nome = 'CONCLUIDO COMPLETAMENTE' THEN 1 ELSE 0 END), " +
             "SUM(CASE WHEN m.movimentacaoOriginal IS NOT NULL THEN 1 ELSE 0 END) " +
             "FROM MovimentacaoEstoque m " +
-            "JOIN m.tipo t JOIN m.status s " +
+            "JOIN m.tipo t LEFT JOIN m.status s " +
             "WHERE m.periodo.id = :periodoId AND t.nome = 'COTACAO'")
     CotacoesPorcentagemDto buscarCotacoesPorPeriodo(@Param("periodoId") Integer periodoId);
 
     @Query("SELECT NEW sptech.school.dto.dashboard.DashboardMensalDto(" +
-            "FUNCTION('MONTH', m.dataMovimentacao), " +
+            "FUNCTION('MONTH', m.dataEntrega), " +
             "SUM(CASE WHEN t.nome = 'ENTRADA' THEN (i.qtd * i.precoUnitario) ELSE 0 END), " +
             "SUM(CASE WHEN t.nome = 'SAIDA' THEN (i.qtd * i.precoUnitario) ELSE 0 END)) " +
             "FROM MovimentacaoEstoque m " +
             "JOIN m.tipo t " +
+            "JOIN m.status s " +
             "JOIN ItensNaMovimentacao i ON i.movimentacaoEstoque.id = m.id " +
             "WHERE m.periodo.id = :periodoId " +
-            "GROUP BY FUNCTION('MONTH', m.dataMovimentacao) " +
-            "ORDER BY FUNCTION('MONTH', m.dataMovimentacao)")
+            "AND t.nome IN ('ENTRADA', 'SAIDA') " +
+            "AND s.nome IN ('CONCLUIDO', 'CONCLUIDO COM ATRASO') " +
+            "AND m.dataEntrega IS NOT NULL " +
+            "GROUP BY FUNCTION('MONTH', m.dataEntrega) " +
+            "ORDER BY FUNCTION('MONTH', m.dataEntrega)")
     List<DashboardMensalDto> obterDadosMensaisPorPeriodo(@Param("periodoId") Integer periodoId);
 }

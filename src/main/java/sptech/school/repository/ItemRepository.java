@@ -57,12 +57,12 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     );
 
     @Query("SELECT AVG(i.precoUnitario) FROM ItensNaMovimentacao i " +
-            "JOIN i.movimentacaoEstoque m JOIN m.tipo t " +
-            "WHERE i.item.id = :itemId AND LOWER(t.nome) LIKE '%compra%'")
+            "JOIN i.movimentacaoEstoque m JOIN m.tipo t JOIN m.status s " +
+            "WHERE i.item.id = :itemId AND t.nome = 'ENTRADA' AND s.nome <> 'CANCELADO'")
     BigDecimal calcularPrecoMedioCompra(@Param("itemId") Integer itemId);
 
     @Query("SELECT AVG(i.precoUnitario) FROM ItensNaMovimentacao i " +
-            "JOIN i.movimentacaoEstoque m JOIN m.tipo t " +
-            "WHERE i.item.id = :itemId AND LOWER(t.nome) LIKE '%venda%'")
+            "JOIN i.movimentacaoEstoque m JOIN m.tipo t JOIN m.status s " +
+            "WHERE i.item.id = :itemId AND t.nome = 'SAIDA' AND s.nome <> 'CANCELADO'")
     BigDecimal calcularPrecoMedioVenda(@Param("itemId") Integer itemId);
 }
