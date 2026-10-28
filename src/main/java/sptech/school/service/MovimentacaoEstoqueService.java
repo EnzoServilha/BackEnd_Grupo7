@@ -55,24 +55,17 @@ public class MovimentacaoEstoqueService {
 
 
     @Transactional
-    public List<MovimentacaoEstoqueResponsePagebleDto> listarPorPeriodoAtual(Integer idPeriodo, Pageble pagebleRequest) {
-        System.out.println("PAGINA: " + pagebleRequest.getPage());
-        System.out.println("TAMANHO: " + pagebleRequest.getSize());
-
-        int pagina = pagebleRequest.getPage() != null ? pagebleRequest.getPage() : 0;
-        int tamanho = pagebleRequest.getSize() != null ? pagebleRequest.getSize() : 10;
-
-        int offset = pagina * tamanho;
-
-        System.out.println("OFFSET CALCULADO: " + offset);
-
+    public MovimentacaoEstoquePaginacaoResponseDto listarPorPeriodoAtual(
+            Integer idPeriodo, int offset, int limit) {
         long totalRegistros = movimentacaoRepository.contarPorPeriodo(idPeriodo);
+        List<MovimentacaoEstoque> movimentacoes =
+                    movimentacaoRepository.listarPorPeriodoComOffset(idPeriodo, limit, offset);
 
-        List<MovimentacaoEstoque> listaPaginada = movimentacaoRepository.listarComPaginacaoNativa(idPeriodo, tamanho, offset);
-
-        return listaPaginada.stream()
-                .map(entity -> MovimentacaoEstoqueMapper.toResponsePageble(entity, pagebleRequest))
-                .toList();
+        return new MovimentacaoEstoquePaginacaoResponseDto(
+                MovimentacaoEstoqueMapper.toResponseDtoList(movimentacoes),
+                offset,
+                limit,
+                totalRegistros);
     }
 
 

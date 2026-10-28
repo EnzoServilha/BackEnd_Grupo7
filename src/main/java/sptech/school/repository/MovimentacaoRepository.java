@@ -1,5 +1,6 @@
 package sptech.school.repository;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -7,9 +8,6 @@ import org.springframework.data.repository.query.Param;
 import sptech.school.dto.dashboard.CotacoesPorcentagemDto;
 import sptech.school.dto.dashboard.DashboardMensalDto;
 import sptech.school.entity.MovimentacaoEstoque;
-
-import jakarta.persistence.LockModeType;
-import sptech.school.entity.Pageble;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,13 +29,13 @@ public interface MovimentacaoRepository extends JpaRepository<MovimentacaoEstoqu
     @Query("SELECT m FROM MovimentacaoEstoque m WHERE m.id = :id")
     Optional<MovimentacaoEstoque> buscarPorIdComBloqueio(@Param("id") Integer id);
 
-    // Paginação:
-
     @Query("SELECT COUNT(m) FROM MovimentacaoEstoque m WHERE m.periodo.id = :idPeriodo")
     long contarPorPeriodo(@Param("idPeriodo") Integer idPeriodo);
 
-    @Query("SELECT m FROM MovimentacaoEstoque m WHERE m.periodo.id = :idPeriodo ORDER BY m.id ASC")
-    List<MovimentacaoEstoque> listarComPaginacaoNativa(
+    @Query(value = "SELECT * FROM movimentacao_estoque " +
+            "WHERE periodo_id = :idPeriodo ORDER BY id ASC LIMIT :limit OFFSET :offset",
+            nativeQuery = true)
+    List<MovimentacaoEstoque> listarPorPeriodoComOffset(
             @Param("idPeriodo") Integer idPeriodo,
             @Param("limit") int limit,
             @Param("offset") int offset);

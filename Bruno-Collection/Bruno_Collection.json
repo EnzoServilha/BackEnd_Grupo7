@@ -3121,7 +3121,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/movimentacoes/periodo/{{periodoId}}",
+              "raw": "{{baseUrl}}/movimentacoes/periodo/{{periodoId}}?offset=0&limit=10",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3131,7 +3131,7 @@
                 "{{periodoId}}"
               ]
             },
-            "description": "Entrada: sem body; use os path/query params exibidos na URL. Retorno: HTTP 200, array."
+            "description": "Entrada: sem body; offset (posicao inicial, default 0) e limit (quantidade, default 10). Retorno: HTTP 200 com conteudo, offset, limit e totalItens."
           },
           "event": [
             {
@@ -3140,7 +3140,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status HTTP esperado\", () => pm.expect([200]).to.include(pm.response.code));",
-                  "pm.test(\"Formato array\", () => { if (pm.response.code !== 204) pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                  "pm.test(\"Formato paginado\", () => { if (pm.response.code === 200) { const body = pm.response.json(); pm.expect(body.conteudo).to.be.an(\"array\"); pm.expect(body).to.have.property(\"offset\"); pm.expect(body).to.have.property(\"limit\"); pm.expect(body).to.have.property(\"totalItens\"); } });"
                 ]
               }
             }

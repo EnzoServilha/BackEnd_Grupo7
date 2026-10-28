@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
 import sptech.school.dto.movimentacaoEstoque.FechamentoCotacaoRequestDto;
 import sptech.school.dto.movimentacaoEstoque.ItemFechamentoCotacaoRequestDto;
+import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoquePaginacaoResponseDto;
 import sptech.school.entity.Item;
 import sptech.school.entity.ItensNaMovimentacao;
 import sptech.school.entity.MovimentacaoEstoque;
@@ -129,6 +130,30 @@ class MovimentacaoEstoqueServiceTest {
             verify(movimentacaoRepository, never()).save(any());
             verifyNoInteractions(usuarioRepository, periodoRepository);
         }
+    }
+
+    @Test
+    @DisplayName("listarPorPeriodoAtual() deve aplicar offset e retornar metadados")
+    void deveListarPorPeriodoComOffset() {
+        MovimentacaoEstoque primeiro = new MovimentacaoEstoque();
+        primeiro.setId(11);
+        MovimentacaoEstoque segundo = new MovimentacaoEstoque();
+        segundo.setId(12);
+
+        when(movimentacaoRepository.contarPorPeriodo(3)).thenReturn(7L);
+        when(movimentacaoRepository.listarPorPeriodoComOffset(3, 2, 4))
+                .thenReturn(List.of(primeiro, segundo));
+
+        MovimentacaoEstoquePaginacaoResponseDto resposta =
+                service.listarPorPeriodoAtual(3, 4, 2);
+
+        assertEquals(4, resposta.offset());
+        assertEquals(2, resposta.limit());
+        assertEquals(7, resposta.totalItens());
+        assertEquals(List.of(11, 12), resposta.conteudo().stream()
+                .map(item -> item.id())
+                .toList());
+        verify(movimentacaoRepository).listarPorPeriodoComOffset(3, 2, 4);
     }
 
     @Nested

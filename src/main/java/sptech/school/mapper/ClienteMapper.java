@@ -1,8 +1,7 @@
 package sptech.school.mapper;
 
-import org.springframework.data.domain.Page;
 import sptech.school.dto.cliente.ClienteRequestDto;
-import sptech.school.dto.cliente.ClienteResponseDtoPaginacao;
+import sptech.school.dto.cliente.ClienteResponseDto;
 import sptech.school.entity.Cliente;
 
 import java.util.List;
@@ -29,8 +28,8 @@ public class ClienteMapper {
         cliente.setObservacoes(dto.observacoes());
     }
 
-    public static ClienteResponseDtoPaginacao toResponseDto(Cliente cliente) {
-        return new ClienteResponseDtoPaginacao(
+    public static ClienteResponseDto toResponseDto(Cliente cliente) {
+        return new ClienteResponseDto(
                 cliente.getId(),
                 cliente.getNomeEmpresa(),
                 cliente.getNomeContato(),
@@ -45,18 +44,8 @@ public class ClienteMapper {
         );
     }
 
-    public static List<ClienteResponseDtoPaginacao> toResponseDtoList(List<Cliente> clientes) {
+    public static List<ClienteResponseDto> toResponseDtoList(List<Cliente> clientes) {
         return clientes.stream().map(ClienteMapper::toResponseDto).toList();
     }
 
-    public static ClienteResponseDtoPaginacao toPaginadoDto(Page<Cliente> page) {
-        return new ClienteResponseDtoPaginacao(
-                page.getContent(),
-                page.getTotalElements(),
-                page.getNumber(),
-                page.getTotalPages()
-        );
 }
-
-}
-

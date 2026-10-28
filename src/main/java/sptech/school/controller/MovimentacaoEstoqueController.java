@@ -1,6 +1,7 @@
 package sptech.school.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Pattern;
@@ -14,10 +15,9 @@ import sptech.school.dto.dashboard.DashboardMensalDto;
 import sptech.school.dto.dashboard.FornecedorEstatisticasDto;
 import sptech.school.dto.movimentacaoEstoque.FechamentoCotacaoRequestDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueRequestDto;
+import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoquePaginacaoResponseDto;
 import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponseDto;
-import sptech.school.dto.movimentacaoEstoque.MovimentacaoEstoqueResponsePagebleDto;
 import sptech.school.dto.usuario.UsuarioResponseDto;
-import sptech.school.entity.Pageble;
 import sptech.school.service.MovimentacaoEstoqueService;
 import sptech.school.service.UsuarioService;
 
@@ -43,17 +43,12 @@ public class MovimentacaoEstoqueController {
     }
 
     @GetMapping("/periodo/{idPeriodo}")
-    public ResponseEntity<List<MovimentacaoEstoqueResponsePagebleDto>> listarPorPeriodoAtual(
+    public ResponseEntity<MovimentacaoEstoquePaginacaoResponseDto> listarPorPeriodoAtual(
             @PathVariable Integer idPeriodo,
-            Pageble pageble
+            @RequestParam(defaultValue = "0") @Min(0) int offset,
+            @RequestParam(defaultValue = "10") @Min(1) int limit
     ){
-        List<MovimentacaoEstoqueResponsePagebleDto> resposta = service.listarPorPeriodoAtual(idPeriodo, pageble);
-
-        if (resposta.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.status(200).body(resposta);
+        return ResponseEntity.ok(service.listarPorPeriodoAtual(idPeriodo, offset, limit));
     }
 
     @GetMapping("/tipo/{tipo}")

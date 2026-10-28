@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sptech.school.dto.cliente.ClienteRequestDto;
-import sptech.school.dto.cliente.ClienteResponseDtoPaginacao;
+import sptech.school.dto.cliente.ClienteResponseDto;
 import sptech.school.entity.Cliente;
 import sptech.school.entity.Endereco;
 import sptech.school.exception.EntidadeNaoEncontradaException;
@@ -67,7 +67,7 @@ public class ClienteServiceTest {
                     .thenReturn(entidade);
 
 
-            ClienteResponseDtoPaginacao resultado = clienteService.atualizar(clientePassado, id);
+            ClienteResponseDto resultado = clienteService.atualizar(clientePassado, id);
 
             Assertions.assertEquals(ClienteMapper.toResponseDto(entidade), resultado);
 
@@ -132,7 +132,7 @@ public class ClienteServiceTest {
                     .thenReturn(entidade);
 
 
-            ClienteResponseDtoPaginacao resposta = ClienteMapper.toResponseDto(entidade);
+            ClienteResponseDto resposta = ClienteMapper.toResponseDto(entidade);
 
 
             Assertions.assertEquals(resposta, clienteService.cadastrar(clientePassado));
