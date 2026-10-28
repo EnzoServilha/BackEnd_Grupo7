@@ -19,4 +19,8 @@ public interface CategoriaRepository extends JpaRepository<Categoria,Integer> {
     Categoria findByNomeContaining(@Param("nome") String nome);
 
     Categoria findByNomeContainingAndAtivoTrue(String nome);
+
+    List<Categoria> findTop10ByNomeContainingIgnoreCaseAndAtivoTrue(String nome);
+    Optional<Categoria> findByNomeIgnoreCase(String nome);
+
 }

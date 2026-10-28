@@ -88,7 +88,7 @@ public interface MovimentacaoRepository extends JpaRepository<MovimentacaoEstoqu
             "COUNT(m), " +
             "SUM(CASE WHEN s.nome = 'CONCLUIDO PARCIALMENTE' THEN 1 ELSE 0 END), " +
             "SUM(CASE WHEN s.nome = 'CONCLUIDO COMPLETAMENTE' THEN 1 ELSE 0 END), " +
-            "SUM(CASE WHEN m.movimentacaoOriginal IS NOT NULL THEN 1 ELSE 0 END) " +
+            "SUM(CASE WHEN s.nome IN ('CONCLUIDO PARCIALMENTE', 'CONCLUIDO COMPLETAMENTE') THEN 1 ELSE 0 END) " +
             "FROM MovimentacaoEstoque m " +
             "JOIN m.tipo t LEFT JOIN m.status s " +
             "WHERE m.periodo.id = :periodoId AND t.nome = 'COTACAO'")
@@ -102,11 +102,11 @@ public interface MovimentacaoRepository extends JpaRepository<MovimentacaoEstoqu
             "JOIN m.tipo t " +
             "JOIN m.status s " +
             "JOIN ItensNaMovimentacao i ON i.movimentacaoEstoque.id = m.id " +
-            "WHERE m.periodo.id = :periodoId " +
+            "WHERE FUNCTION('YEAR', m.dataEntrega) = :ano " +
             "AND t.nome IN ('ENTRADA', 'SAIDA') " +
             "AND s.nome IN ('CONCLUIDO', 'CONCLUIDO COM ATRASO') " +
             "AND m.dataEntrega IS NOT NULL " +
             "GROUP BY FUNCTION('MONTH', m.dataEntrega) " +
             "ORDER BY FUNCTION('MONTH', m.dataEntrega)")
-    List<DashboardMensalDto> obterDadosMensaisPorPeriodo(@Param("periodoId") Integer periodoId);
+    List<DashboardMensalDto> obterDadosMensaisPorAno(@Param("ano") Integer ano);
 }

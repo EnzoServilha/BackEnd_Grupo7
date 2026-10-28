@@ -158,8 +158,9 @@ public class MovimentacaoEstoqueController {
         return ResponseEntity.ok(service.obterEstatisticasCotacoes(id));
     }
 
-    @GetMapping("/{id}/dados-mensais")
-    public ResponseEntity<List<DashboardMensalDto>> getDadosMensais(@PathVariable("id") Integer id) {
-        return ResponseEntity.ok(service.obterEstatisticasMensais(id));
+    @GetMapping("/dados-mensais")
+    public ResponseEntity<List<DashboardMensalDto>> getDadosMensais(
+            @RequestParam(required = false) Integer ano) {
+        return ResponseEntity.ok(service.obterEstatisticasMensais(ano));
     }
 }

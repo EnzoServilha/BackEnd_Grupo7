@@ -474,8 +474,9 @@ public class MovimentacaoEstoqueService {
 
     }
 
-    public List<DashboardMensalDto> obterEstatisticasMensais(Integer periodoId) {
-        return movimentacaoRepository.obterDadosMensaisPorPeriodo(periodoId);
+    public List<DashboardMensalDto> obterEstatisticasMensais(Integer ano) {
+        int anoConsulta = ano != null ? ano : LocalDate.now().getYear();
+        return movimentacaoRepository.obterDadosMensaisPorAno(anoConsulta);
     }
 
 }

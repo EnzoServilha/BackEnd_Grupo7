@@ -2,7 +2,6 @@ package sptech.school.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +21,7 @@ import java.util.List;
 @Validated
 public class MarcaController {
 
-    private MarcaService service;
+    private final MarcaService service;
     private final UsuarioService usuarioService;
 
     public MarcaController(MarcaService service, UsuarioService usuarioService) {
@@ -36,38 +35,46 @@ public class MarcaController {
         return ResponseEntity.ok(service.listarAdministrativo(ativo));
     }
 
+    // Autocomplete: sempre devolve lista (vazia se nada encontrado), nunca corpo nulo.
+    @GetMapping("/pesquisa")
+    public ResponseEntity<List<MarcaResponseDto>> pesquisar(
+            @RequestParam
+            @NotBlank
+            @Size(max = 100)
+            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            String termo) {
+        return ResponseEntity.ok(service.pesquisar(termo));
+    }
+
+    // Mantido por compatibilidade: agora responde 404 quando não existe (em vez de 200 vazio).
     @GetMapping("/{nome}")
     public ResponseEntity<MarcaResponseDto> buscarPorNome(
             @PathVariable
             @NotBlank
             @Size(max = 100)
             @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
-            String nome){
-        return ResponseEntity.status(200).body(service.buscarPorNome(nome));
+            String nome) {
+        MarcaResponseDto dto = service.buscarPorNome(nome);
+        return dto == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(dto);
     }
 
     @GetMapping("/porId/{id}")
-    public ResponseEntity<MarcaResponseDto> buscarPorId(@PathVariable Integer id){
-        return ResponseEntity.status(200).body(service.buscarPorId(id));
+    public ResponseEntity<MarcaResponseDto> buscarPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.buscarPorId(id));
     }
 
+    // Idempotente: se a marca já existe (mesmo inativa), reaproveita/reativa; senão cria.
     @PostMapping
-    public ResponseEntity<MarcaResponseDto> criar(@RequestBody @Valid MarcaRequestDto requestDto){
+    public ResponseEntity<MarcaResponseDto> criar(@RequestBody @Valid MarcaRequestDto requestDto) {
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
         usuarioService.verificarAcesso(logado);
 
-        return ResponseEntity.status(200).body(service.criar(requestDto));
+        return ResponseEntity.status(201).body(service.criar(requestDto));
     }
-
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Null> deletar(@PathVariable Integer id, Authentication authentication){
-        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
-        usuarioService.verificarAcesso(logado);
-
-        service.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
-
-        return ResponseEntity.status(204).build();
+    public ResponseEntity<Void> deletar(@PathVariable Integer id, Authentication authentication) {
+        return desativar(id, authentication);
     }
 
     @PatchMapping("/{id}/desativacao")

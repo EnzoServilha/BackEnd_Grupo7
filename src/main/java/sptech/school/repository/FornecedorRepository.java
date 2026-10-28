@@ -54,5 +54,8 @@ public interface FornecedorRepository extends JpaRepository<Fornecedor, Integer>
             @Param("fabricantes") List<String> fabricantes,
             @Param("categorias") List<String> categorias
     );
+
+    Optional<Fornecedor> findByCnpj(String cnpj);
+
 }
 

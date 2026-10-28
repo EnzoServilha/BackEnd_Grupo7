@@ -2,7 +2,6 @@ package sptech.school.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +21,7 @@ import java.util.List;
 @Validated
 public class CategoriaController {
 
-    private CategoriaService service;
+    private final CategoriaService service;
     private final UsuarioService usuarioService;
 
     public CategoriaController(CategoriaService service, UsuarioService usuarioService) {
@@ -36,38 +35,46 @@ public class CategoriaController {
         return ResponseEntity.ok(service.listarAdministrativo(ativo));
     }
 
+    // Autocomplete: sempre devolve lista (vazia se nada encontrado), nunca corpo nulo.
+    @GetMapping("/pesquisa")
+    public ResponseEntity<List<CategoriaResponseDto>> pesquisar(
+            @RequestParam
+            @NotBlank
+            @Size(max = 100)
+            @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
+            String termo) {
+        return ResponseEntity.ok(service.pesquisar(termo));
+    }
+
+    // Mantido por compatibilidade: agora responde 404 quando não existe (em vez de 200 vazio).
     @GetMapping("/{nome}")
     public ResponseEntity<CategoriaResponseDto> buscarPorNome(
             @PathVariable
             @NotBlank
             @Size(max = 100)
             @Pattern(regexp = "^[\\p{L}\\p{N}\\s._@-]+$")
-            String nome){
-        return ResponseEntity.status(200).body(service.buscarPorNome(nome));
+            String nome) {
+        CategoriaResponseDto dto = service.buscarPorNome(nome);
+        return dto == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(dto);
     }
 
     @GetMapping("/porId/{id}")
-    public ResponseEntity<CategoriaResponseDto> buscarPorId(@PathVariable Integer id){
-        return ResponseEntity.status(200).body(service.buscarPorId(id));
+    public ResponseEntity<CategoriaResponseDto> buscarPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.buscarPorId(id));
     }
 
+    // Idempotente: se a categoria já existe (mesmo inativa), reaproveita/reativa; senão cria.
     @PostMapping
-    public ResponseEntity<CategoriaResponseDto> criar(@RequestBody @Valid CategoriaRequestDto requestDto){
+    public ResponseEntity<CategoriaResponseDto> criar(@RequestBody @Valid CategoriaRequestDto requestDto) {
         UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
         usuarioService.verificarAcesso(logado);
 
-        return ResponseEntity.status(200).body(service.criar(requestDto));
+        return ResponseEntity.status(201).body(service.criar(requestDto));
     }
-
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Null> deletar(@PathVariable Integer id, Authentication authentication){
-        UsuarioResponseDto logado = usuarioService.buscarUsuarioLogado();
-        usuarioService.verificarAcesso(logado);
-
-        service.desativar(id, usuarioService.buscarAtivoPorEmail(authentication.getName()));
-
-        return ResponseEntity.status(204).build();
+    public ResponseEntity<Void> deletar(@PathVariable Integer id, Authentication authentication) {
+        return desativar(id, authentication);
     }
 
     @PatchMapping("/{id}/desativacao")

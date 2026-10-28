@@ -18,4 +18,9 @@ public interface MarcaRepository extends JpaRepository<Marca, Integer> {
     Marca findByNomeEmpresaContaining(@Param("nomeEmpresa") String nomeEmpresa);
 
     Marca findByNomeEmpresaContainingAndAtivoTrue(String nomeContato);
+
+
+    List<Marca> findTop10ByNomeEmpresaContainingIgnoreCaseAndAtivoTrue(String nome);
+    Optional<Marca> findByNomeEmpresaIgnoreCase(String nome);
+
 }
